@@ -12,9 +12,9 @@
     "http",
     "frontend"
   ],
-  "documentation": "https://github.com/qlerup/chores4kids-sync",
+  "documentation": "https://github.com/qlerup/chores4kids",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/qlerup/chores4kids-sync/issues",
+  "issue_tracker": "https://github.com/qlerup/chores4kids/issues",
   "requirements": [],
   "version": "1.0.3"
 }
