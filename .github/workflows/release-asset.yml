@@ -13,7 +13,6 @@ jobs:
     env:
       INTEGRATION: chores4kids
       HACS_ZIP: chores4kids.zip
-      FRONTEND_FILE: chores4kids-card.js
 
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +21,8 @@ jobs:
         run: |
           test -f "custom_components/${{ env.INTEGRATION }}/manifest.json"
           test -f "hacs.json"
-          test -f "${{ env.FRONTEND_FILE }}"
+          # Kort-filen kan enten ligge i repo-roden eller i www/
+          test -f "chores4kids-card.js" || test -f "www/chores4kids-card.js"
 
       - name: Extract version from tag
         id: ver
@@ -48,9 +48,16 @@ jobs:
           # 1) Læg integrationens INDHOLD i ZIP-roden (ingen custom_components mappe i ZIP'en)
           cp -a "custom_components/${{ env.INTEGRATION }}/." "$STAGE/"
 
-          # 2) Tilføj www/ og JS filen fra repo-roden
+          # 2) Tilføj www/ og kort-filen
           mkdir -p "$STAGE/www"
-          cp -f "${{ env.FRONTEND_FILE }}" "$STAGE/www/${{ env.FRONTEND_FILE }}"
+          if [ -f "chores4kids-card.js" ]; then
+            cp -f "chores4kids-card.js" "$STAGE/www/chores4kids-card.js"
+          elif [ -f "www/chores4kids-card.js" ]; then
+            cp -f "www/chores4kids-card.js" "$STAGE/www/chores4kids-card.js"
+          else
+            echo "ERROR: Mangler chores4kids-card.js (forventet i repo-roden eller www/)"
+            exit 1
+          fi
 
           # 3) Zip alt fra stage-roden
           (cd "$STAGE" && zip -r "../${{ env.HACS_ZIP }}" . \
