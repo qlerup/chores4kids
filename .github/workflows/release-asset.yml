@@ -11,48 +11,88 @@ jobs:
   build-and-upload:
     runs-on: ubuntu-latest
     env:
+      # Mappe under custom_components/. Hvis den ikke findes, finder workflowet selv den korrekte.
       INTEGRATION: chores4kids
-      HACS_ZIP: chores4kids.zip
+
+      # Navnet på ZIP'en der uploades til releasen (ret hvis din hacs.json forventer et andet navn)
+      HACS_ZIP: chores4kids-sync.zip
+
+      # Lovelace kortfilen der skal med i zippen under www/
+      FRONTEND_FILE: chores4kids-card.js
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify required files exist
+      - name: Detect integration folder (fallback)
+        shell: bash
         run: |
-          test -f "custom_components/${{ env.INTEGRATION }}/manifest.json"
+          set -e
+          if [ -f "custom_components/$INTEGRATION/manifest.json" ]; then
+            echo "Using INTEGRATION=$INTEGRATION"
+            exit 0
+          fi
+
+          FOUND="$(find custom_components -maxdepth 2 -mindepth 2 -type f -name manifest.json | head -n 1)"
+          if [ -z "$FOUND" ]; then
+            echo "ERROR: Could not find any custom_components/*/manifest.json"
+            echo "Contents of custom_components/:"
+            ls -la custom_components || true
+            exit 1
+          fi
+
+          DETECTED="$(basename "$(dirname "$FOUND")")"
+          echo "Detected INTEGRATION=$DETECTED (overriding '$INTEGRATION')"
+          echo "INTEGRATION=$DETECTED" >> "$GITHUB_ENV"
+
+      - name: Verify required files exist
+        shell: bash
+        run: |
+          set -e
+          test -f "custom_components/$INTEGRATION/manifest.json"
           test -f "hacs.json"
-          test -f "chores4kids-card.js"
+
+          # Kort-filen kan enten ligge i repo-roden eller i www/
+          test -f "$FRONTEND_FILE" || test -f "www/$FRONTEND_FILE"
 
       - name: Extract version from tag
         id: ver
+        shell: bash
         run: |
           TAG="${{ github.event.release.tag_name }}"
           VER="${TAG#v}"
           echo "version=$VER" >> "$GITHUB_OUTPUT"
 
       - name: Update manifest.json with release version
+        shell: bash
         run: |
+          set -e
           jq --arg v "${{ steps.ver.outputs.version }}" '.version=$v' \
-            "custom_components/${{ env.INTEGRATION }}/manifest.json" \
+            "custom_components/$INTEGRATION/manifest.json" \
             > manifest.tmp
-          mv manifest.tmp "custom_components/${{ env.INTEGRATION }}/manifest.json"
+          mv manifest.tmp "custom_components/$INTEGRATION/manifest.json"
 
       - name: Build ZIP for release (integration in ZIP root + www folder)
+        shell: bash
         run: |
+          set -e
           mkdir -p dist
           STAGE="dist/stage"
           rm -rf "$STAGE"
           mkdir -p "$STAGE"
 
           # 1) Læg integrationens INDHOLD i ZIP-roden (ingen custom_components mappe i ZIP'en)
-          cp -a "custom_components/${{ env.INTEGRATION }}/." "$STAGE/"
+          cp -a "custom_components/$INTEGRATION/." "$STAGE/"
 
-          # 2) Tilføj www/ og JS filen fra repo-roden
+          # 2) Tilføj www/ og kort-filen
           mkdir -p "$STAGE/www"
-          cp -f "chores4kids-card.js" "$STAGE/www/chores4kids-card.js"
+          if [ -f "$FRONTEND_FILE" ]; then
+            cp -f "$FRONTEND_FILE" "$STAGE/www/$FRONTEND_FILE"
+          else
+            cp -f "www/$FRONTEND_FILE" "$STAGE/www/$FRONTEND_FILE"
+          fi
 
           # 3) Zip alt fra stage-roden
-          (cd "$STAGE" && zip -r "../${{ env.HACS_ZIP }}" . \
+          (cd "$STAGE" && zip -r "../$HACS_ZIP" . \
             -x "**/__pycache__/*" "**/*.pyc" ".DS_Store" ".git/*")
 
       - name: Upload ZIP asset to release
@@ -61,5 +101,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            dist/chores4kids.zip
+            dist/${{ env.HACS_ZIP }}
           fail_on_unmatched_files: true
