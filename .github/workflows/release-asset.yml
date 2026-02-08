@@ -3,11 +3,6 @@ name: Attach Integration ZIP to Release
 on:
   release:
     types: [published, prereleased]
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to attach assets to (e.g. v1.0.3)'
-        required: false
 
 permissions:
   contents: write
@@ -18,86 +13,54 @@ jobs:
     env:
       INTEGRATION: chores4kids
       HACS_ZIP: chores4kids.zip
+      FRONTEND_FILE: chores4kids-card.js
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Determine tag
-        id: tag
+      - name: Verify required files exist
         run: |
-          if [ -n "${{ github.event.release.tag_name }}" ]; then
-            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Verify required files
-        run: |
-          test -f hacs.json
-          test -f custom_components/${{ env.INTEGRATION }}/manifest.json
-          test -f custom_components/${{ env.INTEGRATION }}/__init__.py
-
-      - name: Ensure hacs.json matches (zip_release & filename)
-        run: |
-          jq -e '.zip_release == true and .filename == env.HACS_ZIP' hacs.json > /dev/null || {
-            echo "::error ::hacs.json must have zip_release=true and filename=${HACS_ZIP}"
-            exit 1
-          }
+          test -f "custom_components/${{ env.INTEGRATION }}/manifest.json"
+          test -f "hacs.json"
+          test -f "${{ env.FRONTEND_FILE }}"
 
       - name: Extract version from tag
         id: ver
         run: |
-          TAG="${{ steps.tag.outputs.tag }}"
-          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          TAG="${{ github.event.release.tag_name }}"
+          VER="${TAG#v}"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
 
-      - name: Bump manifest.json version
+      - name: Update manifest.json with release version
         run: |
           jq --arg v "${{ steps.ver.outputs.version }}" '.version=$v' \
-            custom_components/${{ env.INTEGRATION }}/manifest.json > m.tmp
-          mv m.tmp custom_components/${{ env.INTEGRATION }}/manifest.json
+            "custom_components/${{ env.INTEGRATION }}/manifest.json" \
+            > manifest.tmp
+          mv manifest.tmp "custom_components/${{ env.INTEGRATION }}/manifest.json"
 
-      # (optional) commit manifest bump
-      # - uses: EndBug/add-and-commit@v9
-      #   with:
-      #     add: custom_components/${{ env.INTEGRATION }}/manifest.json
-      #     message: "chore: bump manifest to ${{ steps.ver.outputs.version }}"
-
-      - name: Build ZIPs (HACS + versioned) with FLAT root
+      - name: Build ZIP for release (integration in ZIP root + www folder)
         run: |
-          set -e
           mkdir -p dist
-          pushd custom_components/${{ env.INTEGRATION }} >/dev/null
-          # HACS zip (flat root)
-          zip -r "../../dist/${{ env.HACS_ZIP }}" . \
-            -x "**/__pycache__/*" "**/*.pyc" ".DS_Store" ".git/*"
-          # Versioned zip (flat root)
-          zip -r "../../dist/${{ env.INTEGRATION }}-${{ steps.ver.outputs.version }}.zip" . \
-            -x "**/__pycache__/*" "**/*.pyc" ".DS_Store" ".git/*"
-          popd >/dev/null
+          STAGE="dist/stage"
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE"
 
-      - name: Sanity check ZIP layout (must be flat; manifest at root)
-        run: |
-          # must NOT contain 'custom_components/' at top level
-          if unzip -l dist/${{ env.HACS_ZIP }} | awk '{print $4}' | grep -q "^custom_components/"; then
-            echo "::error ::ZIP must NOT contain 'custom_components/' at root; pack the files directly."
-            exit 1
-          fi
-          # must contain manifest.json at root
-          unzip -l dist/${{ env.HACS_ZIP }} | awk '{print $4}' | grep -qx "manifest.json" || {
-            echo "::error ::ZIP must contain manifest.json at root"
-            exit 1
-          }
-          # should contain __init__.py at root
-          unzip -l dist/${{ env.HACS_ZIP }} | awk '{print $4}' | grep -qx "__init__.py" || {
-            echo "::error ::ZIP should contain __init__.py at root"
-            exit 1
-          }
+          # 1) Læg integrationens INDHOLD i ZIP-roden (ingen custom_components mappe i ZIP'en)
+          cp -a "custom_components/${{ env.INTEGRATION }}/." "$STAGE/"
 
-      - name: Upload ZIP assets
+          # 2) Tilføj www/ og JS filen fra repo-roden
+          mkdir -p "$STAGE/www"
+          cp -f "${{ env.FRONTEND_FILE }}" "$STAGE/www/${{ env.FRONTEND_FILE }}"
+
+          # 3) Zip alt fra stage-roden
+          (cd "$STAGE" && zip -r "../${{ env.HACS_ZIP }}" . \
+            -x "**/__pycache__/*" "**/*.pyc" ".DS_Store" ".git/*")
+
+      - name: Upload ZIP asset to release
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tag.outputs.tag }}
           files: |
             dist/${{ env.HACS_ZIP }}
-            dist/${{ env.INTEGRATION }}-${{ steps.ver.outputs.version }}.zip
+          fail_on_unmatched_files: true
