@@ -15,7 +15,7 @@ jobs:
       INTEGRATION: chores4kids
 
       # Navnet på ZIP'en der uploades til releasen (ret hvis din hacs.json forventer et andet navn)
-      HACS_ZIP: chores4kids-sync.zip
+      HACS_ZIP: chores4kids.zip
 
       # Lovelace kortfilen der skal med i zippen under www/
       FRONTEND_FILE: chores4kids-card.js
