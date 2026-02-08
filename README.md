@@ -1,20 +1,44 @@
-# Chores4Kids — Home Assistant Integration (Sync Engine) 🧹👧👦
+# Chores4Kids — Home Assistant Integration + Lovelace Card 🧹👧👦
 
-[![hacs\_badge](https://img.shields.io/badge/HACS-Default-blue.svg)](https://hacs.xyz) [![Downloads](https://img.shields.io/github/downloads/qlerup/chores4kids-sync/total)](https://github.com/qlerup/chores4kids-sync/releases)
+[![HACS](https://img.shields.io/badge/HACS-Default-blue.svg)](https://hacs.xyz)
+[![Downloads](https://img.shields.io/github/downloads/qlerup/chores4kids/total)](https://github.com/qlerup/chores4kids/releases)
 
+A family-friendly chores system for Home Assistant — **integration + Lovelace card bundled in one package**.
+
+- **The integration** is the local data & sync engine: it stores children, tasks, points, and an optional reward shop as Home Assistant entities and services.
+- **The card** is the UI: an **Admin view** for parents and a **Kid view** for each child.
+
+No cloud. No telemetry. Fast, local, and built for daily use.
 
 If you find this project useful, you can support me on Ko-fi 💙  
-
 [![Buy me some debugging time on Ko-fi](https://img.shields.io/badge/%F0%9F%90%9E_Buy_me_some_debugging_time_on-Ko--fi-2ea44f?style=for-the-badge)](https://ko-fi.com/qlerup)
 
-> **Important:** This integration **requires** the matching Lovelace card (UI):
-> **➡️ [https://github.com/qlerup/lovelace-chores4kids-card](https://github.com/qlerup/lovelace-chores4kids-card)**
-> The card provides the full interface. Without it, you’ll only have entities and services.
+---
 
-<img width="1022" height="335" alt="image" src="https://github.com/user-attachments/assets/8aab466f-bac3-4989-adb2-5dafd10a362d" />
+## Screenshots 📸
 
+<img width="2290" height="1125" alt="image" src="https://github.com/user-attachments/assets/74f144b6-eb41-4f65-9ccf-d5fba1914383" />
+<img width="2287" height="245" alt="image" src="https://github.com/user-attachments/assets/c23c1b43-0470-4d76-9641-05e34fa2a879" />
 
-The **Chores4Kids** integration is the data & sync engine. It persists **children**, **tasks**, **points**, and an optional **reward shop** as Home Assistant entities, and exposes services the Lovelace card calls. It’s local‑only and fast.
+---
+
+## What you get ✨
+
+### UI (Lovelace Card)
+- **Two modes:** `admin` (parent) 🧑‍💻 and `kid` (child) 🧒
+- **Children management:** add, rename, remove, view points & pending approvals
+- **Task lifecycle:** Assigned → In progress → Awaiting approval → Approved
+- **Repeat & auto-assign:** plan repeating chores on specific weekdays
+- **Icon picker:** search & pick Material Design Icons
+- **Scoreboard:** optional ranking of children by points
+- **Reward shop:** items with images, prices, and optional HA actions on purchase
+- **Multi-language i18n:** includes English, Danish, and more
+
+### Backend (Integration / Sync Engine)
+- Persists **children, tasks, points, shop items and purchase history** as HA entities
+- Exposes services in the `chores4kids` domain (called by the card)
+- **Daily rollover at 00:00** for repeated tasks
+- Maintenance helper to remove leftovers from older versions
 
 ---
 
@@ -22,299 +46,187 @@ The **Chores4Kids** integration is the data & sync engine. It persists **childre
 
 ### HACS (recommended)
 
-[![Open this repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=qlerup&repository=chores4kids-sync)
+1. In HACS → **Integrations** → **⋯ → Custom repositories**
+2. Add this repository URL as **Integration**:
+   ```
+   https://github.com/qlerup/chores4kids
+   ```
+3. Install **Chores4Kids**
+4. **Restart** Home Assistant
+5. Go to **Settings → Devices & Services → Add Integration → Chores4Kids** and press **Submit**
 
+### Lovelace Resource (Card JS)
 
-1. In HACS → **Integrations** → **⋯ → Custom repositories** → add this repo URL as **Integration**.
+Depending on your HACS setup, the resource may be added automatically.
 
-```
-https://github.com/qlerup/chores4kids-sync
-```
+If you don’t see the card in the UI editor:
+1. Go to **Settings → Dashboards → Resources**
+2. Add the resource that HACS installed (typically under `/hacsfiles/...`), e.g. something like:
+   - `/hacsfiles/chores4kids/chores4kids-card.js`
+3. Set type to **JavaScript Module**
+4. Reload the dashboard
 
-2. Install **Chores4Kids Sync**.
-3. **Restart** Home Assistant.
-4. Go to **Settings → Devices & Services → Add Integration → Chores4Kids** and press **Submit**.
-
-### Manual
-
-1. Copy `custom_components/chores4kids/` into your HA `config/custom_components/`.
-2. **Restart** Home Assistant.
-3. Add the integration via **Settings → Devices & Services**.
-
-> After installing the integration, install the **Lovelace card**: [https://github.com/qlerup/lovelace-chores4kids-card](https://github.com/qlerup/lovelace-chores4kids-card)
-
----
-
-## Entities created 🧱
-
-> Names can vary with your language; below are the defaults.
-
-### 1) One sensor per child — **Points**
-
-* **Name:** `Chores4Kids Points {Child Name}`
-* **Unique ID:** `chores4kids_points_{child_id}`
-* **State:** current points (integer)
-* **Attributes:**
-
-  * `child_id`, `child_name`, `slug`
-  * `assigned_count`, `in_progress_count`, `awaiting_approval_count`, `approved_count`, `rejected_count`
-  * `tasks`: list of minimal task objects for this child: `{id, title, points, status, due, icon}`
-
-### 2) All tasks (collection)
-
-* **Entity:** `sensor.chores4kids_tasks`
-* **Name:** `Chores4Kids Tasks`
-* **Unique ID:** `chores4kids_tasks_all`
-* **State:** number of tasks
-* **Attributes:**
-
-  ```json
-  {
-    "tasks": [
-      {
-        "id": "t_1",
-        "title": "Make bed",
-        "points": 5,
-        "status": "assigned",      
-        "due": "2025-01-01T07:30:00",
-        "assigned_to": "c_12345",
-        "assigned_to_name": "Emma",
-        "created": "2025-01-01T06:50:12+01:00",
-        "icon": "mdi:bed",
-        "repeat_days": [1,3,5],     
-        "repeat_child_id": "c_12345"
-      }
-    ]
-  }
-  ```
-
-### 3) Shop (optional)
-
-* **Entity:** `sensor.chores4kids_shop`
-* **Name:** `Chores4Kids Shop`
-* **Unique ID:** `chores4kids_shop`
-* **State:** number of **active** items
-* **Attributes:**
-
-  ```json
-  {
-    "items": [
-      {"id":"s_1","title":"Xbox time 30 min","price":20,"icon":"mdi:xbox","image":"/local/chores4kids/xbox.jpg","active":true,
-       "actions":[{"type":"service","domain":"switch","service":"turn_on","entity_id":"switch.xbox"},{"type":"delay","seconds":1800},{"type":"service","domain":"switch","service":"turn_off","entity_id":"switch.xbox"}]
-      }
-    ],
-    "purchases": [
-      {"id":"p_1","child_id":"c_12345","child_name":"Emma","item_id":"s_1","title":"Xbox time 30 min","price":20,"icon":"mdi:xbox","image":"/local/chores4kids/xbox.jpg","ts":"2025-01-01T12:34:56Z"}
-    ]
-  }
-  ```
+> Tip: In HACS, open the installed entry and check the “Instructions” panel — it shows the exact resource path.
 
 ---
 
-## Services (domain: `chores4kids`) ⚙️
+## Quick start (Card configs) ⚙️
 
-Below are the services exposed by the integration. The Lovelace card calls these under the hood.
-
-### Children admin
-
-* **`chores4kids.add_child`**
-
-  ```yaml
-  name: "Emma"
-  ```
-* **`chores4kids.rename_child`**
-
-  ```yaml
-  child_id: "c_12345"
-  new_name: "Emmy"
-  ```
-* **`chores4kids.remove_child`**
-
-  ```yaml
-  child_id: "c_12345"
-  ```
-* **`chores4kids.reset_points`**
-
-  ```yaml
-  # Resets one child if provided; otherwise all children
-  child_id: "c_12345"  # optional
-  ```
-* **`chores4kids.add_points`**
-
-  ```yaml
-  child_id: "c_12345"
-  points: 5
-  ```
-
-### Tasks
-
-* **`chores4kids.add_task`**
-
-  ```yaml
-  title: "Make bed"
-  points: 5
-  description: "Smooth the duvet, tuck pillow"   # optional
-  due: "2025-01-01T07:30:00"                     # optional ISO string
-  child_id: "c_12345"                            # optional (assign on create)
-  repeat_days: [mon, wed, fri]                    # list of ints 0-6 or names mon..sun
-  repeat_child_id: "c_12345"                     # optional default assignee for repeats
-  icon: "mdi:bed"                                # optional
-  ```
-* **`chores4kids.assign_task`**
-
-  ```yaml
-  task_id: "t_1"
-  child_id: "c_12345"           # omit/null to unassign
-  ```
-* **`chores4kids.set_task_status`**
-
-  ```yaml
-  task_id: "t_1"
-  status: assigned | in_progress | awaiting_approval | approved | rejected
-  ```
-* **`chores4kids.approve_task`**
-
-  ```yaml
-  task_id: "t_1"
-  ```
-* **`chores4kids.delete_task`**
-
-  ```yaml
-  task_id: "t_1"
-  ```
-* **`chores4kids.set_task_repeat`**
-
-  ```yaml
-  task_id: "t_1"
-  repeat_days: [1,3,5]      # or [mon, wed, fri]
-  repeat_child_id: "c_12345"
-  ```
-* **`chores4kids.set_task_icon`**
-
-  ```yaml
-  task_id: "t_1"
-  icon: "mdi:star"          # empty to clear
-  ```
-
-### Shop
-
-* **`chores4kids.add_shop_item`**
-
-  ```yaml
-  title: "Xbox time 30 min"
-  price: 20
-  icon: "mdi:xbox"          # optional
-  image: "/local/chores4kids/xbox.jpg"   # optional (see upload service below)
-  active: true               # optional (default true)
-  actions:                   # optional list of steps
-    - type: service
-      domain: switch
-      service: turn_on
-      entity_id: switch.xbox
-    - type: delay
-      seconds: 1800
-    - type: service
-      domain: switch
-      service: turn_off
-      entity_id: switch.xbox
-  ```
-* **`chores4kids.update_shop_item`**
-
-  ```yaml
-  item_id: "s_1"
-  title: "Xbox time 30 min"
-  price: 20
-  icon: "mdi:xbox"
-  image: "/local/chores4kids/xbox.jpg"
-  active: true
-  actions: []
-  ```
-* **`chores4kids.delete_shop_item`**
-
-  ```yaml
-  item_id: "s_1"
-  ```
-* **`chores4kids.buy_shop_item`**
-
-  ```yaml
-  child_id: "c_12345"
-  item_id: "s_1"
-  ```
-* **`chores4kids.upload_shop_image`** — saves a base64 image to `/config/www/chores4kids/` so it can be served as `/local/chores4kids/<filename>`.
-
-  ```yaml
-  filename: "xbox.jpg"
-  data: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."  # or raw base64
-  ```
-
-### Maintenance
-
-* **`chores4kids.purge_orphans`** — remove orphaned entities/devices from older versions (safe to run after big changes).
-
-  ```yaml
-  # no fields
-  ```
-
----
-
-## Daily rollover (midnight) 🌙
-
-Every night at **00:00**, the integration:
-
-1. **Removes old assigned tasks** from previous days (unassigned templates are kept forever).
-2. **Creates today’s repeated tasks** from any task that has `repeat_days`. If `repeat_child_id` is set, it’s used; otherwise the task’s current `assigned_to` is used as the target.
-
-This keeps the list fresh each day while preserving your repeat plans.
-
----
-
-## Using with the Lovelace card (required) 🧩
-
-Install the card: **[https://github.com/qlerup/lovelace-chores4kids-card](https://github.com/qlerup/lovelace-chores4kids-card)**
-
-Minimum configs:
+### Admin view (parents)
 
 ```yaml
-# Admin view
 type: custom:chores4kids-dev-card
 mode: admin
+show_scoreboard: true
+```
 
-# Kid view
+### Kid view (for a specific child)
+
+```yaml
 type: custom:chores4kids-dev-card
 mode: kid
 child: "Emma"
 ```
 
-The card will discover the entities this integration exposes and call the services above.
+> If the child list is empty in the editor, you can type the name manually.
+
+---
+
+## How it works 🧠
+
+The integration creates entities that the card reads from `hass.states`, and services that the card calls to update data.
+
+### Entities created 🧱
+
+#### 1) One sensor per child — **Points**
+- **Name:** `Chores4Kids Points {Child Name}`
+- **State:** current points (integer)
+- **Attributes:** `child_id`, `child_name`, `slug`, task counts, plus a minimal list of tasks for that child
+
+#### 2) All tasks (collection)
+- **Entity:** `sensor.chores4kids_tasks`
+- **State:** number of tasks
+- **Attributes:** `tasks` (full list)
+
+#### 3) Shop (optional)
+- **Entity:** `sensor.chores4kids_shop`
+- **State:** number of active items
+- **Attributes:** `items` and `purchases`
+
+---
+
+## Task lifecycle 🔄
+
+1. **Assigned** 📌 → Visible and linked to a child
+2. **In progress** 🔧 → Kid pressed **Start**
+3. **Awaiting approval** 📨 → Kid pressed **Complete task**
+4. **Approved** 🥳 → Parent approves, points are awarded
+
+Other states you may see: **Unassigned** and **Rejected**.
+
+---
+
+## Repeat & Auto-assign 🔁📅
+
+- Choose weekdays (Mon–Sun) for a task to repeat
+- Optionally pick a default child (`repeat_child_id`) to auto-assign on those days
+- Save the plan — the card calls `chores4kids.set_task_repeat`
+
+If **Auto-assign** is active, manual assignment can be disabled for that task (the UI will indicate this).
+
+---
+
+## Reward Shop 🛒🎁
+
+Create rewards kids can buy with points:
+- Title, price, optional icon & image
+- Toggle **Active** to show/hide in kid view
+- Purchase history is stored in HA
+
+### Advanced shop actions ⚙️⏱️
+
+Rewards can trigger Home Assistant actions when purchased:
+- **Service steps** (e.g. turn on a switch)
+- **Delay steps** (seconds/minutes/hours)
+- Run steps in order
+
+Example: “Xbox time 30 min”
+1) `switch.turn_on`
+2) delay 1800s
+3) `switch.turn_off`
+
+---
+
+## Services (domain: `chores4kids`) 🛠️
+
+### Children admin
+- `chores4kids.add_child`
+- `chores4kids.rename_child`
+- `chores4kids.remove_child`
+- `chores4kids.add_points`
+- `chores4kids.reset_points`
+
+### Tasks
+- `chores4kids.add_task`
+- `chores4kids.assign_task`
+- `chores4kids.set_task_status`
+- `chores4kids.approve_task`
+- `chores4kids.delete_task`
+- `chores4kids.set_task_repeat`
+- `chores4kids.set_task_icon`
+
+### Shop
+- `chores4kids.add_shop_item`
+- `chores4kids.update_shop_item`
+- `chores4kids.delete_shop_item`
+- `chores4kids.buy_shop_item`
+- `chores4kids.upload_shop_image` (saves to `/config/www/chores4kids/` for `/local/chores4kids/<file>`)
+
+### Maintenance
+- `chores4kids.purge_orphans` — remove leftovers from older versions
+
+---
+
+## Daily rollover (00:00) 🌙
+
+Every night at **00:00**, the integration:
+1. Removes old assigned tasks from previous days (templates can remain)
+2. Creates today’s tasks for any chores that match `repeat_days`
+   - If `repeat_child_id` is set → assign to that child
+   - Otherwise → use the task’s current assignment as the target
+
+---
+
+## Internationalization 🌍
+
+The card includes multiple languages (including English and Danish) and localizes based on your Home Assistant language settings.
 
 ---
 
 ## Troubleshooting 🧰
 
-* **Card shows no data** → ensure this integration is installed, configured, and HA was restarted.
-* **No children listed** → create children in Admin view (or call `chores4kids.add_child`).
-* **No tasks** → create one via the card or `chores4kids.add_task`.
-* **Shop images** → use `chores4kids.upload_shop_image` then reference `/local/chores4kids/<file>` in the item.
-* **Leftover sensors/devices** → run `chores4kids.purge_orphans`.
+- **Card shows no data**
+  - Make sure the integration is installed, configured, and HA was restarted
+- **No children listed**
+  - Create children in Admin view (or call `chores4kids.add_child`)
+- **No tasks**
+  - Create one in Admin view (or call `chores4kids.add_task`)
+- **Shop empty for kids**
+  - Ensure items are **Active**
+- **Shop images not showing**
+  - Use `chores4kids.upload_shop_image`, then reference `/local/chores4kids/<filename>`
+- **Leftover sensors/devices after upgrade**
+  - Run `chores4kids.purge_orphans`
 
 ---
 
-## Privacy & Local‑only
+## Upgrading from the old split repos (card + sync) ♻️
 
-All data stays in your Home Assistant. No cloud, no telemetry. Shop actions run local HA services (`domain.service`) and optional delays.
-
----
-
-## Releases & HACS
-
-If you distribute releases via GitHub:
-
-* Add `hacs.json` with:
-
-  ```json
-  { "name": "Chores4Kids Sync", "render_readme": true, "zip_release": true }
-  ```
-* Attach a ZIP that contains `custom_components/chores4kids/...` at the root (HACS will fetch it when `zip_release` is true).
+If you previously installed **two separate HACS repos**:
+1. Remove the old entries from HACS (card + sync)
+2. Install this bundled repo
+3. Verify your Lovelace **Resources** point at the new JS file (remove old resource entries if needed)
+4. Restart Home Assistant
 
 ---
 
