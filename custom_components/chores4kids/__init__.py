@@ -28,6 +28,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN]["store"] = store
 
+    # Ensure Lovelace card JS is available and resource is registered (best-effort)
+    try:
+        from .frontend import ensure_frontend
+        await ensure_frontend(hass)
+    except Exception:
+        _LOGGER.debug("%s: ensure_frontend failed", DOMAIN, exc_info=True)
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Services
