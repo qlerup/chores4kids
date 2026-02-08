@@ -22,6 +22,29 @@ If you find this project useful, you can support me on Ko-fi 💙
 
 ---
 
+## Highlights (Features)
+
+- 🧑‍💻 **Three views in one card**: `admin` (parents), `kid` (child), and **overview** (recent tasks)
+- 👧👦 **Children management**: add, rename, remove, set colors, view points & pending approvals
+- 🏷️ **Categories**: create categories, assign to tasks, and control category sort order
+- ✅ **Full task lifecycle**: assigned → in progress → awaiting approval → approved/rejected
+- 🚦 **Extra task states**: unassigned, taken (first-claim), and overdue
+- ⏱️ **Deadlines + early bonus**: optional due date, bonus points if done early
+- 🔁 **Repeat & schedules**: weekly or monthly schedules + weekday repeat plan
+- 🎯 **Auto-assign**: repeat tasks can auto-assign to one or more children
+- ⚡ **Quick rules**: one‑tap completion, skip approval, and “fastest wins” mode
+- ♻️ **Auto recycle**: automatically re-create approved repeat tasks
+- 📅 **Persist unfinished tasks**: carry to next day and optionally mark overdue
+- 🧮 **Points management**: add/reset points per child, quick add/remove
+- 🏆 **Scoreboard**: optional ranking by points
+- 🛒 **Reward shop**: items with price, icon/image, active toggle, and purchase history
+- 🧰 **Shop automations**: action steps + delays on purchase (service calls, timers)
+- 🖼️ **Media upload**: shop images uploaded to `/local/chores4kids/`
+- 🎉 **Kid UX**: daily/weekly task sections, confetti, and completion sound
+- 🎨 **Color theming**: customize button and points colors
+- 🧪 **Developer mode**: debug controls like manual overdue marking
+- 🌍 **Internationalization**: English, Danish, and more
+
 ## What you get ✨
 
 ### UI (Lovelace Card)
