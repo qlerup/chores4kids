@@ -21,8 +21,7 @@ jobs:
         run: |
           test -f "custom_components/${{ env.INTEGRATION }}/manifest.json"
           test -f "hacs.json"
-          # Kort-filen kan enten ligge i repo-roden eller i www/
-          test -f "chores4kids-card.js" || test -f "www/chores4kids-card.js"
+          test -f "chores4kids-card.js"
 
       - name: Extract version from tag
         id: ver
@@ -48,16 +47,9 @@ jobs:
           # 1) Læg integrationens INDHOLD i ZIP-roden (ingen custom_components mappe i ZIP'en)
           cp -a "custom_components/${{ env.INTEGRATION }}/." "$STAGE/"
 
-          # 2) Tilføj www/ og kort-filen
+          # 2) Tilføj www/ og JS filen fra repo-roden
           mkdir -p "$STAGE/www"
-          if [ -f "chores4kids-card.js" ]; then
-            cp -f "chores4kids-card.js" "$STAGE/www/chores4kids-card.js"
-          elif [ -f "www/chores4kids-card.js" ]; then
-            cp -f "www/chores4kids-card.js" "$STAGE/www/chores4kids-card.js"
-          else
-            echo "ERROR: Mangler chores4kids-card.js (forventet i repo-roden eller www/)"
-            exit 1
-          fi
+          cp -f "chores4kids-card.js" "$STAGE/www/chores4kids-card.js"
 
           # 3) Zip alt fra stage-roden
           (cd "$STAGE" && zip -r "../${{ env.HACS_ZIP }}" . \
@@ -69,5 +61,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            dist/${{ env.HACS_ZIP }}
+            dist/chores4kids.zip
           fail_on_unmatched_files: true
