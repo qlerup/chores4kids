@@ -1,11 +1,20 @@
 {
   "domain": "chores4kids",
   "name": "Chores4Kids Sync",
-  "codeowners": ["@qlerup"],
+  "after_dependencies": [
+    "lovelace"
+  ],
+  "codeowners": [
+    "@qlerup"
+  ],
   "config_flow": true,
+  "dependencies": [
+    "http",
+    "frontend"
+  ],
   "documentation": "https://github.com/qlerup/chores4kids-sync",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/qlerup/chores4kids-sync/issues",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.3"
 }
