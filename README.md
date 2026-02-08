@@ -69,6 +69,8 @@ If you find this project useful, you can support me on Ko-fi 💙
 
 ### HACS (recommended)
 
+[![Open this repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=qlerup&repository=chores4kids)
+
 1. In HACS → **Integrations** → **⋯ → Custom repositories**
 2. Add this repository URL as **Integration**:
    ```
