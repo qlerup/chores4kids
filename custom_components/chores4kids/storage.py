@@ -114,6 +114,9 @@ class KidsChoresStore:
         self.ui_colors: Dict[str, str] = {}
         self.enable_points: bool = True
         self.confetti_enabled: bool = True
+        self.notify_service: str = ""
+        self.notify_services: List[str] = []
+        self.notify_service_settings: Dict[str, Dict[str, bool]] = {}
 
     async def async_load(self):
         data = await self._store.async_load()
@@ -155,6 +158,39 @@ class KidsChoresStore:
         except Exception:
             self.confetti_enabled = True
 
+        try:
+            raw_list = data.get("notify_services")
+            if isinstance(raw_list, list):
+                self.notify_services = [str(x).strip() for x in raw_list if str(x).strip()]
+            else:
+                self.notify_services = []
+            self.notify_service = str(data.get("notify_service") or "").strip()
+            if self.notify_service and not self.notify_services:
+                self.notify_services = [self.notify_service]
+        except Exception:
+            self.notify_service = ""
+            self.notify_services = []
+
+        try:
+            raw_settings = data.get("notify_service_settings") or {}
+            cleaned: Dict[str, Dict[str, bool]] = {}
+            if isinstance(raw_settings, dict):
+                for svc, opts in raw_settings.items():
+                    if not svc or not isinstance(opts, dict):
+                        continue
+                    entry: Dict[str, bool] = {}
+                    if "task_complete" in opts:
+                        entry["task_complete"] = bool(opts.get("task_complete"))
+                    if "shop_purchase" in opts:
+                        entry["shop_purchase"] = bool(opts.get("shop_purchase"))
+                    if "shop_image" in opts:
+                        entry["shop_image"] = bool(opts.get("shop_image"))
+                    if entry:
+                        cleaned[str(svc).strip()] = entry
+            self.notify_service_settings = cleaned
+        except Exception:
+            self.notify_service_settings = {}
+
     async def async_save(self):
         await self._store.async_save({
             "version": STORAGE_VERSION,
@@ -166,6 +202,9 @@ class KidsChoresStore:
             "ui_colors": dict(self.ui_colors or {}),
             "enable_points": bool(getattr(self, "enable_points", True)),
             "confetti_enabled": bool(getattr(self, "confetti_enabled", True)),
+            "notify_service": str(getattr(self, "notify_service", "") or ""),
+            "notify_services": list(getattr(self, "notify_services", []) or []),
+            "notify_service_settings": dict(getattr(self, "notify_service_settings", {}) or {}),
         })
 
     async def set_ui_colors(
@@ -185,6 +224,9 @@ class KidsChoresStore:
         kid_task_button_size: Optional[str] = None,
         enable_points: Optional[bool] = None,
         confetti_enabled: Optional[bool] = None,
+        notify_service: Optional[str] = None,
+        notify_services: Optional[List[str]] = None,
+        notify_service_settings: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, str]:
         """Set global UI colors. Empty string clears a value."""
         def _set(key: str, value: Optional[str]):
@@ -218,6 +260,31 @@ class KidsChoresStore:
 
         if confetti_enabled is not None:
             self.confetti_enabled = bool(confetti_enabled)
+
+        if notify_services is not None:
+            cleaned = [str(x).strip() for x in (notify_services or []) if str(x).strip()]
+            self.notify_services = cleaned
+            self.notify_service = cleaned[0] if cleaned else ""
+        elif notify_service is not None:
+            self.notify_service = str(notify_service).strip()
+            self.notify_services = [self.notify_service] if self.notify_service else []
+
+        if notify_service_settings is not None:
+            cleaned_settings: Dict[str, Dict[str, bool]] = {}
+            if isinstance(notify_service_settings, dict):
+                for svc, opts in notify_service_settings.items():
+                    if not svc or not isinstance(opts, dict):
+                        continue
+                    entry: Dict[str, bool] = {}
+                    if "task_complete" in opts:
+                        entry["task_complete"] = bool(opts.get("task_complete"))
+                    if "shop_purchase" in opts:
+                        entry["shop_purchase"] = bool(opts.get("shop_purchase"))
+                    if "shop_image" in opts:
+                        entry["shop_image"] = bool(opts.get("shop_image"))
+                    if entry:
+                        cleaned_settings[str(svc).strip()] = entry
+            self.notify_service_settings = cleaned_settings
         await self.async_save()
         return dict(self.ui_colors)
 
