@@ -239,6 +239,24 @@ set_ui_colors:
       required: false
       description: Enable/disable confetti animation globally (synced across users/devices).
       example: true
+    notify_service:
+      required: false
+      description: Notify service to use for task completion (e.g. mobile_app_iphone or notify.mobile_app_iphone).
+      example: "mobile_app_iphone"
+    notify_services:
+      required: false
+      description: List of notify services to use for task completion (e.g. [mobile_app_iphone, mobile_app_ipad]).
+      example:
+        - "mobile_app_iphone"
+        - "mobile_app_ipad"
+    notify_service_settings:
+      required: false
+      description: Per-service notification toggles (task_complete, shop_purchase, shop_image).
+      example:
+        mobile_app_iphone:
+          task_complete: true
+          shop_purchase: false
+          shop_image: true
     enable_points:
       required: false
       description: Enable/disable the points feature globally (synced across users/devices).
