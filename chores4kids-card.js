@@ -90,6 +90,13 @@ const C4K_I18N = {
 			'editor.delete_sound_failed':'Failed to delete sound file',
 			'editor.confetti':'Confetti',
 			'editor.confetti_help':'Show confetti animation on completion',
+			'editor.notify_target':'Completion notification',
+			'editor.notify_target_help':'Send a push notification when a child marks a task done.',
+			'editor.notify_target_none':'Add person',
+			'editor.notify_toggle_complete':'Notify on task completion',
+			'editor.notify_toggle_shop':'Notify on shop purchase',
+			'editor.notify_toggle_shop_image':'Show image in shop notification',
+			'section.notifications':'Notifications',
 			'editor.colors':'Colors',
 			'editor.color_field_bg':'Background',
 			'editor.color_field_text':'Text',
@@ -188,6 +195,13 @@ const C4K_I18N = {
 			'editor.delete_sound_failed':'Kunne ikke slette lydfilen',
 			'editor.confetti':'Konfetti',
 			'editor.confetti_help':'Vis konfetti-animation ved færdiggørelse',
+			'editor.notify_target':'Notifikation ved færdig',
+			'editor.notify_target_help':'Send en push-notifikation når et barn markerer en opgave som færdig.',
+			'editor.notify_target_none':'Tilføj person',
+			'editor.notify_toggle_complete':'Notifikation ved færdig opgave',
+			'editor.notify_toggle_shop':'Notifikation ved køb i shoppen',
+			'editor.notify_toggle_shop_image':'Vis billede i shop-notifikation',
+			'section.notifications':'Notifikationer',
 			'editor.colors':'Farver',
 			'editor.color_field_bg':'Baggrund',
 			'editor.color_field_text':'Tekst',
@@ -244,6 +258,13 @@ const C4K_I18N = {
 			'editor.developer_mode_help':'Visar debug-kontroller som manuell förseningsmarkering',
 			'editor.completion_sound':'Klar-ljud',
 			'editor.completion_sound_help':'Sparas som /local/chores4kids/completion.<ext> och används på alla dashboards',
+			'editor.notify_target':'Notifikation vid slutförande',
+			'editor.notify_target_help':'Skicka en push-notis när ett barn markerar en uppgift som klar.',
+			'editor.notify_target_none':'Lägg till person',
+			'editor.notify_toggle_complete':'Notis vid slutförd uppgift',
+			'editor.notify_toggle_shop':'Notis vid köp i shoppen',
+			'editor.notify_toggle_shop_image':'Visa bild i shop-notis',
+			'section.notifications':'Notiser',
 			'editor.colors':'Färger',
 			'editor.color_field_bg':'Bakgrund',
 			'editor.color_field_text':'Text',
@@ -300,6 +321,13 @@ const C4K_I18N = {
 			'editor.developer_mode_help':'Viser debug-kontroller som manuell forfallsmarkering',
 			'editor.completion_sound':'Fullføringslyd',
 			'editor.completion_sound_help':'Lagres som /local/chores4kids/completion.<ext> og brukes på tvers av dashboards',
+			'editor.notify_target':'Varsling ved fullføring',
+			'editor.notify_target_help':'Send en push-varsling når et barn markerer en oppgave som ferdig.',
+			'editor.notify_target_none':'Legg til person',
+			'editor.notify_toggle_complete':'Varsling ved fullført oppgave',
+			'editor.notify_toggle_shop':'Varsling ved kjøp i butikken',
+			'editor.notify_toggle_shop_image':'Vis bilde i butikkvarsling',
+			'section.notifications':'Varsler',
 			'editor.colors':'Farger',
 			'editor.color_field_bg':'Bakgrunn',
 			'editor.color_field_text':'Tekst',
@@ -356,6 +384,13 @@ const C4K_I18N = {
 			'editor.developer_mode_help':'Zeigt Debug-Steuerungen wie manuelles Überfällig-Markieren',
 			'editor.completion_sound':'Abschluss-Sound',
 			'editor.completion_sound_help':'Wird als /local/chores4kids/completion.<ext> gespeichert und auf allen Dashboards verwendet',
+			'editor.notify_target':'Abschlussbenachrichtigung',
+			'editor.notify_target_help':'Sende eine Push-Benachrichtigung, wenn ein Kind eine Aufgabe als erledigt markiert.',
+			'editor.notify_target_none':'Person hinzufügen',
+			'editor.notify_toggle_complete':'Benachrichtigung bei Aufgabenabschluss',
+			'editor.notify_toggle_shop':'Benachrichtigung bei Shop-Kauf',
+			'editor.notify_toggle_shop_image':'Bild in Shop-Benachrichtigung anzeigen',
+			'section.notifications':'Benachrichtigungen',
 			'editor.colors':'Farben',
 			'editor.color_field_bg':'Hintergrund',
 			'editor.color_field_text':'Text',
@@ -412,6 +447,13 @@ const C4K_I18N = {
 			'editor.developer_mode_help':'Muestra controles de depuración como marcar vencido manualmente',
 			'editor.completion_sound':'Sonido de finalización',
 			'editor.completion_sound_help':'Se guarda como /local/chores4kids/completion.<ext> y se usa en todos los paneles',
+			'editor.notify_target':'Notificación de finalización',
+			'editor.notify_target_help':'Enviar una notificación push cuando un niño marque una tarea como hecha.',
+			'editor.notify_target_none':'Añadir persona',
+			'editor.notify_toggle_complete':'Notificar al completar una tarea',
+			'editor.notify_toggle_shop':'Notificar compra en la tienda',
+			'editor.notify_toggle_shop_image':'Mostrar imagen en notificación de tienda',
+			'section.notifications':'Notificaciones',
 			'editor.colors':'Colores',
 			'editor.color_field_bg':'Fondo',
 			'editor.color_field_text':'Texto',
@@ -468,6 +510,13 @@ const C4K_I18N = {
 			'editor.developer_mode_help':'Affiche des contrôles de débogage comme marquer en retard manuellement',
 			'editor.completion_sound':'Son de fin',
 			'editor.completion_sound_help':'Enregistré sous /local/chores4kids/completion.<ext> et utilisé sur tous les tableaux de bord',
+			'editor.notify_target':'Notification d’achèvement',
+			'editor.notify_target_help':'Envoyer une notification push lorsqu’un enfant marque une tâche comme terminée.',
+			'editor.notify_target_none':'Ajouter une personne',
+			'editor.notify_toggle_complete':'Notifier la fin d’une tâche',
+			'editor.notify_toggle_shop':'Notifier un achat dans la boutique',
+			'editor.notify_toggle_shop_image':'Afficher l’image dans la notification d’achat',
+			'section.notifications':'Notifications',
 			'editor.colors':'Couleurs',
 			'editor.color_field_bg':'Fond',
 			'editor.color_field_text':'Texte',
@@ -524,6 +573,13 @@ const C4K_I18N = {
 			'editor.developer_mode_help':'Näyttää debug-ohjaimet, kuten manuaalisen myöhässä-merkinnän',
 			'editor.completion_sound':'Valmistumisääni',
 			'editor.completion_sound_help':'Tallennetaan muotoon /local/chores4kids/completion.<ext> ja käytetään kaikilla näkymillä',
+			'editor.notify_target':'Valmistumisilmoitus',
+			'editor.notify_target_help':'Lähetä push-ilmoitus, kun lapsi merkitsee tehtävän valmiiksi.',
+			'editor.notify_target_none':'Lisää henkilö',
+			'editor.notify_toggle_complete':'Ilmoitus tehtävän valmistumisesta',
+			'editor.notify_toggle_shop':'Ilmoitus ostosta kaupassa',
+			'editor.notify_toggle_shop_image':'Näytä kuva oston ilmoituksessa',
+			'section.notifications':'Ilmoitukset',
 			'editor.colors':'Värit',
 			'editor.color_field_bg':'Tausta',
 			'editor.color_field_text':'Teksti',
@@ -580,6 +636,13 @@ const C4K_I18N = {
 			'editor.developer_mode_help':'Mostra controlli di debug come segnare scaduto manualmente',
 			'editor.completion_sound':'Suono di completamento',
 			'editor.completion_sound_help':'Salvato come /local/chores4kids/completion.<ext> e usato su tutte le dashboard',
+			'editor.notify_target':'Notifica di completamento',
+			'editor.notify_target_help':'Invia una notifica push quando un bambino segna un’attività come completata.',
+			'editor.notify_target_none':'Aggiungi persona',
+			'editor.notify_toggle_complete':'Notifica completamento attività',
+			'editor.notify_toggle_shop':'Notifica acquisto nel negozio',
+			'editor.notify_toggle_shop_image':'Mostra immagine nella notifica di acquisto',
+			'section.notifications':'Notifiche',
 			'editor.colors':'Colori',
 			'editor.color_field_bg':'Sfondo',
 			'editor.color_field_text':'Testo',
@@ -867,6 +930,10 @@ class Chores4KidsDevCard extends LitElement {
 		.title.completed{ text-decoration: line-through; }
 		.meta{ color: var(--secondary-text-color); font-size: 12px; display:flex; flex-wrap:wrap; gap:10px; }
 		.chip{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+		.notify-chips{ display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 8px; }
+		.notify-chip{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600; background: color-mix(in srgb, var(--primary-color) 12%, transparent); color: var(--primary-text-color); }
+		.notify-chip .chip-x{ border:0; background: transparent; color: inherit; padding:0; margin:0; line-height:1; font-size:14px; cursor:pointer; }
+		.notify-empty{ color: var(--secondary-text-color); font-size: .9rem; }
 		.chip-points{ background: var(--c4k-task-points-bg, color-mix(in srgb, var(--warning-color, #ff9800) 18%, transparent)); color: var(--c4k-task-points-text, var(--warning-color, #ff9800)); }
 		.task .chip-points{ font-size: var(--c4k-kid-task-points-size, 12px); }
 		.chip-deadline{ background: color-mix(in srgb, var(--secondary-text-color) 14%, transparent); color: var(--secondary-text-color); }
@@ -889,6 +956,19 @@ class Chores4KidsDevCard extends LitElement {
 			.shop-item .body button{ width:100%; }
 		}
 		.shop-item{ border: 1px solid var(--divider-color); border-radius: 12px; overflow:hidden; background: var(--card-background-color); display:flex; flex-direction:column; }
+		.shop-item.is-buying .btn-primary{ animation: c4k-buy-pulse 0.6s ease; }
+		.shop-item.is-bought{ animation: c4k-buy-pop 0.5s ease; }
+		.shop-item.is-bought .btn-primary{ background: var(--success-color, #43a047); box-shadow: 0 0 0 2px color-mix(in srgb, var(--success-color, #43a047) 35%, transparent); }
+		@keyframes c4k-buy-pulse{
+			0%{ transform: scale(1); box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary-color) 40%, transparent); }
+			50%{ transform: scale(0.96); box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary-color) 30%, transparent); }
+			100%{ transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+		}
+		@keyframes c4k-buy-pop{
+			0%{ transform: scale(1); }
+			40%{ transform: scale(1.03); }
+			100%{ transform: scale(1); }
+		}
 		.shop-item .img-wrap{ width:100%; aspect-ratio: 1/1; background: color-mix(in srgb, var(--primary-color) 6%, transparent); overflow:hidden; display:block; }
 		.shop-item .img-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
 		.shop-item .body{ padding:10px; display:flex; flex-direction:column; gap:8px; align-items:center; text-align:center; }
@@ -2577,12 +2657,12 @@ class Chores4KidsDevCard extends LitElement {
 							<h3 style="margin:0 0 8px;">${this._t('shop.title')}</h3>
 							<div class="shop-grid">
 								${items.map(i=> html`
-									<div class="shop-item">
+									<div class="shop-item ${this._buyingItemId===i.id ? 'is-buying' : ''} ${this._buySuccessItemId===i.id ? 'is-bought' : ''}">
 										${i.image ? html`<div class="img-wrap"><img src="${this._resolveUrl(i.image)}" alt="${i.title}" loading="lazy" decoding="async"></div>` : html`<div class="img-wrap" style="display:grid;place-items:center;opacity:.7;">${i.icon? html`<ha-icon icon="${i.icon}" style="--mdc-icon-size:48px"></ha-icon>`:'?'}</div>`}
 										<div class="body">
 											<div class="title">${i.title}</div>
 											<div class="meta"><span class="chip chip-points">${i.price} ${this._t('lbl.points')}</span></div>
-											<button class="btn-primary" ?disabled=${Number(s.state)<Number(i.price)} @click=${()=>this._buy(i, s.attributes.child_id)}>${this._t('shop.buy')}</button>
+											<button class="btn-primary" ?disabled=${Number(s.state)<Number(i.price) || this._buyingItemId===i.id} @click=${()=>this._buy(i, s.attributes.child_id)}>${this._t('shop.buy')}</button>
 										</div>
 									</div>
 								`)}
@@ -3187,7 +3267,28 @@ class Chores4KidsDevCard extends LitElement {
 			console.log('No playable completion sound found');
 		}catch(e){ console.log('Sound playback error:', e); }
 	}
-	async _buy(item, childId){ if(!this._pointsEnabled()) return; if(!item?.id || !childId) return; await this.hass.callService('chores4kids','buy_shop_item',{ child_id: childId, item_id: item.id }); }
+	async _buy(item, childId){
+		if(!this._pointsEnabled()) return;
+		if(!item?.id || !childId) return;
+		if(this._buyingItemId===item.id) return;
+		this._buyingItemId = item.id;
+		this._buySuccessItemId = null;
+		this.requestUpdate();
+		try{
+			await this.hass.callService('chores4kids','buy_shop_item',{ child_id: childId, item_id: item.id });
+			this._buySuccessItemId = item.id;
+			this.requestUpdate();
+			setTimeout(()=>{
+				if(this._buySuccessItemId===item.id){
+					this._buySuccessItemId = null;
+					this.requestUpdate();
+				}
+			}, 900);
+		}finally{
+			this._buyingItemId = null;
+			this.requestUpdate();
+		}
+	}
 	
 	// DEBUG: Mark task as overdue for testing
 	async _debugMarkOverdue(task) {
@@ -3392,6 +3493,46 @@ class Chores4KidsDevCardEditor extends LitElement{
 			return Array.from(new Set(names)).sort((a,b)=> String(a).localeCompare(String(b)));
 		}catch{ return []; }
 	}
+	_getNotifyServiceOptions(){
+		try{
+			const services = this.hass?.services?.notify || {};
+			return Object.keys(services).sort((a,b)=> String(a).localeCompare(String(b)));
+		}catch{ return []; }
+	}
+	_getGlobalNotifyServices(){
+		try{
+			const a = this._getUiSensorAttrs?.() || {};
+			const fromCfg = Array.isArray(this._config?.notify_services) ? this._config.notify_services : [];
+			const list = Array.isArray(a.notify_services) ? a.notify_services : [];
+			const cleaned = [...list, ...fromCfg].map(s=> String(s||'').trim()).filter(Boolean)
+				.filter((v,i,a)=> a.indexOf(v)===i);
+			const single = String(a.notify_service || '').trim();
+			if (single && !cleaned.includes(single)) cleaned.push(single);
+			return cleaned;
+		}catch{ return []; }
+	}
+	_getNotifyServiceSettings(){
+		try{
+			const a = this._getUiSensorAttrs?.() || {};
+			const fromCfg = (this._config?.notify_service_settings && typeof this._config.notify_service_settings === 'object') ? this._config.notify_service_settings : {};
+			const fromStore = (a.notify_service_settings && typeof a.notify_service_settings === 'object') ? a.notify_service_settings : {};
+			const merged = { ...fromStore };
+			for (const [svc, opts] of Object.entries(fromCfg || {})){
+				if (!opts || typeof opts !== 'object') continue;
+				merged[svc] = { ...(merged[svc] || {}), ...opts };
+			}
+			return merged;
+		}catch{ return {}; }
+	}
+	_setNotifyServiceSetting(service, key, value){
+		try{
+			const map = this._getNotifyServiceSettings();
+			const next = { ...map, [service]: { ...(map?.[service] || {}), [key]: !!value } };
+			this._config = { ...(this._config||{}), notify_service_settings: next };
+			this._saveGlobalUiSettings({ notify_service_settings: next });
+			this._emit();
+		}catch{ /* ignore */ }
+	}
 	_getUiSensorAttrs(){
 		try{
 			const states = this.hass?.states;
@@ -3409,6 +3550,7 @@ class Chores4KidsDevCardEditor extends LitElement{
 							|| ('task_points_bg' in a) || ('task_points_text' in a)
 							|| ('kid_task_title_size' in a) || ('kid_task_points_size' in a) || ('kid_task_button_size' in a)
 							|| ('confetti_enabled' in a)
+							|| ('notify_service' in a) || ('notify_services' in a) || ('notify_service_settings' in a)
 						);
 					}catch{ return false; }
 				});
@@ -3430,6 +3572,13 @@ class Chores4KidsDevCardEditor extends LitElement{
 			if (!this.hass) return;
 			const next = { ...(this._pendingUiColors || {}), ...(payload || {}) };
 			this._pendingUiColors = next;
+			const hasNotifySettings = payload && Object.prototype.hasOwnProperty.call(payload, 'notify_service_settings');
+			if (hasNotifySettings){
+				try{ this.hass.callService('chores4kids','set_ui_colors', this._pendingUiColors || next); }catch(e){
+					console.warn('Failed to save UI settings (notify)', e);
+				}
+				return;
+			}
 			if (this._uiColorSaveTimer) clearTimeout(this._uiColorSaveTimer);
 			this._uiColorSaveTimer = setTimeout(async ()=>{
 				try{
@@ -3443,6 +3592,10 @@ class Chores4KidsDevCardEditor extends LitElement{
 		render(){
 		const cfg=this._config||{};
 		const kids=this._getChildren();
+		const notifyOptions = this._getNotifyServiceOptions();
+		const globalNotify = this._getGlobalNotifyServices();
+		const notifyAvailable = (notifyOptions||[]).filter(s=> !globalNotify.includes(s));
+		const notifySettings = this._getNotifyServiceSettings();
 		const globalFs = this._getGlobalKidFontSizes();
 		const fsTitle = (this._fsTaskTitle != null) ? this._fsTaskTitle : globalFs.title;
 		const fsPoints = (this._fsTaskPoints != null) ? this._fsTaskPoints : globalFs.points;
@@ -3497,6 +3650,60 @@ class Chores4KidsDevCardEditor extends LitElement{
 					</div>
 				` : ''}
 			</div>
+
+			${(cfg.mode||'admin')==='admin' ? html`
+				<div class="section-box">
+					<div class="form-field">
+						<label>${this._t('section.notifications')}</label>
+						<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.notify_target_help')}</small>
+						<div class="notify-chips">
+							${(globalNotify||[]).length ? (globalNotify||[]).map(s=> html`
+								<span class="notify-chip">
+									${s}
+									<button class="chip-x" title="${this._t('form.clear')}" @click=${()=>{
+										const next = (globalNotify||[]).filter(x=> x!==s);
+										this._saveGlobalUiSettings({ notify_services: next, notify_service: next[0] || '' });
+										this._config={...cfg, notify_service: next[0] || '', notify_services: next};
+										this._emit();
+									}}>&times;</button>
+								</span>
+							`) : html`<span class="notify-empty">${this._t('editor.notify_target_none')}</span>`}
+						</div>
+						<select .value=${''} @change=${e=>{ const v=String(e.target.value||''); if(!v){ this._saveGlobalUiSettings({ notify_services: [], notify_service: '' }); this._config={...cfg, notify_service: '', notify_services: []}; this._emit(); return; } const next=[...(globalNotify||[]), v].filter((x,i,a)=>a.indexOf(x)===i); this._saveGlobalUiSettings({ notify_services: next, notify_service: next[0] || '' }); this._config={...cfg, notify_service: next[0] || '', notify_services: next}; this._emit(); try{ e.target.value=''; }catch{} }}>
+							<option value="">${this._t('editor.notify_target_none')}</option>
+							${(notifyAvailable||[]).map(s=> html`<option value="${s}">${s}</option>`)}
+						</select>
+						${(globalNotify||[]).length ? html`
+							<div style="margin-top:10px; display:grid; gap:10px;">
+								${(globalNotify||[]).map(service=>{
+									const s = notifySettings?.[service] || {};
+									const taskCompleteEnabled = (s.task_complete !== undefined) ? !!s.task_complete : true;
+									const shopPurchaseEnabled = (s.shop_purchase !== undefined) ? !!s.shop_purchase : true;
+									const shopImageEnabled = (s.shop_image !== undefined) ? !!s.shop_image : true;
+									return html`
+										<ha-expansion-panel .header=${service} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
+											<div style="padding:10px; display:grid; gap:10px;">
+												<label style="display:flex;align-items:center;gap:8px;">
+													<ha-switch .checked=${taskCompleteEnabled} @change=${e=> this._setNotifyServiceSetting(service, 'task_complete', e.target.checked)}></ha-switch>
+													<span>${this._t('editor.notify_toggle_complete')}</span>
+												</label>
+												<label style="display:flex;align-items:center;gap:8px;">
+													<ha-switch .checked=${shopPurchaseEnabled} @change=${e=> this._setNotifyServiceSetting(service, 'shop_purchase', e.target.checked)}></ha-switch>
+													<span>${this._t('editor.notify_toggle_shop')}</span>
+												</label>
+												<label style="display:flex;align-items:center;gap:8px; margin-left:26px; opacity:${shopPurchaseEnabled ? '1' : '.5'};">
+													<ha-switch .checked=${shopImageEnabled} ?disabled=${!shopPurchaseEnabled} @change=${e=> this._setNotifyServiceSetting(service, 'shop_image', e.target.checked)}></ha-switch>
+													<span>${this._t('editor.notify_toggle_shop_image')}</span>
+												</label>
+											</div>
+										</ha-expansion-panel>
+									`;
+								})}
+							</div>
+						` : ''}
+					</div>
+				</div>
+			` : ''}
 
 			${cfg.mode==='admin' ? html`
 				<div class="section-box">
@@ -3692,6 +3899,7 @@ class Chores4KidsDevCardEditor extends LitElement{
 			.section-box{ border:1px solid var(--divider-color); border-radius: var(--ha-card-border-radius, 12px); padding: 12px; display:grid; gap:10px; }
 			label{ display:block; font-weight:600; margin-bottom:4px; }
 			input,select{ width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); }
+			ha-expansion-panel{ background: var(--ha-card-background, var(--card-background-color)); }
 		`;
 	}
 }
@@ -3700,3 +3908,5 @@ try{ customElements.define('chores4kids-card-editor', Chores4KidsDevCardEditor);
 // Lovelace card registry
 window.customCards = window.customCards || [];
 window.customCards.push({ type: 'chores4kids-card', name: 'Chores4Kids (Parent/Child/Latest)', preview: true, description: 'Combined card – choose Parent, Child, or Latest tasks in the editor' });
+
+
