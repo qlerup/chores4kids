@@ -282,6 +282,9 @@ class Chores4KidsUiSensor(SensorEntity):
         return {
             "enable_points": bool(getattr(self._store, "enable_points", True)),
             "confetti_enabled": bool(getattr(self._store, "confetti_enabled", True)),
+            "notify_service": str(getattr(self._store, "notify_service", "") or ""),
+            "notify_services": list(getattr(self._store, "notify_services", []) or []),
+            "notify_service_settings": dict(getattr(self._store, "notify_service_settings", {}) or {}),
             "start_task_bg": colors.get("start_task_bg", ""),
             "complete_task_bg": colors.get("complete_task_bg", ""),
             "kid_points_bg": colors.get("kid_points_bg", ""),
