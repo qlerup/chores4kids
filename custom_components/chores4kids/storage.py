@@ -32,6 +32,11 @@ class Child:
     name: str
     points: int = 0
     slug: str = ""
+    lifetime_earned: int = 0
+    monthly_earned: int = 0
+    weekly_earned: int = 0
+    last_earned_month: str = ""
+    last_earned_week: str = ""
 
 @dataclass
 class Category:
@@ -83,6 +88,14 @@ class Task:
     early_bonus_days: int = 0
     early_bonus_points: int = 0
 
+    # Bonus task (sub-task)
+    bonus_enabled: bool = False
+    bonus_title: str = ""
+    bonus_points: int = 0
+    bonus_completed_ts: Optional[int] = None
+    bonus_approved: bool = False
+    bonus_approved_at: Optional[str] = None
+
     # If true, multiple children can be assigned the same task template and the first
     # child to start/complete it will "claim" it; other children's copies are marked as taken.
     fastest_wins: bool = False
@@ -117,6 +130,7 @@ class KidsChoresStore:
         self.notify_service: str = ""
         self.notify_services: List[str] = []
         self.notify_service_settings: Dict[str, Dict[str, bool]] = {}
+        self._earned_backfill_done: bool = False
 
     async def async_load(self):
         data = await self._store.async_load()
@@ -191,6 +205,19 @@ class KidsChoresStore:
         except Exception:
             self.notify_service_settings = {}
 
+        try:
+            self._earned_backfill_done = bool(data.get("earned_backfill_done", False))
+        except Exception:
+            self._earned_backfill_done = False
+
+        if not self._earned_backfill_done:
+            try:
+                self._backfill_earned_points()
+                self._earned_backfill_done = True
+                await self.async_save()
+            except Exception:
+                pass
+
     async def async_save(self):
         await self._store.async_save({
             "version": STORAGE_VERSION,
@@ -205,7 +232,96 @@ class KidsChoresStore:
             "notify_service": str(getattr(self, "notify_service", "") or ""),
             "notify_services": list(getattr(self, "notify_services", []) or []),
             "notify_service_settings": dict(getattr(self, "notify_service_settings", {}) or {}),
+            "earned_backfill_done": bool(getattr(self, "_earned_backfill_done", False)),
         })
+
+    def _backfill_earned_points(self) -> None:
+        now_local = dt_util.now()
+        month_key = f"{now_local.year}-{now_local.month:02d}"
+        iso_year, iso_week, _ = now_local.isocalendar()
+        week_key = f"{iso_year}-W{iso_week:02d}"
+
+        def _task_bonus(task: Task) -> int:
+            try:
+                eb_enabled = bool(getattr(task, "early_bonus_enabled", False))
+                eb_days = int(getattr(task, "early_bonus_days", 0) or 0)
+                eb_points = int(getattr(task, "early_bonus_points", 0) or 0)
+                due_raw = getattr(task, "due", None)
+                comp_ts = getattr(task, "completed_ts", None)
+                if not (eb_enabled and eb_days > 0 and eb_points > 0 and due_raw and comp_ts):
+                    return 0
+                due_dt = dt_util.parse_datetime(str(due_raw))
+                due_date = None
+                if due_dt is not None:
+                    due_date = dt_util.as_local(due_dt).date()
+                else:
+                    due_d = dt_util.parse_date(str(due_raw))
+                    if due_d is not None:
+                        due_date = due_d
+                if due_date is None:
+                    return 0
+                completed_dt = dt_util.as_local(dt_util.utc_from_timestamp(int(comp_ts) / 1000.0))
+                completed_date = completed_dt.date()
+                from datetime import timedelta
+                threshold_date = due_date - timedelta(days=eb_days)
+                return eb_points if completed_date <= threshold_date else 0
+            except Exception:
+                return 0
+
+        def _task_earned_date(task: Task):
+            try:
+                approved_raw = getattr(task, "approved_at", None)
+                if approved_raw:
+                    approved_dt = dt_util.parse_datetime(str(approved_raw))
+                    if approved_dt is None:
+                        from datetime import datetime
+                        approved_dt = datetime.fromisoformat(str(approved_raw))
+                    return dt_util.as_local(approved_dt)
+            except Exception:
+                pass
+            try:
+                comp_ts = getattr(task, "completed_ts", None)
+                if comp_ts:
+                    return dt_util.as_local(dt_util.utc_from_timestamp(int(comp_ts) / 1000.0))
+            except Exception:
+                pass
+            try:
+                created_raw = getattr(task, "created", None)
+                if created_raw:
+                    created_dt = dt_util.parse_datetime(str(created_raw))
+                    if created_dt is None:
+                        from datetime import datetime
+                        created_dt = datetime.fromisoformat(str(created_raw))
+                    return dt_util.as_local(created_dt)
+            except Exception:
+                pass
+            return None
+
+        for child in self.children:
+            lifetime = 0
+            monthly = 0
+            weekly = 0
+            for task in self.tasks:
+                if task.assigned_to != child.id:
+                    continue
+                if getattr(task, "status", None) != STATUS_APPROVED:
+                    continue
+                points = int(getattr(task, "points", 0) or 0)
+                points += int(_task_bonus(task) or 0)
+                lifetime += points
+                d = _task_earned_date(task)
+                if d is None:
+                    continue
+                if f"{d.year}-{d.month:02d}" == month_key:
+                    monthly += points
+                iso_y, iso_w, _ = d.isocalendar()
+                if f"{iso_y}-W{iso_w:02d}" == week_key:
+                    weekly += points
+            child.lifetime_earned = int(lifetime)
+            child.monthly_earned = int(monthly)
+            child.weekly_earned = int(weekly)
+            child.last_earned_month = month_key
+            child.last_earned_week = week_key
 
     async def set_ui_colors(
         self,
@@ -333,6 +449,9 @@ class KidsChoresStore:
         early_bonus_enabled: Optional[bool] = None,
         early_bonus_days: Optional[int] = None,
         early_bonus_points: Optional[int] = None,
+        bonus_enabled: Optional[bool] = None,
+        bonus_title: Optional[str] = None,
+        bonus_points: Optional[int] = None,
         fastest_wins: Optional[bool] = None,
         fastest_wins_template_id: Optional[str] = None,
         schedule_mode: Optional[str] = None,
@@ -377,6 +496,27 @@ class KidsChoresStore:
                 t.early_bonus_points = max(0, int(early_bonus_points))
             except Exception:
                 t.early_bonus_points = 0
+
+        if bonus_enabled is not None:
+            t.bonus_enabled = bool(bonus_enabled)
+        if bonus_title is not None:
+            t.bonus_title = str(bonus_title).strip()
+        if bonus_points is not None:
+            try:
+                t.bonus_points = max(0, int(bonus_points))
+            except Exception:
+                t.bonus_points = 0
+        if bonus_enabled is None:
+            try:
+                t.bonus_enabled = bool(str(getattr(t, "bonus_title", "") or "").strip() or int(getattr(t, "bonus_points", 0) or 0) > 0)
+            except Exception:
+                t.bonus_enabled = False
+        if bonus_enabled is False:
+            t.bonus_title = ""
+            t.bonus_points = 0
+            t.bonus_completed_ts = None
+            t.bonus_approved = False
+            t.bonus_approved_at = None
 
         if fastest_wins is not None:
             t.fastest_wins = bool(fastest_wins)
@@ -612,6 +752,9 @@ class KidsChoresStore:
             inst.early_bonus_enabled = bool(getattr(template, "early_bonus_enabled", False))
             inst.early_bonus_days = int(getattr(template, "early_bonus_days", 0) or 0)
             inst.early_bonus_points = int(getattr(template, "early_bonus_points", 0) or 0)
+            inst.bonus_enabled = bool(getattr(template, "bonus_enabled", False))
+            inst.bonus_title = str(getattr(template, "bonus_title", "") or "").strip()
+            inst.bonus_points = int(getattr(template, "bonus_points", 0) or 0)
             self.tasks.append(inst)
 
     async def assign_task(self, task_id: str, child_id: str):
@@ -649,6 +792,9 @@ class KidsChoresStore:
                 early_bonus_enabled=getattr(t, "early_bonus_enabled", False),
                 early_bonus_days=getattr(t, "early_bonus_days", 0),
                 early_bonus_points=getattr(t, "early_bonus_points", 0),
+                bonus_enabled=getattr(t, "bonus_enabled", False),
+                bonus_title=getattr(t, "bonus_title", ""),
+                bonus_points=getattr(t, "bonus_points", 0),
                 fastest_wins=bool(getattr(t, "fastest_wins", False)),
                 fastest_wins_template_id=(t.id if bool(getattr(t, "fastest_wins", False)) else None),
                 schedule_mode=getattr(t, "schedule_mode", None),
@@ -813,6 +959,67 @@ class KidsChoresStore:
         if status == STATUS_ASSIGNED:
             from datetime import datetime, timezone
             t.created = datetime.now(timezone.utc).isoformat()
+            t.bonus_completed_ts = None
+            t.bonus_approved = False
+            t.bonus_approved_at = None
+        await self.async_save()
+
+    def _add_earned_points(self, child: Child, earned: int) -> None:
+        if not earned:
+            return
+        try:
+            now_local = dt_util.now()
+            month_key = f"{now_local.year}-{now_local.month:02d}"
+            iso_year, iso_week, _ = now_local.isocalendar()
+            week_key = f"{iso_year}-W{iso_week:02d}"
+            if getattr(child, "last_earned_month", "") != month_key:
+                child.monthly_earned = 0
+                child.last_earned_month = month_key
+            if getattr(child, "last_earned_week", "") != week_key:
+                child.weekly_earned = 0
+                child.last_earned_week = week_key
+            child.lifetime_earned = int(getattr(child, "lifetime_earned", 0) or 0) + earned
+            child.monthly_earned = int(getattr(child, "monthly_earned", 0) or 0) + earned
+            child.weekly_earned = int(getattr(child, "weekly_earned", 0) or 0) + earned
+        except Exception:
+            pass
+        child.points += earned
+
+    async def set_task_bonus_completed(self, task_id: str, completed_ts: Optional[int] = None):
+        t = self._get_task(task_id)
+        if not bool(getattr(t, "bonus_enabled", False)):
+            raise ValueError("bonus_not_enabled")
+        if t.status not in (STATUS_AWAITING, STATUS_APPROVED):
+            raise ValueError("bonus_not_ready")
+        if t.bonus_completed_ts:
+            await self.async_save()
+            return
+        ts = completed_ts
+        if ts is None:
+            ts = int(dt_util.utcnow().timestamp() * 1000)
+        t.bonus_completed_ts = int(ts)
+        if bool(getattr(t, "skip_approval", False)):
+            await self.approve_bonus_task(task_id)
+            return
+        await self.async_save()
+
+    async def approve_bonus_task(self, task_id: str):
+        from datetime import datetime, timezone
+        t = self._get_task(task_id)
+        if not t.assigned_to:
+            raise ValueError("task_not_assigned")
+        if not bool(getattr(t, "bonus_enabled", False)):
+            raise ValueError("bonus_not_enabled")
+        if getattr(t, "bonus_approved", False):
+            return
+        if not getattr(t, "bonus_completed_ts", None):
+            raise ValueError("bonus_not_completed")
+        child = self._get_child(t.assigned_to)
+        t.bonus_approved = True
+        t.bonus_approved_at = datetime.now(timezone.utc).isoformat()
+        earned = int(getattr(t, "bonus_points", 0) or 0)
+        if earned:
+            self._add_earned_points(child, earned)
         await self.async_save()
 
     async def approve_task(self, task_id: str):
@@ -821,6 +1028,8 @@ class KidsChoresStore:
         if not t.assigned_to:
             raise ValueError("task_not_assigned")
         child = self._get_child(t.assigned_to)
+        if t.status == STATUS_APPROVED and getattr(t, "approved_at", None):
+            return
         if t.status != STATUS_AWAITING:
             # allow approving from other states but normalize
             pass
@@ -860,7 +1069,9 @@ class KidsChoresStore:
         except Exception:
             bonus = 0
 
-        child.points += int(t.points) + int(bonus)
+        earned = int(t.points) + int(bonus)
+        if earned:
+            self._add_earned_points(child, earned)
 
         # If this task was spawned from a repeat template, create the next upcoming instance
         # right away (so the child card shows the next deadline without waiting for midnight).
@@ -912,6 +1123,9 @@ class KidsChoresStore:
                         inst.early_bonus_enabled = bool(getattr(template, "early_bonus_enabled", False))
                         inst.early_bonus_days = int(getattr(template, "early_bonus_days", 0) or 0)
                         inst.early_bonus_points = int(getattr(template, "early_bonus_points", 0) or 0)
+                        inst.bonus_enabled = bool(getattr(template, "bonus_enabled", False))
+                        inst.bonus_title = str(getattr(template, "bonus_title", "") or "").strip()
+                        inst.bonus_points = int(getattr(template, "bonus_points", 0) or 0)
                         self.tasks.append(inst)
         except Exception:
             pass
@@ -1025,6 +1239,9 @@ class KidsChoresStore:
         early_bonus_enabled: Optional[bool] = None,
         early_bonus_days: Optional[int] = None,
         early_bonus_points: Optional[int] = None,
+        bonus_enabled: Optional[bool] = None,
+        bonus_title: Optional[str] = None,
+        bonus_points: Optional[int] = None,
         icon: Optional[str] = None,
         persist_until_completed: Optional[bool] = None,
         quick_complete: Optional[bool] = None,
@@ -1067,6 +1284,26 @@ class KidsChoresStore:
                 t.early_bonus_points = max(0, int(early_bonus_points))
             except Exception:
                 t.early_bonus_points = getattr(t, "early_bonus_points", 0) or 0
+        if bonus_enabled is not None:
+            t.bonus_enabled = bool(bonus_enabled)
+        if bonus_title is not None:
+            t.bonus_title = str(bonus_title).strip()
+        if bonus_points is not None:
+            try:
+                t.bonus_points = max(0, int(bonus_points))
+            except Exception:
+                t.bonus_points = getattr(t, "bonus_points", 0) or 0
+        if bonus_enabled is None and (bonus_title is not None or bonus_points is not None):
+            try:
+                t.bonus_enabled = bool(str(getattr(t, "bonus_title", "") or "").strip() or int(getattr(t, "bonus_points", 0) or 0) > 0)
+            except Exception:
+                pass
+        if bonus_enabled is False:
+            t.bonus_title = ""
+            t.bonus_points = 0
+            t.bonus_completed_ts = None
+            t.bonus_approved = False
+            t.bonus_approved_at = None
         if icon is not None:
             t.icon = str(icon).strip()
         if persist_until_completed is not None:
@@ -1115,6 +1352,9 @@ class KidsChoresStore:
                     inst.early_bonus_enabled = bool(getattr(t, "early_bonus_enabled", False))
                     inst.early_bonus_days = int(getattr(t, "early_bonus_days", 0) or 0)
                     inst.early_bonus_points = int(getattr(t, "early_bonus_points", 0) or 0)
+                    inst.bonus_enabled = bool(getattr(t, "bonus_enabled", False))
+                    inst.bonus_title = str(getattr(t, "bonus_title", "") or "").strip()
+                    inst.bonus_points = int(getattr(t, "bonus_points", 0) or 0)
                     inst.persist_until_completed = bool(getattr(t, "persist_until_completed", False))
                     inst.quick_complete = bool(getattr(t, "quick_complete", False))
                     inst.skip_approval = bool(getattr(t, "skip_approval", False))
@@ -1171,6 +1411,9 @@ class KidsChoresStore:
                 "early_bonus_enabled": getattr(t, "early_bonus_enabled", False),
                 "early_bonus_days": getattr(t, "early_bonus_days", 0),
                 "early_bonus_points": getattr(t, "early_bonus_points", 0),
+                "bonus_enabled": getattr(t, "bonus_enabled", False),
+                "bonus_title": getattr(t, "bonus_title", ""),
+                "bonus_points": getattr(t, "bonus_points", 0),
                 "persist_until_completed": getattr(t, "persist_until_completed", False),
                 "quick_complete": getattr(t, "quick_complete", False),
                 "skip_approval": getattr(t, "skip_approval", False),
@@ -1205,6 +1448,9 @@ class KidsChoresStore:
             # If created is missing/invalid, treat it as "old" so it doesn't stick around forever.
             is_older = (created_date is None) or (created_date < today)
             if is_older:
+                if getattr(t, "status", None) == STATUS_AWAITING:
+                    kept.append(t)
+                    continue
                 if bool(getattr(t, "persist_until_completed", False)) and getattr(t, "status", None) != STATUS_APPROVED:
                     from datetime import datetime as _dt, timezone as _tz
                     t.created = _dt.now(_tz.utc).isoformat()
@@ -1271,6 +1517,9 @@ class KidsChoresStore:
                             early_bonus_enabled=True,
                             early_bonus_days=int(tpl.get("early_bonus_days", 0) or 0),
                             early_bonus_points=int(tpl.get("early_bonus_points", 0) or 0),
+                            bonus_enabled=bool(tpl.get("bonus_enabled", False)),
+                            bonus_title=str(tpl.get("bonus_title", "") or ""),
+                            bonus_points=int(tpl.get("bonus_points", 0) or 0),
                             persist_until_completed=True,
                             quick_complete=tpl.get("quick_complete", False),
                             skip_approval=tpl.get("skip_approval", False),
@@ -1316,6 +1565,9 @@ class KidsChoresStore:
                         early_bonus_enabled=tpl.get("early_bonus_enabled"),
                         early_bonus_days=tpl.get("early_bonus_days"),
                         early_bonus_points=tpl.get("early_bonus_points"),
+                        bonus_enabled=tpl.get("bonus_enabled"),
+                        bonus_title=tpl.get("bonus_title"),
+                        bonus_points=tpl.get("bonus_points"),
                         persist_until_completed=(tpl.get("persist_until_completed", False) if mode in ("", "repeat") else False),
                         quick_complete=tpl.get("quick_complete", False),
                         skip_approval=tpl.get("skip_approval", False),
