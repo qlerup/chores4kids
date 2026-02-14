@@ -2,8 +2,9 @@ name: Check reported version vs latest release
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, labeled]
   issue_comment:
+    # include edited so users can add the version by editing their comment
     types: [created, edited]
 
 permissions:
@@ -11,9 +12,17 @@ permissions:
   contents: read
   models: read
 
+concurrency:
+  group: version-latest-check-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   check:
-    if: github.event.issue.pull_request == null
+    if: >
+      github.event.issue.pull_request == null && (
+        (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'bug') ||
+        ((github.event_name != 'issues' || github.event.action != 'labeled') && contains(github.event.issue.labels.*.name, 'bug'))
+      )
     runs-on: ubuntu-latest
 
     steps:
@@ -197,6 +206,41 @@ jobs:
             const issue = payload.issue;
             const issueNumber = issue.number;
 
+            const BUG_LABEL = "bug";
+            const labels = (issue.labels || [])
+              .map(l => (typeof l === "string" ? l : l.name))
+              .filter(Boolean);
+
+            // Safety: only act on issues labeled as bug
+            if (!labels.includes(BUG_LABEL)) return;
+
+            const repoFull = `${context.repo.owner}/${context.repo.repo}`;
+
+            // Fetch ALL comments once (used to prevent asking/checking multiple times)
+            const allComments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              per_page: 100,
+            });
+
+            const missingSig = `Checked version: repo=${repoFull}, status=missing`;
+            const alreadyAsked = (allComments || []).some(c =>
+              (c.body || "").includes(marker) &&
+              (c.body || "").includes(missingSig)
+            );
+
+            const alreadyChecked = (allComments || []).some(c => {
+              const b = c.body || "";
+              return b.includes(marker) &&
+                b.includes(`Checked version: repo=${repoFull},`) &&
+                /status=(outdated|latest|newer)\b/.test(b);
+            });
+
+            // If we've already done a version check once, do nothing forever after
+            if (alreadyChecked) return;
+
+
             const bodyText = issue.body || "";
             let commentText = "";
 
@@ -221,23 +265,12 @@ jobs:
               if (!reported) reported = extractVersionRegex(bodyText);
 
               if (!reported) {
-                // Ask ONLY on issue creation (opened), and only once
-                if (payload.action !== "opened") return;
+                // Ask ONLY when it becomes a bug issue (opened with bug label OR bug label just got added), and only once
+                const shouldAskNow =
+                  context.eventName === "issues" &&
+                  (payload.action === "opened" || (payload.action === "labeled" && payload.label?.name === BUG_LABEL));
 
-                const existingComments = await github.rest.issues.listComments({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issueNumber,
-                  per_page: 100,
-                });
-
-                const repoFull = `${context.repo.owner}/${context.repo.repo}`;
-                const missingSig = `Checked version: repo=${repoFull}, status=missing`;
-
-                const alreadyAsked = (existingComments.data || []).some(c =>
-                  (c.body || "").includes(marker) &&
-                  (c.body || "").includes(missingSig)
-                );
+                if (!shouldAskNow) return;
                 if (alreadyAsked) return;
 
                 await github.rest.issues.createComment({
@@ -248,10 +281,10 @@ jobs:
                     marker,
                     missingSig,
                     "",
-                    "Hej! Jeg kan ikke se nogen version i din issue-beskrivelse.",
-                    "Skriv venligst hvilken version du kører i formatet `vX.Y.Z` eller `X.Y.Z` (fx `v10.30.40`).",
+                    "Hi! I couldn't find a version number in the issue description.",
+                    "Please reply with the version you're running in `X.Y.Z` format (e.g. `3.1.1`) or with a `v` prefix (e.g. `v3.1.1`).",
                     "",
-                    "Tak 🙏"
+                    "Thanks 🙏"
                   ].join("\n"),
                 });
 
@@ -271,25 +304,14 @@ jobs:
               vCmp ===  0 ? "latest" :
                            "newer";
 
-            // Avoid duplicate comments for same (reported + latest + status)
-            const existingComments = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issueNumber,
-              per_page: 100,
-            });
-
-            const repoFull = `${context.repo.owner}/${context.repo.repo}`;
+            // Avoid duplicate comment in case of re-runs (we only want ONE check total)
             const signatureLine = `Checked version: repo=${repoFull}, reported=${reported}, latest=${latest.tag}, status=${status}`;
-
-            const already = (existingComments.data || []).some(c =>
-              (c.body || "").includes(marker) &&
-              (c.body || "").includes(`repo=${repoFull}`) &&
-              (c.body || "").includes(`reported=${reported}`) &&
-              (c.body || "").includes(`latest=${latest.tag}`) &&
-              (c.body || "").includes(`status=${status}`)
-            );
+            const already = (allComments || []).some(c => {
+              const b = c.body || "";
+              return b.includes(marker) && b.includes(signatureLine);
+            });
             if (already) return;
+
 
             const lines = [marker, signatureLine, ""];
 
