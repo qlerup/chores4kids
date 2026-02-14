@@ -322,6 +322,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             early_bonus_enabled=call.data.get("early_bonus_enabled"),
             early_bonus_days=call.data.get("early_bonus_days"),
             early_bonus_points=call.data.get("early_bonus_points"),
+            bonus_enabled=call.data.get("bonus_enabled"),
+            bonus_title=call.data.get("bonus_title"),
+            bonus_points=call.data.get("bonus_points"),
             assigned_to=call.data.get("child_id"),
             repeat_days=call.data.get("repeat_days"),
             repeat_child_id=call.data.get("repeat_child_id"),
@@ -351,6 +354,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await _notify_task_completed(call.data["task_id"])
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
+    async def svc_complete_bonus_task(call: ServiceCall):
+        await store.set_task_bonus_completed(
+            call.data["task_id"],
+            call.data.get("completed_ts"),
+        )
+        async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
+
+    async def svc_approve_bonus_task(call: ServiceCall):
+        await store.approve_bonus_task(call.data["task_id"])
+        async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
+
     async def svc_approve_task(call: ServiceCall):
         await store.approve_task(call.data["task_id"])
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
@@ -369,6 +383,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             early_bonus_enabled=call.data.get("early_bonus_enabled"),
             early_bonus_days=call.data.get("early_bonus_days"),
             early_bonus_points=call.data.get("early_bonus_points"),
+            bonus_enabled=call.data.get("bonus_enabled"),
+            bonus_title=call.data.get("bonus_title"),
+            bonus_points=call.data.get("bonus_points"),
             icon=call.data.get("icon"),
             persist_until_completed=call.data.get("persist_until_completed"),
             quick_complete=call.data.get("quick_complete"),
@@ -446,6 +463,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "assign_task", svc_assign_task)
     hass.services.async_register(DOMAIN, "set_task_status", svc_set_task_status)
     hass.services.async_register(DOMAIN, "approve_task", svc_approve_task)
+    hass.services.async_register(DOMAIN, "complete_bonus_task", svc_complete_bonus_task)
+    hass.services.async_register(DOMAIN, "approve_bonus_task", svc_approve_bonus_task)
     hass.services.async_register(DOMAIN, "delete_task", svc_delete_task)
     hass.services.async_register(DOMAIN, "update_task", svc_update_task)
     hass.services.async_register(DOMAIN, "reset_points", svc_reset_points)
