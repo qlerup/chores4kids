@@ -165,11 +165,14 @@ async def _ensure_lovelace_resource(hass: HomeAssistant) -> None:
         if matches:
             entry = matches[0]
             entry_url = str(entry.get("url", ""))
-            if entry_url != url or entry.get("res_type") != RESOURCE_TYPE:
-                await resources.async_update_item(
-                    entry["id"],
-                    {"res_type": RESOURCE_TYPE, "url": url},
-                )
+            entry_type = entry.get("type") or entry.get("res_type")
+            if entry_url != url or entry_type != RESOURCE_TYPE:
+                payload = {"type": RESOURCE_TYPE, "url": url}
+                try:
+                    await resources.async_update_item(entry["id"], payload)
+                except Exception:
+                    # Some HA versions expect legacy key name.
+                    await resources.async_update_item(entry["id"], {"res_type": RESOURCE_TYPE, "url": url})
                 _LOGGER.info("Updated Lovelace resource: %s", url)
 
             # Remove duplicates (keep first)
@@ -180,7 +183,12 @@ async def _ensure_lovelace_resource(hass: HomeAssistant) -> None:
                     pass
             return
 
-        await resources.async_create_item({"res_type": RESOURCE_TYPE, "url": url})
+        payload = {"type": RESOURCE_TYPE, "url": url}
+        try:
+            await resources.async_create_item(payload)
+        except Exception:
+            # Backwards compatibility with older HA API variants.
+            await resources.async_create_item({"res_type": RESOURCE_TYPE, "url": url})
         _LOGGER.info("Added Lovelace resource: %s", url)
         return
 
