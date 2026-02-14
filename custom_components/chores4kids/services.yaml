@@ -36,6 +36,18 @@ add_task:
       required: false
       description: "Bonus points awarded when early_bonus_days condition is met"
       example: 10
+    bonus_enabled:
+      required: false
+      description: "Enable bonus sub-task for this task"
+      example: true
+    bonus_title:
+      required: false
+      description: "Title for bonus sub-task"
+      example: "Rake the clippings"
+    bonus_points:
+      required: false
+      description: "Extra points for completing the bonus sub-task"
+      example: 3
     icon:
       required: false
       description: "Optional icon id (e.g. mdi:vacuum)"
@@ -99,6 +111,16 @@ approve_task:
   fields:
     task_id:
       required: true
+approve_bonus_task:
+  fields:
+    task_id:
+      required: true
+complete_bonus_task:
+  fields:
+    task_id:
+      required: true
+    completed_ts:
+      required: false
 update_task:
   name: Update task fields
   description: Update title, points, description, due or icon for a task
@@ -128,6 +150,18 @@ update_task:
       required: false
       description: "Bonus points awarded when early_bonus_days condition is met"
       example: 10
+    bonus_enabled:
+      required: false
+      description: "Enable bonus sub-task for this task"
+      example: true
+    bonus_title:
+      required: false
+      description: "Title for bonus sub-task"
+      example: "Rake the clippings"
+    bonus_points:
+      required: false
+      description: "Extra points for completing the bonus sub-task"
+      example: 3
     icon:
       required: false
     quick_complete:
