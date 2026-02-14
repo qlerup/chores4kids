@@ -1,4 +1,4 @@
-name: Issue triage (label + prefix + conservative retitle + version questions)
+name: Issue triage (label + prefix + conservative retitle)
 
 on:
   issues:
@@ -201,56 +201,12 @@ jobs:
           candidate_title = f"{prefix} {base_title}".strip()
           new_title = "" if candidate_title.lower() == original_title.lower() else candidate_title
 
-          # ---------- Version check (bugs only) ----------
-          def has_version_for(kind: str, text: str) -> bool:
-            """
-            Heuristic: find versions near keywords.
-            Matches e.g. 1.2, 1.2.3, v1.2.3, 1.2.3-beta.1
-            """
-            version_pat = r"(?:v)?\d+\.\d+(?:\.\d+)?(?:[-+][0-9A-Za-z\.-]+)?"
-            t = text or ""
-            if kind == "card":
-              # includes Danish "kort" just in case
-              kw = r"(?:\bcard\b|\bkort\b)"
-            else:
-              kw = r"(?:\bsync\b(?:\s+integration)?|\bsync-integration\b|\bsync\s+integration\b)"
-
-            p1 = re.compile(rf"{kw}[^\n]{{0,120}}\b({version_pat})\b", re.I)
-            p2 = re.compile(rf"\b({version_pat})\b[^\n]{{0,80}}{kw}", re.I)
-            return bool(p1.search(t) or p2.search(t))
-
-          comment_body = ""
-          if category == "bug":
-            text = f"{stripped_title}\n\n{body}"
-            card_ok = has_version_for("card", text)
-            sync_ok = has_version_for("sync", text)
-
-            missing_card = not card_ok
-            missing_sync = not sync_ok
-
-            if missing_card or missing_sync:
-              lines = [
-                "Hi! To help us reproduce this bug faster, could you please share the following version info:",
-                ""
-              ]
-              if missing_card:
-                lines.append("- **Card version** (e.g. 1.2.3)")
-              if missing_sync:
-                lines.append("- **Sync integration version** (e.g. 0.9.1)")
-              lines += [
-                "",
-                "Please reply here with the missing details — thank you 🙏"
-              ]
-              comment_body = "\n".join(lines)
-          # ----------------------------------------------
-
           # Outputs (multiline-safe)
           out = os.environ["GITHUB_OUTPUT"]
           with open(out, "a", encoding="utf-8") as f:
             f.write(f"category={category}\n")
             f.write("label<<EOF\n" + (label or "") + "\nEOF\n")
             f.write("new_title<<EOF\n" + (new_title or "") + "\nEOF\n")
-            f.write("comment_body<<EOF\n" + (comment_body or "") + "\nEOF\n")
           PY
 
       - name: Apply label + title
@@ -283,16 +239,3 @@ jobs:
               });
             }
 
-      - name: Ask for missing versions (bug only)
-        if: steps.decide.outputs.comment_body != ''
-        uses: actions/github-script@v7
-        env:
-          COMMENT: ${{ steps.decide.outputs.comment_body }}
-        with:
-          script: |
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.issue.number,
-              body: process.env.COMMENT
-            });
