@@ -787,7 +787,8 @@ class Chores4KidsDevCard extends LitElement {
 		.btn-ghost { background: transparent; }
 		.icon-btn{ padding:4px 6px; border-radius:8px; min-height:auto; }
 		button:disabled { opacity:.55; cursor:not-allowed; }
-		input, select, textarea { width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); box-sizing:border-box; font: inherit; }
+		input:not([type="checkbox"]):not([type="radio"]), select, textarea { width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); box-sizing:border-box; font: inherit; }
+		input[type="checkbox"], input[type="radio"]{ width:auto; padding:0; margin:0; border:0; border-radius:0; background:transparent; box-sizing:border-box; }
 		/* Ensure native color inputs look like color pickers (and don't stretch as text inputs) */
 		input[type="color"]{ width:44px; min-width:44px; height:42px; padding:0; border-radius:10px; cursor:pointer; }
 		input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; }
@@ -4209,3 +4210,5 @@ try{ customElements.define('chores4kids-card-editor', Chores4KidsDevCardEditor);
 // Lovelace card registry
 window.customCards = window.customCards || [];
 window.customCards.push({ type: 'chores4kids-card', name: 'Chores4Kids (Parent/Child/Latest)', preview: true, description: 'Combined card – choose Parent, Child, or Latest tasks in the editor' });
+
+
