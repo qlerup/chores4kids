@@ -1664,10 +1664,12 @@ class Chores4KidsDevCard extends LitElement {
 		try{
 			if (!(t?.status === 'awaiting_approval' || t?.status === 'approved')) return 'assigned';
 			if (t?.bonus_approved) return 'done';
+			if (t?.bonus_completed_ts) return 'done';
 			const id = String(t?.id||'');
 			if (!id) return 'assigned';
 			const cur = this._bonusVisual || {};
-			return String(cur[id]||'assigned');
+			const state = String(cur[id]||'assigned');
+			return state === 'in_progress' ? 'in_progress' : 'assigned';
 		}catch{ return 'assigned'; }
 	}
 
@@ -1680,16 +1682,28 @@ class Chores4KidsDevCard extends LitElement {
 		this.requestUpdate();
 	}
 
-	_onChildBonusVisualClick(t){
+	async _onChildBonusVisualClick(t){
 		if (!t?.id) return;
 		if (!(t.status === 'awaiting_approval' || t.status === 'approved')) return;
 		const cur = this._getBonusVisualState(t);
 		if (cur === 'assigned') return this._setBonusVisualState(t.id, 'in_progress');
-		if (cur === 'in_progress'){
+		if (cur !== 'in_progress') return;
+		if (this._isTaskBusy(t.id)) return;
+		this._setTaskBusy(t.id, true);
+		try{
+			if (!t?.bonus_completed_ts){
+				await this.hass.callService('chores4kids','complete_bonus_task',{ task_id: t.id, completed_ts: Date.now() });
+				t.bonus_completed_ts = Date.now();
+			}
 			this._setBonusVisualState(t.id, 'done');
 			this._playCompletionSound();
 			if (this._confettiEnabled()) this._triggerConfetti();
-			return;
+		} catch(err){
+			console.error('Failed to complete bonus task:', err);
+			const msg = String(err?.message || err || 'Unknown error');
+			alert(`Kunne ikke markere bonus som færdig: ${msg}`);
+		} finally {
+			this._setTaskBusy(t.id, false);
 		}
 	}
 
@@ -1729,11 +1743,11 @@ class Chores4KidsDevCard extends LitElement {
 
 	_renderAwaitingApproveBtns(t){
 		if (!this._hasBonusTask(t)){
-			return html`<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._approve(t)}>${this._t('btn.approve')}</button>`;
+			return html`<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${(e)=>{ e?.stopPropagation?.(); this._approve(t); }}>${this._t('btn.approve')}</button>`;
 		}
 		return html`
-			<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._approveMainAndBonus(t)}>${this._t('btn.approve_all')}</button>
-			<button class="btn-ghost" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._approve(t)}>${this._t('btn.approve_partial')}</button>
+			<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${(e)=>{ e?.stopPropagation?.(); this._approveMainAndBonus(t); }}>${this._t('btn.approve_all')}</button>
+			<button class="btn-ghost" ?disabled=${this._isTaskBusy(t.id)} @click=${(e)=>{ e?.stopPropagation?.(); this._approve(t); }}>${this._t('btn.approve_partial')}</button>
 		`;
 	}
 
@@ -3222,6 +3236,10 @@ class Chores4KidsDevCard extends LitElement {
 		}
 	}
 	async _approve(task){ 
+		if (!task?.id) return;
+		if (this._isTaskBusy(task.id)) return;
+		this._setTaskBusy(task.id, true);
+		try{
 		// Check if task is overdue and has auto-assign for today
 		if (this._isTaskOverdue(task) && this._autoAssignActive(task)) {
 			if (this._isScheduledToday(task)) {
@@ -3234,6 +3252,13 @@ class Chores4KidsDevCard extends LitElement {
 		
 		// Normal approve (timestamp remains in backend for historical view)
 		await this.hass.callService('chores4kids','approve_task',{ task_id: task.id });
+		}catch(err){
+			console.error('Failed to approve task:', err);
+			const msg = String(err?.message || err || 'Unknown error');
+			alert(`Kunne ikke godkende opgaven: ${msg}`);
+		} finally {
+			this._setTaskBusy(task.id, false);
+		}
 	}
 	async _assignTask(task, childId){ if(!childId){ alert(this._t('alert.choose_child_first')); return; } await this.hass.callService('chores4kids','assign_task',{ task_id: task.id, child_id: childId }); this._setBonusVisualState(task.id, 'assigned'); task._assignTo=''; this.requestUpdate(); }
 	async _assignTaskMulti(task, childIds){
