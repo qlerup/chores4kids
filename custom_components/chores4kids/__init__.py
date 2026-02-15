@@ -46,69 +46,128 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             "child": "A child",
             "message": "{who} completed: {title} ({dt})",
             "approve": "Approve",
+            "approve_all": "Approve all",
+            "approve_partial": "Partial approve",
             "reassign": "Reassign",
             "purchase": "{who} bought {item} for {price} points ({dt})",
+            "bonus_label": "Bonus task",
+            "bonus_done": "Bonus task completed",
+            "bonus_not_done": "Bonus task not completed",
+            "bonus_line": "{status}",
         },
         "da": {
             "child": "Et barn",
             "message": "{who} har meldt opgaven færdig: {title} ({dt})",
             "approve": "Godkend",
+            "approve_all": "Godkend alle",
+            "approve_partial": "Delvis godkend",
             "reassign": "Gentildel",
             "purchase": "{who} købte {item} for {price} point ({dt})",
+            "bonus_label": "Bonusopgave",
+            "bonus_done": "Bonusopgave er klaret",
+            "bonus_not_done": "Bonusopgave er ikke klaret",
+            "bonus_line": "{status}",
         },
         "sv": {
             "child": "Ett barn",
             "message": "{who} har markerat uppgiften som klar: {title} ({dt})",
             "approve": "Godkänn",
+            "approve_all": "Godkänn alla",
+            "approve_partial": "Delvis godkänn",
             "reassign": "Tilldela igen",
             "purchase": "{who} köpte {item} för {price} poäng ({dt})",
+            "bonus_label": "Bonusuppgift",
+            "bonus_done": "Bonusuppgift klar",
+            "bonus_not_done": "Bonusuppgift inte klar",
+            "bonus_line": "{status}",
         },
         "nb": {
             "child": "Et barn",
             "message": "{who} har meldt oppgaven ferdig: {title} ({dt})",
             "approve": "Godkjenn",
+            "approve_all": "Godkjenn alle",
+            "approve_partial": "Delvis godkjenn",
             "reassign": "Tildel på nytt",
             "purchase": "{who} kjøpte {item} for {price} poeng ({dt})",
+            "bonus_label": "Bonusoppgave",
+            "bonus_done": "Bonusoppgave fullført",
+            "bonus_not_done": "Bonusoppgave ikke fullført",
+            "bonus_line": "{status}",
         },
         "de": {
             "child": "Ein Kind",
             "message": "{who} hat die Aufgabe erledigt: {title} ({dt})",
             "approve": "Genehmigen",
+            "approve_all": "Alle genehmigen",
+            "approve_partial": "Teilweise genehmigen",
             "reassign": "Neu zuweisen",
             "purchase": "{who} kaufte {item} für {price} Punkte ({dt})",
+            "bonus_label": "Bonusaufgabe",
+            "bonus_done": "Bonusaufgabe erledigt",
+            "bonus_not_done": "Bonusaufgabe nicht erledigt",
+            "bonus_line": "{status}",
         },
         "es": {
             "child": "Un niño",
             "message": "{who} completó: {title} ({dt})",
             "approve": "Aprobar",
+            "approve_all": "Aprobar todo",
+            "approve_partial": "Aprobar parcial",
             "reassign": "Reasignar",
             "purchase": "{who} compró {item} por {price} puntos ({dt})",
+            "bonus_label": "Tarea de bono",
+            "bonus_done": "Tarea de bono completada",
+            "bonus_not_done": "Tarea de bono no completada",
+            "bonus_line": "{status}",
         },
         "fr": {
             "child": "Un enfant",
             "message": "{who} a terminé : {title} ({dt})",
             "approve": "Approuver",
+            "approve_all": "Tout approuver",
+            "approve_partial": "Approuver partiellement",
             "reassign": "Réattribuer",
             "purchase": "{who} a acheté {item} pour {price} points ({dt})",
+            "bonus_label": "Tâche bonus",
+            "bonus_done": "Tâche bonus terminée",
+            "bonus_not_done": "Tâche bonus non terminée",
+            "bonus_line": "{status}",
         },
         "fi": {
             "child": "Lapsi",
             "message": "{who} suoritti: {title} ({dt})",
             "approve": "Hyväksy",
+            "approve_all": "Hyväksy kaikki",
+            "approve_partial": "Osittainen hyväksyntä",
             "reassign": "Määritä uudelleen",
             "purchase": "{who} osti {item} {price} pisteellä ({dt})",
+            "bonus_label": "Bonustehtävä",
+            "bonus_done": "Bonustehtävä valmis",
+            "bonus_not_done": "Bonustehtävä ei valmis",
+            "bonus_line": "{status}",
         },
         "it": {
             "child": "Un bambino",
             "message": "{who} ha completato: {title} ({dt})",
             "approve": "Approva",
+            "approve_all": "Approva tutto",
+            "approve_partial": "Approva parzialmente",
             "reassign": "Riassegna",
             "purchase": "{who} ha comprato {item} per {price} punti ({dt})",
+            "bonus_label": "Attività bonus",
+            "bonus_done": "Attività bonus completata",
+            "bonus_not_done": "Attività bonus non completata",
+            "bonus_line": "{status}",
         },
+    }
+
+    _NOTIFY_LANG_ALIAS = {
+        "no": "nb",
     }
 
     def _get_notify_texts() -> dict:
         lang = _get_lang_key()
+        lang = _NOTIFY_LANG_ALIAS.get(lang, lang)
         return _NOTIFY_I18N.get(lang, _NOTIFY_I18N["en"])
 
     def _format_dt(dt):
@@ -204,16 +263,50 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             who = child_name or texts["child"]
             dt = _format_dt(dt_util.utcnow())
             message = str(texts["message"]).format(who=who, title=task.title, dt=dt)
+            if bool(getattr(task, "bonus_enabled", False)):
+                bonus_title = str(getattr(task, "bonus_title", "") or "").strip()
+                bonus_label = bonus_title or str(texts.get("bonus_label", "Bonus task"))
+                bonus_status_key = "bonus_done" if bool(getattr(task, "bonus_completed_ts", None)) else "bonus_not_done"
+                bonus_status = str(texts.get(bonus_status_key, "Bonus task completed" if bonus_status_key == "bonus_done" else "Bonus task not completed"))
+                bonus_line_tpl = str(texts.get("bonus_line", "{status}"))
+                message = f"{message}\n{bonus_line_tpl.format(label=bonus_label, status=bonus_status)}"
             tag = f"chores4kids_task_done_{task_id}"
-            data = {"tag": tag}
+            data = {"tag": tag, "task_id": task_id}
 
             if not getattr(task, "skip_approval", False):
                 approve_label = texts["approve"]
                 reassign_label = texts["reassign"]
-                data["actions"] = [
-                    {"action": f"C4K_APPROVE_{task_id}", "title": approve_label},
-                    {"action": f"C4K_REASSIGN_{task_id}", "title": reassign_label},
-                ]
+                if bool(getattr(task, "bonus_enabled", False)):
+                    data["actions"] = [
+                        {
+                            "action": f"C4K_APPROVE_ALL_{task_id}",
+                            "title": texts.get("approve_all", approve_label),
+                            "action_data": {"task_id": task_id},
+                        },
+                        {
+                            "action": f"C4K_APPROVE_PARTIAL_{task_id}",
+                            "title": texts.get("approve_partial", approve_label),
+                            "action_data": {"task_id": task_id},
+                        },
+                        {
+                            "action": f"C4K_REASSIGN_{task_id}",
+                            "title": reassign_label,
+                            "action_data": {"task_id": task_id},
+                        },
+                    ]
+                else:
+                    data["actions"] = [
+                        {
+                            "action": f"C4K_APPROVE_{task_id}",
+                            "title": approve_label,
+                            "action_data": {"task_id": task_id},
+                        },
+                        {
+                            "action": f"C4K_REASSIGN_{task_id}",
+                            "title": reassign_label,
+                            "action_data": {"task_id": task_id},
+                        },
+                    ]
 
             for svc in targets:
                 domain = "notify"
@@ -277,15 +370,78 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def _handle_mobile_app_action(event):
         try:
-            action = str(event.data.get("action") or "")
-            if action.startswith("C4K_APPROVE_"):
+            action = str(
+                event.data.get("action")
+                or event.data.get("actionName")
+                or ""
+            )
+            action_data = event.data.get("action_data") or {}
+            if isinstance(action_data, str):
+                try:
+                    import json
+                    parsed = json.loads(action_data)
+                    action_data = parsed if isinstance(parsed, dict) else {}
+                except Exception:
+                    action_data = {}
+            if not isinstance(action_data, dict):
+                action_data = {}
+
+            task_id = str(
+                event.data.get("task_id")
+                or action_data.get("task_id")
+                or ""
+            ).strip()
+
+            if not task_id:
+                try:
+                    tag = str(
+                        event.data.get("tag")
+                        or event.data.get("notification_tag")
+                        or action_data.get("tag")
+                        or ""
+                    ).strip()
+                    if tag.startswith("chores4kids_task_done_"):
+                        task_id = tag.split("chores4kids_task_done_", 1)[1].strip()
+                except Exception:
+                    pass
+
+            if not task_id and action.startswith("C4K_APPROVE_ALL_"):
+                task_id = action.split("C4K_APPROVE_ALL_", 1)[1].strip()
+            elif not task_id and action.startswith("C4K_APPROVE_PARTIAL_"):
+                task_id = action.split("C4K_APPROVE_PARTIAL_", 1)[1].strip()
+            elif not task_id and action.startswith("C4K_APPROVE_"):
                 task_id = action.split("C4K_APPROVE_", 1)[1].strip()
+            elif not task_id and action.startswith("C4K_REASSIGN_"):
+                task_id = action.split("C4K_REASSIGN_", 1)[1].strip()
+
+            if action in ("C4K_APPROVE_ALL",) or action.startswith("C4K_APPROVE_ALL_"):
                 if not task_id:
+                    _LOGGER.warning("%s: missing task_id for action %s (data=%s)", DOMAIN, action, dict(event.data))
                     return
                 await store.approve_task(task_id)
-            elif action.startswith("C4K_REASSIGN_"):
-                task_id = action.split("C4K_REASSIGN_", 1)[1].strip()
+                try:
+                    task = next((t for t in store.tasks if t.id == task_id), None)
+                    if task and bool(getattr(task, "bonus_enabled", False)):
+                        if not getattr(task, "bonus_completed_ts", None):
+                            completed_ts = int(dt_util.utcnow().timestamp() * 1000)
+                            await store.set_task_bonus_completed(task_id, completed_ts)
+                        if not bool(getattr(task, "bonus_approved", False)):
+                            await store.approve_bonus_task(task_id)
+                except Exception:
+                    _LOGGER.debug("%s: approve-all bonus flow failed", DOMAIN, exc_info=True)
+            elif action in ("C4K_APPROVE_PARTIAL",) or action.startswith("C4K_APPROVE_PARTIAL_"):
                 if not task_id:
+                    _LOGGER.warning("%s: missing task_id for action %s (data=%s)", DOMAIN, action, dict(event.data))
+                    return
+                await store.approve_task(task_id)
+            elif action in ("C4K_APPROVE",) or action.startswith("C4K_APPROVE_"):
+                if not task_id:
+                    _LOGGER.warning("%s: missing task_id for action %s (data=%s)", DOMAIN, action, dict(event.data))
+                    return
+                await store.approve_task(task_id)
+            elif action in ("C4K_REASSIGN",) or action.startswith("C4K_REASSIGN_"):
+                if not task_id:
+                    _LOGGER.warning("%s: missing task_id for action %s (data=%s)", DOMAIN, action, dict(event.data))
                     return
                 await store.set_task_status(task_id, "assigned")
             else:
@@ -296,6 +452,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data[DOMAIN]["notify_action_unsub"] = hass.bus.async_listen(
         "mobile_app_notification_action", _handle_mobile_app_action
+    )
+    hass.data[DOMAIN]["notify_action_unsub_ios"] = hass.bus.async_listen(
+        "ios.notification_action_fired", _handle_mobile_app_action
     )
 
     async def svc_add_child(call: ServiceCall):
@@ -355,10 +514,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
     async def svc_complete_bonus_task(call: ServiceCall):
+        task_id = call.data["task_id"]
         await store.set_task_bonus_completed(
-            call.data["task_id"],
+            task_id,
             call.data.get("completed_ts"),
         )
+        await _notify_task_completed(task_id)
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
     async def svc_approve_bonus_task(call: ServiceCall):
@@ -717,5 +878,11 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 unsub()
             except Exception:
                 _LOGGER.debug("%s: notify action unsubscribe failed", DOMAIN, exc_info=True)
+        unsub_ios = hass.data.get(DOMAIN, {}).pop("notify_action_unsub_ios", None)
+        if unsub_ios:
+            try:
+                unsub_ios()
+            except Exception:
+                _LOGGER.debug("%s: iOS notify action unsubscribe failed", DOMAIN, exc_info=True)
         hass.data.pop(DOMAIN, None)
     return unload_ok
