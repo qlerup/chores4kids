@@ -18,11 +18,7 @@ concurrency:
 
 jobs:
   check:
-    if: >
-      github.event.issue.pull_request == null && (
-        (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'bug') ||
-        ((github.event_name != 'issues' || github.event.action != 'labeled') && contains(github.event.issue.labels.*.name, 'bug'))
-      )
+    if: github.event.issue.pull_request == null
     runs-on: ubuntu-latest
 
     steps:
@@ -203,16 +199,40 @@ jobs:
 
             // --- Decide what to scan (comment vs body) ---
             const payload = context.payload;
-            const issue = payload.issue;
-            const issueNumber = issue.number;
+            const issueNumber = payload.issue.number;
 
             const BUG_LABEL = "bug";
-            const labels = (issue.labels || [])
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            async function fetchIssue() {
+              const { data } = await github.rest.issues.get({ owner, repo, issue_number: issueNumber });
+              return data;
+            }
+
+            // Re-fetch the issue so we don't rely on the webhook payload (labels can arrive slightly later)
+            let issue = await fetchIssue();
+            let labels = (issue.labels || [])
               .map(l => (typeof l === "string" ? l : l.name))
               .filter(Boolean);
 
+            // On "opened", triage often runs in parallel and applies labels shortly after.
+            // Wait a bit so we don't miss the bug label and skip forever.
+            if (!labels.includes(BUG_LABEL) && context.eventName === "issues" && payload.action === "opened") {
+              for (let i = 0; i < 20; i++) { // ~60 seconds (20 * 3 sec)
+                await new Promise(r => setTimeout(r, 3000));
+                issue = await fetchIssue();
+                labels = (issue.labels || [])
+                  .map(l => (typeof l === "string" ? l : l.name))
+                  .filter(Boolean);
+
+                if (labels.includes(BUG_LABEL)) break;
+              }
+            }
+
             // Safety: only act on issues labeled as bug
             if (!labels.includes(BUG_LABEL)) return;
+
 
             const repoFull = `${context.repo.owner}/${context.repo.repo}`;
 
