@@ -265,6 +265,15 @@ set_category_color:
       description: "Hex color like #ff0000 (or empty to clear)"
       example: "#4ecdc4"
 
+reorder_categories:
+  name: Reorder categories
+  description: Set the display order of categories (synced across users/devices).
+  fields:
+    order:
+      required: true
+      description: "List of category ids in the desired display order"
+      example: "['cat_id_1', 'cat_id_2']"
+
 set_ui_colors:
   name: Set UI colors
   description: Set global UI colors used by the Chores4Kids card (synced across users/devices).

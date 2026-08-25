@@ -764,7 +764,7 @@ class Chores4KidsDevCard extends LitElement {
 			// Child state
 			_shopOpen: { state: true },
 			// Sorting/categories order
-			_sortModalOpen: { state: true }, _catOrder: { state: true },
+			_sortModalOpen: { state: true }, _catOrderDraft: { state: true },
 			// Task description view
 			_viewingTaskDesc: { state: true },
 			_taskTimeBonusEnabled: { state: true },
@@ -1105,8 +1105,9 @@ class Chores4KidsDevCard extends LitElement {
 		try{ this._customIcons = JSON.parse(localStorage.getItem('c4k_custom_icons')||'[]') || []; }catch{ this._customIcons = []; }
 		this._iconSearch = '';
 		this._availableIcons = [];
-		// sorting
-		try{ this._catOrder = JSON.parse(localStorage.getItem('c4k_cat_order')||'[]') || []; }catch{ this._catOrder = []; }
+		// sorting (category order itself now comes from the backend - see
+		// _catOrderResolved() - this only holds an in-progress drag draft)
+		this._catOrderDraft = null;
 		// collapsed sections
 		try{ this._collapsed = JSON.parse(localStorage.getItem('c4k_admin_collapsed')||'{}') || {}; }catch{ this._collapsed = {}; }
 		// completed timestamps
@@ -1571,11 +1572,15 @@ class Chores4KidsDevCard extends LitElement {
 
 	// ===== CATEGORY SORTING HELPERS =====
 	_catOrderResolved(){
+		// Categories now arrive from the backend already in the admin's chosen
+		// order (see the reorder_categories service, called from the sort
+		// modal's save()) - use that directly instead of the old per-browser
+		// localStorage override, which only ever matched on whichever single
+		// device last saved it and left every other device/tablet on raw
+		// (creation-order) list order (#37).
 		const cats = this._store.categories||[];
 		const NONE='__none__';
-		let order = Array.isArray(this._catOrder)? [...this._catOrder]:[];
-		order = order.filter(id=> id===NONE || cats.some(c=> c.id===id));
-		for (const c of cats){ if (!order.includes(c.id)) order.push(c.id); }
+		const order = cats.map(c=> c.id);
 		if (!order.includes(NONE)) order.push(NONE);
 		return order;
 	}
@@ -1995,16 +2000,16 @@ class Chores4KidsDevCard extends LitElement {
 																	<span style="white-space:nowrap;">${this._t('schedule.monthly')}</span>
 																</label>
 							</div>
-															${this._repeatEnabled ? html`
+															${(this._repeatEnabled || this._weeklyEnabled || this._monthlyEnabled) ? html`
 								<div class="repeat-line">
-									<div class="repeat-days">
+									${this._repeatEnabled ? html`<div class="repeat-days">
 										<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:4px;">${this._t('repeat.label')}</div>
 										<div class="days">
 											${['mon','tue','wed','thu','fri','sat','sun'].map(k=> html`
 												<span class="day ${this._repeatDays.has(k)?'on':''}" @click=${()=>{ const s=this._repeatDays; s.has(k)?s.delete(k):s.add(k); this.requestUpdate(); }}>${this._t('repeat.days.'+k)}</span>
 											`)}
 										</div>
-									</div>
+									</div>` : ''}
 									<div class="repeat-assign">
 										<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:4px;">${this._t('repeat.auto_assign')}</div>
 										<div class="multi-dd" @click=${(e)=>{ e.stopPropagation(); this._openRepeatMenu = !this._openRepeatMenu; }}>
@@ -2068,26 +2073,15 @@ class Chores4KidsDevCard extends LitElement {
 													</div>`}
 												</td>
 									<td data-label="${this._t('th.actions')}">
-														${(this._weeklyEnabled || this._monthlyEnabled) ? html`
-															<div class="repeat-line">
-																<div class="repeat-assign">
-																	<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:4px;">${this._t('repeat.auto_assign')}</div>
-																	<div class="multi-dd" @click=${(e)=>{ e.stopPropagation(); this._openRepeatMenu = !this._openRepeatMenu; }}>
-																		<div class="box">
-																			<span class="multi-dd-value ${this._repeatAssign && this._repeatAssign.size ? '' : 'placeholder'}">
-																				${(()=>{ const ids=this._repeatAssign||new Set(); const names=children.filter(c=>ids.has(c.id)).map(c=>c.name); return names.length? (names.slice(0,2).join(', ')+(names.length>2?` +${names.length-2}`:'')) : '—'; })()}
-																			</span>
-																			<ha-icon icon="mdi:chevron-down"></ha-icon>
-																		</div>
-																		${this._openRepeatMenu ? html`
-																			<div class="multi-dd-menu" @click=${e=> e.stopPropagation()}>
-																				${children.map(c=> html`<label><input type="checkbox" .checked=${this._repeatAssign?.has?.(c.id)} @change=${(e)=>{ const s=this._repeatAssign instanceof Set? this._repeatAssign : new Set(this._repeatAssign||[]); if(e.target.checked){ s.add(c.id);}else{ s.delete(c.id);} this._repeatAssign=s; this.requestUpdate(); }} /><span>${c.name}</span></label>`)}
-																			</div>
-																		` : ''}
-																	</div>
-																</div>
-															</div>
-														` : ''}
+														<!-- Weekly/monthly auto-assign is edited via the task edit modal
+														     (see _editTask + the repeat-assign block above around
+														     line 1998), which properly scopes _repeatAssign to the
+														     single task being edited AND actually persists the change
+														     via set_task_repeat. This inline per-row copy shared the
+														     same component-level _repeatAssign/_openRepeatMenu state
+														     across every row in the table (so checking a box appeared
+														     to "auto assign" every other weekly/monthly task too) and
+														     never called any service to save the change - removed (#39). -->
 										<button class="btn-ghost" @click=${()=> this._editTask(t)}>${this._t('btn.edit')}</button>
 										<button class="btn-primary" ?disabled=${this._autoAssignActive(t)} title="${this._autoAssignActive(t)? this._t('assign.disabled_auto') : ''}" @click=${()=> {
 											const row = this.shadowRoot.querySelector(`tr[data-task="${t.id}"]`);
@@ -2629,14 +2623,13 @@ class Chores4KidsDevCard extends LitElement {
 	}
 	_renderSortModal(){
 		const cats = (this._store.categories||[]);
-		// Working order = saved order filtered to existing + new appended; include optional NONE marker at end if present in saved
 		const NONE = '__none__';
-		let order = Array.isArray(this._catOrder)? [...this._catOrder]:[];
-		// ensure only existing ids + NONE
+		// Working (draft) order while the modal is open: start from the
+		// resolved (backend-driven) order, or a locally-dragged-but-not-yet-
+		// saved draft if one exists from earlier in this same modal session.
+		let order = Array.isArray(this._catOrderDraft)? [...this._catOrderDraft] : this._catOrderResolved();
 		order = order.filter(id => id===NONE || cats.some(c=> c.id===id));
-		// append any missing categories
 		for (const c of cats){ if (!order.includes(c.id)) order.push(c.id); }
-		// also ensure NONE is present at end if previously chosen
 		if (!order.includes(NONE)) order.push(NONE);
 		const labelFor = (id)=> id===NONE ? this._t('sort.none') : (cats.find(c=>c.id===id)?.name || id);
 		const onDragStart = (e, idx)=>{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', String(idx)); };
@@ -2649,11 +2642,15 @@ class Chores4KidsDevCard extends LitElement {
 			const arr = [...order];
 			const [it] = arr.splice(fromIdx,1);
 			arr.splice(toIdx,0,it);
-			this._catOrder = arr; this.requestUpdate();
+			this._catOrderDraft = arr; this.requestUpdate();
 		};
-		const save = ()=>{ try{ localStorage.setItem('c4k_cat_order', JSON.stringify(order)); }catch{} this._catOrder = order; this._sortModalOpen=false; this.requestUpdate(); };
-		const reset = ()=>{ order = cats.map(c=> c.id); order.push(NONE); this._catOrder = order; this.requestUpdate(); };
-		return html`<div class="overlay ${this._sortModalOpen?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) this._sortModalOpen=false; }}>
+		const save = async ()=>{
+			try{ await this.hass.callService('chores4kids','reorder_categories',{ order: order.filter(id=> id!==NONE) }); }catch{}
+			this._catOrderDraft = null;
+			this._sortModalOpen=false; this.requestUpdate();
+		};
+		const reset = ()=>{ const arr = cats.map(c=> c.id); arr.push(NONE); this._catOrderDraft = arr; this.requestUpdate(); };
+		return html`<div class="overlay ${this._sortModalOpen?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) { this._sortModalOpen=false; this._catOrderDraft=null; } }}>
 			${this._sortModalOpen ? html`<div class="modal" style="max-width: 560px; width: min(95vw, 560px);" @click=${e=>e.stopPropagation()}>
 				<h3>${this._t('sort.title')}</h3>
 				<div style="font-size:.9rem; color: var(--secondary-text-color);">${this._t('sort.categories_order')}</div>

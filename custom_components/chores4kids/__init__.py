@@ -662,10 +662,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await store.set_category_color(call.data["category_id"], call.data.get("color", ""))
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
+    async def svc_reorder_categories(call: ServiceCall):
+        await store.reorder_categories(call.data.get("order") or [])
+        async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
+
     hass.services.async_register(DOMAIN, "add_category", svc_add_category)
     hass.services.async_register(DOMAIN, "rename_category", svc_rename_category)
     hass.services.async_register(DOMAIN, "delete_category", svc_delete_category)
     hass.services.async_register(DOMAIN, "set_category_color", svc_set_category_color)
+    hass.services.async_register(DOMAIN, "reorder_categories", svc_reorder_categories)
     # Shop
     hass.services.async_register(DOMAIN, "add_shop_item", svc_add_shop_item)
     hass.services.async_register(DOMAIN, "update_shop_item", svc_update_shop_item)

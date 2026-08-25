@@ -797,6 +797,8 @@ class KidsChoresStore:
                 skip_approval=bool(getattr(template, "skip_approval", False)),
                 categories=list(getattr(template, "categories", []) or []),
                 mark_overdue=bool(getattr(template, "mark_overdue", True)),
+                fastest_wins=bool(getattr(template, "fastest_wins", False)),
+                fastest_wins_template_id=(template.id if bool(getattr(template, "fastest_wins", False)) else None),
             )
             inst.time_bonus_enabled = bool(getattr(template, "time_bonus_enabled", False))
             inst.time_bonus_before = str(getattr(template, "time_bonus_before", "") or "").strip()
@@ -1552,8 +1554,26 @@ class KidsChoresStore:
         # 2) Auto-create today's repeated tasks from captured templates
         # Prefer using repeat_template_id to detect existing active instances (more robust than title/date).
         def _active_instance_exists(template_id: str, child_id: str) -> bool:
+            # Deliberately NOT the same as self._active_repeat_instance_exists():
+            # a task carried over from a previous day (kept above because it's
+            # still awaiting approval) must not block today's fresh occurrence
+            # from spawning - the parent still needs to review that older one
+            # separately, and the child still needs a new one to do today.
+            # Only a task actually created *today* should count as "already
+            # exists" here. Otherwise an unapproved task silently stopped the
+            # chore from ever repeating again (#42).
+            if not template_id:
+                return False
             try:
-                if template_id and self._active_repeat_instance_exists(template_id, child_id):
+                for x in self.tasks:
+                    if x.assigned_to != child_id:
+                        continue
+                    if getattr(x, "repeat_template_id", None) != template_id:
+                        continue
+                    if x.status not in (STATUS_ASSIGNED, STATUS_IN_PROGRESS, STATUS_AWAITING):
+                        continue
+                    if _local_created_date(x) != today:
+                        continue
                     return True
             except Exception:
                 pass
@@ -1616,6 +1636,7 @@ class KidsChoresStore:
                             categories=list(tpl.get("categories") or []),
                             mark_overdue=tpl.get("mark_overdue", True),
                             fastest_wins=bool(tpl.get("fastest_wins", False)),
+                            fastest_wins_template_id=(tpl_id if tpl.get("fastest_wins") else None),
                         )
                 continue
 
@@ -1668,6 +1689,7 @@ class KidsChoresStore:
                         categories=list(tpl.get("categories") or []),
                         mark_overdue=tpl.get("mark_overdue", True),
                         fastest_wins=bool(tpl.get("fastest_wins", False)),
+                        fastest_wins_template_id=(tpl_id if tpl.get("fastest_wins") else None),
                     )
 
         await self.async_save()
@@ -1835,6 +1857,30 @@ class KidsChoresStore:
         cat.color = self._normalize_hex_color(color)
         await self.async_save()
         return cat
+
+    async def reorder_categories(self, order: list[str]) -> None:
+        """Persist the admin's chosen category display order to the shared store.
+
+        Previously the display order was kept only in each browser's
+        localStorage, so it only ever matched on whichever device last saved
+        it - every other device/tablet fell back to raw list order (#37).
+        """
+        by_id = {c.id: c for c in self.categories}
+        ordered: list[Category] = []
+        seen: set[str] = set()
+        for cid in (order or []):
+            cat = by_id.get(str(cid))
+            if cat is not None and cat.id not in seen:
+                ordered.append(cat)
+                seen.add(cat.id)
+        # Keep any categories missing from the given order (e.g. added
+        # concurrently elsewhere) appended at the end rather than dropped.
+        for cat in self.categories:
+            if cat.id not in seen:
+                ordered.append(cat)
+                seen.add(cat.id)
+        self.categories = ordered
+        await self.async_save()
 
     async def delete_category(self, category_id: str):
         # remove from tasks and from list
