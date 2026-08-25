@@ -37,6 +37,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
+    async def svc_force_rollover(call: ServiceCall):
+        await store.daily_rollover()
+        async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
+
+    hass.services.async_register(DOMAIN, "force_rollover", svc_force_rollover)
+
+
     def _get_lang_key() -> str:
         raw = str(getattr(hass.config, "language", "en") or "en").lower()
         return raw.split("-", 1)[0]
@@ -478,6 +485,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             points=int(call.data["points"]),
             description=call.data.get("description", ""),
             due=call.data.get("due"),
+            time_bonus_enabled=call.data.get("time_bonus_enabled"),
+            time_bonus_before=call.data.get("time_bonus_before"),
+            time_bonus_points=call.data.get("time_bonus_points"),
             early_bonus_enabled=call.data.get("early_bonus_enabled"),
             early_bonus_days=call.data.get("early_bonus_days"),
             early_bonus_points=call.data.get("early_bonus_points"),
@@ -541,6 +551,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             points=(int(call.data["points"]) if "points" in call.data else None),
             description=call.data.get("description"),
             due=call.data.get("due"),
+            time_bonus_enabled=call.data.get("time_bonus_enabled"),
+            time_bonus_before=call.data.get("time_bonus_before"),
+            time_bonus_points=call.data.get("time_bonus_points"),
             early_bonus_enabled=call.data.get("early_bonus_enabled"),
             early_bonus_days=call.data.get("early_bonus_days"),
             early_bonus_points=call.data.get("early_bonus_points"),

@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
+from datetime import timedelta, datetime, timezone
 from uuid import uuid4
 import os
 import asyncio
@@ -87,7 +88,11 @@ class Task:
     early_bonus_enabled: bool = False
     early_bonus_days: int = 0
     early_bonus_points: int = 0
-
+    time_bonus_enabled: bool = False
+    time_bonus_before: str = ""   # "HH:MM" 24h, local
+    time_bonus_points: int = 0
+    time_bonus_awarded: int = 0
+    time_bonus_awarded_ts: Optional[int] = None
     # Bonus task (sub-task)
     bonus_enabled: bool = False
     bonus_title: str = ""
@@ -262,9 +267,42 @@ class KidsChoresStore:
                     return 0
                 completed_dt = dt_util.as_local(dt_util.utc_from_timestamp(int(comp_ts) / 1000.0))
                 completed_date = completed_dt.date()
-                from datetime import timedelta
+
                 threshold_date = due_date - timedelta(days=eb_days)
                 return eb_points if completed_date <= threshold_date else 0
+            except Exception:
+                return 0
+
+        def _task_time_bonus(task: Task) -> int:
+            try:
+                if not bool(getattr(task, "time_bonus_enabled", False)):
+                    return 0
+                if bool(getattr(task, "carried_over", False)):
+                    return 0
+
+                pts = int(getattr(task, "time_bonus_points", 0) or 0)
+                if pts <= 0:
+                    return 0
+
+                comp_ts = getattr(task, "completed_ts", None)
+                if not comp_ts:
+                    return 0
+
+                hhmm = str(getattr(task, "time_bonus_before", "") or "").strip()
+                m = re.fullmatch(r"([01]\d|2[0-3]):([0-5]\d)", hhmm)
+                if not m:
+                    return 0
+
+                hh = int(m.group(1))
+                mm = int(m.group(2))
+
+                # completion date in HA local time
+                completed_local = dt_util.as_local(dt_util.utc_from_timestamp(int(comp_ts) / 1000.0))
+                cutoff_local = completed_local.replace(hour=hh, minute=mm, second=0, microsecond=0)
+                cutoff_utc = dt_util.as_utc(cutoff_local)
+                cutoff_ms = int(cutoff_utc.timestamp() * 1000)
+
+                return pts if int(comp_ts) < cutoff_ms else 0
             except Exception:
                 return 0
 
@@ -274,7 +312,6 @@ class KidsChoresStore:
                 if approved_raw:
                     approved_dt = dt_util.parse_datetime(str(approved_raw))
                     if approved_dt is None:
-                        from datetime import datetime
                         approved_dt = datetime.fromisoformat(str(approved_raw))
                     return dt_util.as_local(approved_dt)
             except Exception:
@@ -290,7 +327,6 @@ class KidsChoresStore:
                 if created_raw:
                     created_dt = dt_util.parse_datetime(str(created_raw))
                     if created_dt is None:
-                        from datetime import datetime
                         created_dt = datetime.fromisoformat(str(created_raw))
                     return dt_util.as_local(created_dt)
             except Exception:
@@ -308,6 +344,7 @@ class KidsChoresStore:
                     continue
                 points = int(getattr(task, "points", 0) or 0)
                 points += int(_task_bonus(task) or 0)
+                points += int(_task_time_bonus(task) or 0)
                 lifetime += points
                 d = _task_earned_date(task)
                 if d is None:
@@ -446,6 +483,9 @@ class KidsChoresStore:
         quick_complete: Optional[bool] = None,
         skip_approval: Optional[bool] = None,
         categories: Optional[list[str]] = None,
+        time_bonus_enabled: Optional[bool] = None,
+        time_bonus_before: Optional[str] = None,
+        time_bonus_points: Optional[int] = None,
         early_bonus_enabled: Optional[bool] = None,
         early_bonus_days: Optional[int] = None,
         early_bonus_points: Optional[int] = None,
@@ -481,7 +521,6 @@ class KidsChoresStore:
             icon=(icon or "").strip(),
             repeat_template_id=(repeat_template_id or None),
         )
-        from datetime import datetime, timezone
         t.created = datetime.now(timezone.utc).isoformat()
 
         if early_bonus_enabled is not None:
@@ -496,6 +535,19 @@ class KidsChoresStore:
                 t.early_bonus_points = max(0, int(early_bonus_points))
             except Exception:
                 t.early_bonus_points = 0
+        if time_bonus_enabled is not None:
+            t.time_bonus_enabled = bool(time_bonus_enabled)
+        if time_bonus_before is not None:
+            t.time_bonus_before = str(time_bonus_before or "").strip()
+        if time_bonus_points is not None:
+            try:
+                t.time_bonus_points = max(0, int(time_bonus_points))
+            except Exception:
+                t.time_bonus_points = 0
+
+        if time_bonus_enabled is False:
+            t.time_bonus_before = ""
+            t.time_bonus_points = 0
 
         if bonus_enabled is not None:
             t.bonus_enabled = bool(bonus_enabled)
@@ -646,7 +698,6 @@ class KidsChoresStore:
 
     def _next_repeat_due_iso(self, base_date, repeat_days: list[int], include_today: bool = True) -> Optional[str]:
         try:
-            from datetime import timedelta
             if not repeat_days:
                 return None
             wd = int(base_date.weekday())
@@ -665,7 +716,6 @@ class KidsChoresStore:
 
     def _next_monthly_due_iso(self, base_date, include_today: bool = True) -> Optional[str]:
         try:
-            from datetime import date, timedelta
 
             if not isinstance(base_date, date):
                 return None
@@ -710,8 +760,7 @@ class KidsChoresStore:
         if not targets:
             return
 
-        from homeassistant.util import dt as dt_util
-        from datetime import datetime, timezone
+
         today = dt_util.now().date()  # local
         if mode == "monthly":
             due_iso = self._next_monthly_due_iso(today, include_today=True)
@@ -749,6 +798,9 @@ class KidsChoresStore:
                 categories=list(getattr(template, "categories", []) or []),
                 mark_overdue=bool(getattr(template, "mark_overdue", True)),
             )
+            inst.time_bonus_enabled = bool(getattr(template, "time_bonus_enabled", False))
+            inst.time_bonus_before = str(getattr(template, "time_bonus_before", "") or "").strip()
+            inst.time_bonus_points = int(getattr(template, "time_bonus_points", 0) or 0)
             inst.early_bonus_enabled = bool(getattr(template, "early_bonus_enabled", False))
             inst.early_bonus_days = int(getattr(template, "early_bonus_days", 0) or 0)
             inst.early_bonus_points = int(getattr(template, "early_bonus_points", 0) or 0)
@@ -789,6 +841,9 @@ class KidsChoresStore:
                 quick_complete=getattr(t, "quick_complete", False),
                 skip_approval=getattr(t, "skip_approval", False),
                 categories=list(getattr(t, "categories", []) or []),
+                time_bonus_enabled=getattr(t, "time_bonus_enabled", False),
+                time_bonus_before=getattr(t, "time_bonus_before", ""),
+                time_bonus_points=getattr(t, "time_bonus_points", 0),
                 early_bonus_enabled=getattr(t, "early_bonus_enabled", False),
                 early_bonus_days=getattr(t, "early_bonus_days", 0),
                 early_bonus_points=getattr(t, "early_bonus_points", 0),
@@ -813,9 +868,6 @@ class KidsChoresStore:
         t = self._get_task(task_id)
 
         def _local_created_date(task: Task):
-            from homeassistant.util import dt as dt_util
-            from datetime import datetime
-
             created_raw = getattr(task, "created", None)
             if not created_raw:
                 return None
@@ -957,7 +1009,6 @@ class KidsChoresStore:
         # If a task is sent "back" to assigned, consider it (re)assigned today
         # so it appears as a current task for the child, regardless of original day.
         if status == STATUS_ASSIGNED:
-            from datetime import datetime, timezone
             t.created = datetime.now(timezone.utc).isoformat()
             t.bonus_completed_ts = None
             t.bonus_approved = False
@@ -1004,7 +1055,6 @@ class KidsChoresStore:
         await self.async_save()
 
     async def approve_bonus_task(self, task_id: str):
-        from datetime import datetime, timezone
         t = self._get_task(task_id)
         if not t.assigned_to:
             raise ValueError("task_not_assigned")
@@ -1023,7 +1073,6 @@ class KidsChoresStore:
         await self.async_save()
 
     async def approve_task(self, task_id: str):
-        from datetime import datetime, timezone
         t = self._get_task(task_id)
         if not t.assigned_to:
             raise ValueError("task_not_assigned")
@@ -1047,8 +1096,7 @@ class KidsChoresStore:
             comp_ts = getattr(t, "completed_ts", None)
 
             if eb_enabled and eb_days > 0 and eb_points > 0 and due_raw and comp_ts:
-                from datetime import timedelta
-                from homeassistant.util import dt as dt_util
+                
 
                 # Parse due as datetime or date (YYYY-MM-DD)
                 due_dt = dt_util.parse_datetime(str(due_raw))
@@ -1069,7 +1117,19 @@ class KidsChoresStore:
         except Exception:
             bonus = 0
 
-        earned = int(t.points) + int(bonus)
+        # ADD THIS (time bonus)
+        time_bonus = 0
+        try:
+            # pick ONE of these depending on how _task_time_bonus is defined for you:
+            time_bonus = self._task_time_bonus(t)              # if you made it a proper method (has self)
+            # time_bonus = KidsChoresStore._task_time_bonus(t)  # if you made it @staticmethod
+            # time_bonus = _task_time_bonus(t)                 # if it's a module-level function
+        except Exception:
+            time_bonus = 0
+        t.time_bonus_awarded = int(time_bonus or 0)
+        t.time_bonus_awarded_ts = int(dt_util.utcnow().timestamp() * 1000) if time_bonus else None
+
+        earned = int(t.points) + int(bonus) + int(time_bonus)
         if earned:
             self._add_earned_points(child, earned)
 
@@ -1084,7 +1144,6 @@ class KidsChoresStore:
                         template = x
                         break
                 if template and getattr(template, "repeat_days", None) and self._repeat_bonus_active(template):
-                    from homeassistant.util import dt as dt_util
                     from datetime import datetime as _dt, timezone as _tz
                     # Advance based on the instance deadline (t.due), not "today", so multi-weekday
                     # schedules chain correctly.
@@ -1236,6 +1295,9 @@ class KidsChoresStore:
         points: Optional[int] = None,
         description: Optional[str] = None,
         due: Optional[str] = None,
+        time_bonus_enabled: Optional[bool] = None,
+        time_bonus_before: Optional[str] = None,
+        time_bonus_points: Optional[int] = None,
         early_bonus_enabled: Optional[bool] = None,
         early_bonus_days: Optional[int] = None,
         early_bonus_points: Optional[int] = None,
@@ -1272,6 +1334,22 @@ class KidsChoresStore:
             t.description = str(description).strip()
         if due is not None:
             t.due = str(due).strip() or None
+        if time_bonus_enabled is not None:
+            t.time_bonus_enabled = bool(time_bonus_enabled)
+
+        if time_bonus_before is not None:
+            t.time_bonus_before = str(time_bonus_before or "").strip()
+
+        if time_bonus_points is not None:
+            try:
+                t.time_bonus_points = max(0, int(time_bonus_points))
+            except Exception:
+                t.time_bonus_points = getattr(t, "time_bonus_points", 0) or 0
+
+        # If explicitly disabled, clear config so UI doesn’t “half-enable”
+        if time_bonus_enabled is False:
+            t.time_bonus_before = ""
+            t.time_bonus_points = 0
         if early_bonus_enabled is not None:
             t.early_bonus_enabled = bool(early_bonus_enabled)
         if early_bonus_days is not None:
@@ -1349,6 +1427,9 @@ class KidsChoresStore:
                     inst.description = getattr(t, "description", "") or ""
                     inst.icon = getattr(t, "icon", "") or ""
                     inst.categories = list(getattr(t, "categories", []) or [])
+                    inst.time_bonus_enabled = bool(getattr(t, "time_bonus_enabled", False))
+                    inst.time_bonus_before = str(getattr(t, "time_bonus_before", "") or "").strip()
+                    inst.time_bonus_points = int(getattr(t, "time_bonus_points", 0) or 0)
                     inst.early_bonus_enabled = bool(getattr(t, "early_bonus_enabled", False))
                     inst.early_bonus_days = int(getattr(t, "early_bonus_days", 0) or 0)
                     inst.early_bonus_points = int(getattr(t, "early_bonus_points", 0) or 0)
@@ -1359,6 +1440,7 @@ class KidsChoresStore:
                     inst.quick_complete = bool(getattr(t, "quick_complete", False))
                     inst.skip_approval = bool(getattr(t, "skip_approval", False))
                     inst.mark_overdue = bool(getattr(t, "mark_overdue", True))
+                    inst.fastest_wins = bool(getattr(t, "fastest_wins", False))
             except Exception:
                 pass
 
@@ -1376,8 +1458,7 @@ class KidsChoresStore:
         - Then create today's repeated tasks based on the repeat templates captured
           from the existing tasks before cleanup.
         """
-        from homeassistant.util import dt as dt_util
-        from datetime import datetime
+
 
         now = dt_util.now()  # aware, local
         today = now.date()
@@ -1408,6 +1489,9 @@ class KidsChoresStore:
                 "schedule_mode": mode,
                 "icon": t.icon,
                 "due": getattr(t, "due", None),
+                "time_bonus_enabled": getattr(t, "time_bonus_enabled", False),
+                "time_bonus_before": getattr(t, "time_bonus_before", ""),
+                "time_bonus_points": getattr(t, "time_bonus_points", 0),
                 "early_bonus_enabled": getattr(t, "early_bonus_enabled", False),
                 "early_bonus_days": getattr(t, "early_bonus_days", 0),
                 "early_bonus_points": getattr(t, "early_bonus_points", 0),
@@ -1420,6 +1504,7 @@ class KidsChoresStore:
                 "categories": list(getattr(t, "categories", []) or []),
                 "targets": [x for x in targets if x],
                 "mark_overdue": getattr(t, "mark_overdue", True),
+                "fastest_wins": bool(getattr(t, "fastest_wins", False)),
             })
 
         def _local_created_date(task: Task):
@@ -1452,6 +1537,8 @@ class KidsChoresStore:
                     kept.append(t)
                     continue
                 if bool(getattr(t, "persist_until_completed", False)) and getattr(t, "status", None) != STATUS_APPROVED:
+                    if getattr(t, "status", None) == STATUS_ASSIGNED and getattr(t, "fastest_wins_claimed_ts", None) != None:
+                        continue
                     from datetime import datetime as _dt, timezone as _tz
                     t.created = _dt.now(_tz.utc).isoformat()
                     t.carried_over = True
@@ -1514,6 +1601,9 @@ class KidsChoresStore:
                             icon=tpl.get("icon") or "",
                             due=due_iso,
                             repeat_template_id=tpl_id,
+                            time_bonus_enabled=tpl.get("time_bonus_enabled", False),
+                            time_bonus_before=tpl.get("time_bonus_before", ""),
+                            time_bonus_points=tpl.get("time_bonus_points", 0),
                             early_bonus_enabled=True,
                             early_bonus_days=int(tpl.get("early_bonus_days", 0) or 0),
                             early_bonus_points=int(tpl.get("early_bonus_points", 0) or 0),
@@ -1525,6 +1615,7 @@ class KidsChoresStore:
                             skip_approval=tpl.get("skip_approval", False),
                             categories=list(tpl.get("categories") or []),
                             mark_overdue=tpl.get("mark_overdue", True),
+                            fastest_wins=bool(tpl.get("fastest_wins", False)),
                         )
                 continue
 
@@ -1562,6 +1653,9 @@ class KidsChoresStore:
                         icon=tpl.get("icon") or "",
                         due=tpl.get("due"),
                         repeat_template_id=tpl_id or None,
+                        time_bonus_enabled=tpl.get("time_bonus_enabled", False),
+                        time_bonus_before=tpl.get("time_bonus_before", ""),
+                        time_bonus_points=tpl.get("time_bonus_points", 0),
                         early_bonus_enabled=tpl.get("early_bonus_enabled"),
                         early_bonus_days=tpl.get("early_bonus_days"),
                         early_bonus_points=tpl.get("early_bonus_points"),
@@ -1573,6 +1667,7 @@ class KidsChoresStore:
                         skip_approval=tpl.get("skip_approval", False),
                         categories=list(tpl.get("categories") or []),
                         mark_overdue=tpl.get("mark_overdue", True),
+                        fastest_wins=bool(tpl.get("fastest_wins", False)),
                     )
 
         await self.async_save()
@@ -1661,7 +1756,6 @@ class KidsChoresStore:
         if child.points < price:
             raise ValueError("insufficient_points")
         child.points -= price
-        from datetime import datetime, timezone
         pur = Purchase(
             id=str(uuid4()), child_id=child.id, item_id=it.id,
             title=it.title, price=price, icon=it.icon, image=getattr(it, 'image', ''),
@@ -1817,6 +1911,38 @@ class KidsChoresStore:
             except Exception:
                 # Keep processing remaining steps
                 continue
+    @staticmethod
+    def _task_time_bonus(task: Task) -> int:
+        try:
+            if not bool(getattr(task, "time_bonus_enabled", False)):
+                return 0
+            if bool(getattr(task, "carried_over", False)):
+                return 0
+
+            pts = int(getattr(task, "time_bonus_points", 0) or 0)
+            if pts <= 0:
+                return 0
+
+            comp_ts = getattr(task, "completed_ts", None)
+            if not comp_ts:
+                return 0
+
+            hhmm = str(getattr(task, "time_bonus_before", "") or "").strip()
+            m = re.fullmatch(r"([01]\d|2[0-3]):([0-5]\d)", hhmm)
+            if not m:
+                return 0
+
+            hh = int(m.group(1))
+            mm = int(m.group(2))
+
+            # cutoff on the SAME LOCAL DAY as completion
+            completed_local = dt_util.as_local(dt_util.utc_from_timestamp(int(comp_ts) / 1000.0))
+            cutoff_local = completed_local.replace(hour=hh, minute=mm, second=0, microsecond=0)
+            cutoff_ms = int(dt_util.as_utc(cutoff_local).timestamp() * 1000)
+
+            return pts if int(comp_ts) < cutoff_ms else 0
+        except Exception:
+            return 0
 
 # ---- Point shop ----
 
