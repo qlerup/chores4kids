@@ -100,7 +100,7 @@ If you don’t see the card in the UI editor:
 ### Admin view (parents)
 
 ```yaml
-type: custom:chores4kids-dev-card
+type: custom:chores4kids-card
 mode: admin
 show_scoreboard: true
 ```
@@ -108,7 +108,7 @@ show_scoreboard: true
 ### Kid view (for a specific child)
 
 ```yaml
-type: custom:chores4kids-dev-card
+type: custom:chores4kids-card
 mode: kid
 child: "Emma"
 ```
