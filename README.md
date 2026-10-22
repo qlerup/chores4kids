@@ -230,6 +230,24 @@ The card includes multiple languages (including English and Danish) and localize
 
 ## Troubleshooting 🧰
 
+### Completing tasks from automations
+
+Use the **assigned task instance ID** from the child's tasks sensor, rather than
+the reusable unassigned template ID. `approve_task` and `set_task_status` with
+`status: approved` both award points, once only.
+
+For repeating tasks, a template ID together with `child_id` can resolve the
+child's active copy. If multiple active copies match, use an explicit instance
+ID; the service will not guess which task should receive points.
+
+### Missing bonus controls after upgrading
+
+The integration includes the current card. In storage-mode dashboards it now
+consolidates known old HACS and `/local/` resource entries so an older standalone
+card cannot register the same custom element first. After upgrading, restart HA
+and fully reload open dashboards. For YAML resources, keep only
+`/local/chores4kids-card.js` and remove the old standalone card resource.
+
 - **Card shows no data**
   - Make sure the integration is installed, configured, and HA was restarted
 - **No children listed**

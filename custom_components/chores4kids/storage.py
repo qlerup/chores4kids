@@ -864,10 +864,16 @@ class KidsChoresStore:
         t.status = STATUS_ASSIGNED
         await self.async_save()
 
-    async def set_task_status(self, task_id: str, status: str, completed_ts: Optional[int] = None):
+    async def set_task_status(self, task_id: str, status: str, completed_ts: Optional[int] = None, child_id: Optional[str] = None):
         if status not in STATUSES:
             raise ValueError("invalid_status")
-        t = self._get_task(task_id)
+        t = self._resolve_assigned_task(task_id, child_id)
+        task_id = t.id
+        if status == STATUS_APPROVED:
+            if completed_ts is not None:
+                t.completed_ts = completed_ts
+            await self.approve_task(task_id)
+            return
 
         def _local_created_date(task: Task):
             created_raw = getattr(task, "created", None)
@@ -1074,8 +1080,8 @@ class KidsChoresStore:
             self._add_earned_points(child, earned)
         await self.async_save()
 
-    async def approve_task(self, task_id: str):
-        t = self._get_task(task_id)
+    async def approve_task(self, task_id: str, child_id: Optional[str] = None):
+        t = self._resolve_assigned_task(task_id, child_id)
         if not t.assigned_to:
             raise ValueError("task_not_assigned")
         child = self._get_child(t.assigned_to)
@@ -1805,6 +1811,25 @@ class KidsChoresStore:
         await self.async_save()
 
     # Helpers
+    def _resolve_assigned_task(self, task_id: str, child_id: Optional[str] = None) -> Task:
+        """Resolve an explicit instance, or a template plus child, without guessing."""
+        task = self._get_task(task_id)
+        if not child_id:
+            return task
+        self._get_child(child_id)
+        if task.assigned_to:
+            if task.assigned_to != child_id:
+                raise ValueError("task_assigned_to_different_child")
+            return task
+        matches = [t for t in self.tasks
+                   if t.repeat_template_id == task_id and t.assigned_to == child_id
+                   and t.status not in (STATUS_APPROVED, STATUS_REJECTED)]
+        if len(matches) > 1:
+            raise ValueError("ambiguous_task_use_assigned_task_id")
+        if not matches:
+            raise ValueError("assigned_task_not_found_use_assigned_task_id")
+        return matches[0]
+
     def _get_child(self, child_id: str) -> Child:
         for c in self.children:
             if c.id == child_id:

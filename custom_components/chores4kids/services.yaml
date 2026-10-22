@@ -90,7 +90,10 @@ assign_task:
     child_id:
       required: true
 set_task_status:
+  description: Use the assigned task ID from the child's tasks sensor. For a repeating template ID, also supply child_id.
   fields:
+    child_id:
+      required: false
     task_id:
       required: true
     status:
@@ -108,7 +111,10 @@ delete_task:
     task_id:
       required: true
 approve_task:
+  description: Approve an assigned task and award points. Use its assigned ID, or a repeating template ID together with child_id.
   fields:
+    child_id:
+      required: false
     task_id:
       required: true
 approve_bonus_task:

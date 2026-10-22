@@ -205,6 +205,11 @@ jobs:
               // 2) Labels
               if (type === 'bug') {
                 await safeRemoveLabel(issue_number, LABELS.bugWaiting);
+                for (const label of issue.labels || []) {
+                  if (/^bugs?$/i.test(label.name || label)) {
+                    await safeRemoveLabel(issue_number, label.name || label);
+                  }
+                }
                 await safeRemoveLabel(issue_number, LABELS.legacyBugFixed);
 
                 await github.rest.issues.addLabels({
@@ -245,6 +250,11 @@ jobs:
               }
 
               if (appliedLabel === LABELS.bugWaiting) {
+                for (const label of issue.labels || []) {
+                  if (/^bugs?$/i.test(label.name || label)) {
+                    await safeRemoveLabel(issue.number, label.name || label);
+                  }
+                }
                 await upsertComment(issue.number, MARKERS.bugWaiting, waitingBody('bug'));
                 core.info(`#${issue.number}: waiting-for-release comment (bug).`);
                 return;

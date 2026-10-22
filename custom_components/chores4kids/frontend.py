@@ -19,6 +19,14 @@ JS_FILENAME = "chores4kids-card.js"
 RESOURCE_URL = f"/local/{JS_FILENAME}"
 RESOURCE_TYPE = "module"  # modern custom cards should be loaded as ES modules
 
+# These distributions register the same custom element. Loading both lets an
+# outdated card win the registration race, hiding newer controls in some clients.
+RESOURCE_ALIASES = {
+    RESOURCE_URL,
+    f"/hacsfiles/lovelace-chores4kids-card/{JS_FILENAME}",
+    f"/hacsfiles/chores4kids-card/{JS_FILENAME}",
+}
+
 
 def _strip_query(url: str) -> str:
     try:
@@ -116,6 +124,10 @@ async def _ensure_lovelace_resource_retry(hass: HomeAssistant, attempts_left: in
 async def _ensure_js_in_www(hass: HomeAssistant) -> None:
     src = Path(__file__).parent / "www" / JS_FILENAME
     dst = Path(hass.config.path("www", JS_FILENAME))
+    await hass.async_add_executor_job(_copy_js_if_changed, src, dst)
+
+
+def _copy_js_if_changed(src: Path, dst: Path) -> None:
 
     if not src.exists():
         # If the file isn't shipped, do nothing.
@@ -133,7 +145,14 @@ async def _ensure_js_in_www(hass: HomeAssistant) -> None:
             # If hashing fails for any reason, overwrite.
             pass
 
-    await hass.async_add_executor_job(shutil.copyfile, src, dst)
+    shutil.copyfile(src, dst)
+
+
+def _deployed_token(path: Path) -> str:
+    try:
+        return _token_from_hash(_sha256(path))
+    except (OSError, ValueError):
+        return "0"
 
 
 async def _ensure_lovelace_resource(hass: HomeAssistant) -> None:
@@ -146,18 +165,13 @@ async def _ensure_lovelace_resource(hass: HomeAssistant) -> None:
             await resources.async_load()
 
         deployed = Path(hass.config.path("www", JS_FILENAME))
-        token = "0"
-        if deployed.exists():
-            try:
-                token = _token_from_hash(_sha256(deployed))
-            except Exception:
-                token = "0"
+        token = await hass.async_add_executor_job(_deployed_token, deployed)
         url = f"{RESOURCE_URL}?v={token}"
 
         matches = []
         for entry in resources.async_items():
             try:
-                if _strip_query(entry.get("url", "")) == RESOURCE_URL:
+                if _strip_query(entry.get("url", "")) in RESOURCE_ALIASES:
                     matches.append(entry)
             except Exception:
                 continue
@@ -213,22 +227,18 @@ async def _ensure_lovelace_resource(hass: HomeAssistant) -> None:
         resources = resources.get("resources", [])
 
     deployed = Path(hass.config.path("www", JS_FILENAME))
-    token = "0"
-    if deployed.exists():
-        try:
-            token = _token_from_hash(_sha256(deployed))
-        except Exception:
-            token = "0"
+    token = await hass.async_add_executor_job(_deployed_token, deployed)
     url = f"{RESOURCE_URL}?v={token}"
 
-    for r in resources:
-        if isinstance(r, dict) and _strip_query(r.get("url", "")) == RESOURCE_URL:
-            if r.get("url") != url or r.get("type") != RESOURCE_TYPE:
-                r["url"] = url
-                r["type"] = RESOURCE_TYPE
-                await store.async_save(resources)
-                _LOGGER.info("Updated Lovelace resource (fallback): %s", url)
-            return
+    matches = [r for r in resources if isinstance(r, dict)
+               and _strip_query(r.get("url", "")) in RESOURCE_ALIASES]
+    if matches:
+        entry = matches[0]
+        if entry.get("url") != url or entry.get("type") != RESOURCE_TYPE or len(matches) > 1:
+            entry.update(url=url, type=RESOURCE_TYPE)
+            resources = [r for r in resources if r is entry or r not in matches]
+            await store.async_save(resources)
+        return
 
     resources.append(
         {

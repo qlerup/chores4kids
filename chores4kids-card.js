@@ -1,5 +1,6 @@
 import { LitElement, html, css } from "https://unpkg.com/lit?module";
 
+// Card distribution version: 3.2.3
 // Unified i18n (admin + child keys)
 const C4K_I18N = {
 	en: {
@@ -949,8 +950,9 @@ class Chores4KidsDevCard extends LitElement {
 		.tasks.child-tasks-scroll{ max-height:min(72vh, 920px); overflow-y:auto; overflow-x:hidden; margin-right:-32px; padding-right:36px; scrollbar-gutter: stable; }
 		@media (max-width:700px){ .tasks.child-tasks-scroll{ max-height:min(65vh, 760px); } }
 		.cat-title{ font-weight:700; color: var(--secondary-text-color); margin: 6px 0 2px; padding-left:2px; }
-		.task{ display:grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items:center; padding: 12px; border: 1px solid var(--divider-color); border-radius: 14px; background: var(--card-background-color); }
-		.task.no-icon{ grid-template-columns: 1fr auto; }
+		.task{ display:grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 12px; align-items:center; padding: 12px; border: 1px solid var(--divider-color); border-radius: 14px; background: var(--card-background-color); }
+		.task.no-icon{ grid-template-columns: minmax(0,1fr) auto; }
+		.task > div, .bonus-subtask > div{ min-width:0; overflow-wrap:anywhere; }
 		.task.no-icon .task-icon{ display:none; }
 		.task:hover{ background: color-mix(in srgb, var(--primary-color) 6%, transparent); }
 		.task-icon{ display:flex; align-items:center; justify-content:center; width: 48px; }
@@ -969,15 +971,22 @@ class Chores4KidsDevCard extends LitElement {
 		.chip-deadline{ background: color-mix(in srgb, var(--secondary-text-color) 14%, transparent); color: var(--secondary-text-color); }
 		.chip-bonus{ background: color-mix(in srgb, var(--success-color, #43a047) 18%, transparent); color: var(--success-color, #43a047); }
 		.chip-bonus-expired{ background: color-mix(in srgb, var(--error-color, #f44336) 18%, transparent); color: var(--error-color, #f44336); text-decoration: line-through; }
-		.bonus-wrap{ position:relative; grid-column:2; justify-self:stretch; width:calc(100% - 160px); max-width:none; margin-left:160px; margin-top:4px; margin-bottom:8px; }
-		.bonus-link{ position:absolute; left:-86px; top:-4px; width:84px; height:42px; border-left:2px solid var(--divider-color); border-bottom:2px solid var(--divider-color); border-bottom-left-radius:8px; opacity:.9; }
-		.bonus-subtask{ display:grid; grid-template-columns: 1fr auto; column-gap:12px; row-gap:6px; align-items:center; width:100%; max-width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--divider-color); border-radius:14px; background: var(--card-background-color); }
+		.bonus-wrap{ --bonus-indent:clamp(20px, 8%, 64px); position:relative; width:calc(100% - var(--bonus-indent)); min-width:0; margin-left:var(--bonus-indent); margin-top:4px; margin-bottom:8px; }
+		.bonus-link{ position:absolute; left:calc(-1 * var(--bonus-indent) + 8px); top:-4px; width:calc(var(--bonus-indent) - 10px); height:42px; border-left:2px solid var(--divider-color); border-bottom:2px solid var(--divider-color); border-bottom-left-radius:8px; opacity:.9; }
+		.bonus-subtask{ display:grid; grid-template-columns: minmax(0,1fr) auto; column-gap:12px; row-gap:6px; align-items:center; width:100%; max-width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--divider-color); border-radius:14px; background: var(--card-background-color); }
 		.bonus-subtask-title{ font-weight:600; margin-bottom:6px; }
 		.bonus-subtask-title{ grid-column:1; margin-bottom:0; }
 		.bonus-subtask-meta{ grid-column:1; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 		.bonus-subtask-actions{ grid-column:2; grid-row:1 / -1; display:flex; justify-content:center; align-items:flex-end; }
-		.bonus-subtask-actions button{ font-size: var(--c4k-kid-task-button-size, 14px); padding: .55em 1.05em; min-height: 2.4em; transform: translateY(14px); }
-		.bonus-subtask-actions .chip{ transform: translateY(14px); }
+		.bonus-subtask-actions button{ font-size: var(--c4k-kid-task-button-size, 14px); padding: .55em 1.05em; min-height: 2.4em; }
+		@media (max-width:700px){
+			.tasks.child-tasks-scroll{ margin-right:0; padding-right:4px; }
+			.task, .task.no-icon{ grid-template-columns:minmax(0,1fr); }
+			.task.has-icon{ grid-template-columns:auto minmax(0,1fr); }
+			.task .actions{ grid-column:1 / -1; align-items:flex-start; }
+			.bonus-subtask{ grid-template-columns:minmax(0,1fr); }
+			.bonus-subtask-actions{ grid-column:1; grid-row:auto; justify-content:flex-start; }
+		}
 		.actions{ display:flex; gap:8px; }
 		.task .actions button{ font-size: var(--c4k-kid-task-button-size, 14px); padding: .55em 1.05em; min-height: 2.4em; }
 		.img-preview{ width:72px; height:72px; border-radius:10px; border:1px solid var(--divider-color); background: color-mix(in srgb, var(--primary-color) 6%, transparent); object-fit:cover; }
@@ -1743,7 +1752,7 @@ class Chores4KidsDevCard extends LitElement {
 		if (this._isTaskBusy(t.id)) return;
 		this._setTaskBusy(t.id, true);
 		try{
-			await this._approve(t);
+			if (!await this._approve(t, true)) return;
 			if (this._reassignTask?.id === t.id) return;
 			if (!this._hasBonusTask(t)) return;
 			if (!t?.bonus_completed_ts){
@@ -3269,10 +3278,10 @@ class Chores4KidsDevCard extends LitElement {
 			console.error('Failed to manually reassign task:', e);
 		}
 	}
-	async _approve(task){ 
-		if (!task?.id) return;
-		if (this._isTaskBusy(task.id)) return;
-		this._setTaskBusy(task.id, true);
+	async _approve(task, busyAlreadyHeld=false){
+		if (!task?.id) return false;
+		if (!busyAlreadyHeld && this._isTaskBusy(task.id)) return false;
+		if (!busyAlreadyHeld) this._setTaskBusy(task.id, true);
 		try{
 		// Check if task is overdue and has auto-assign for today
 		if (this._isTaskOverdue(task) && this._autoAssignActive(task)) {
@@ -3280,18 +3289,20 @@ class Chores4KidsDevCard extends LitElement {
 				// Show re-assign prompt
 				this._reassignTask = task;
 				this.requestUpdate();
-				return;
+				return false;
 			}
 		}
 		
 		// Normal approve (timestamp remains in backend for historical view)
 		await this.hass.callService('chores4kids','approve_task',{ task_id: task.id });
+		return true;
 		}catch(err){
 			console.error('Failed to approve task:', err);
 			const msg = String(err?.message || err || 'Unknown error');
 			alert(`Kunne ikke godkende opgaven: ${msg}`);
+			return false;
 		} finally {
-			this._setTaskBusy(task.id, false);
+			if (!busyAlreadyHeld) this._setTaskBusy(task.id, false);
 		}
 	}
 	async _assignTask(task, childId){ if(!childId){ alert(this._t('alert.choose_child_first')); return; } await this.hass.callService('chores4kids','assign_task',{ task_id: task.id, child_id: childId }); this._setBonusVisualState(task.id, 'assigned'); task._assignTo=''; this.requestUpdate(); }
