@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Extract version + compare with latest release (this repo)
         uses: actions/github-script@v7
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           script: |
             const marker = '<!-- version-latest-check -->';
@@ -146,6 +148,7 @@ jobs:
             }
 
             async function extractVersionAI(text) {
+              try {
               const payload = {
                 model: "openai/gpt-4.1",
                 temperature: 0,
@@ -195,6 +198,12 @@ jobs:
 
               if (!SEMVERISH.test(v) || isMissingOrPlaceholderVersion(v)) v = "";
               return v;
+              } catch (error) {
+                // Models is optional; network/non-JSON responses must not stop
+                // the deterministic version extraction that follows this call.
+                core.warning(`Models version extraction unavailable: ${error.message}`);
+                return "";
+              }
             }
 
             // --- Decide what to scan (comment vs body) ---
@@ -231,6 +240,9 @@ jobs:
             }
 
             // Safety: only act on issues labeled as bug
+            if (issue.state === "closed" || labels.some(label =>
+              label === "Bug fixed - created - waiting for release" ||
+              label === "Bug fixed - released" || label === "Bug fixed")) return;
             if (!labels.includes(BUG_LABEL)) return;
 
 
