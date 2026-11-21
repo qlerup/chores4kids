@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "https://unpkg.com/lit?module";
 
-// Card distribution version: 3.2.3
+// Card distribution version: 3.2.4
 // Unified i18n (admin + child keys)
 const C4K_I18N = {
 	en: {
@@ -3527,44 +3527,23 @@ class Chores4KidsDevCard extends LitElement {
 	_opsForDomain(dom){ switch(dom){ case 'switch': case 'light': case 'fan': case 'input_boolean': return ['turn_on','turn_off','toggle']; case 'media_player': return ['turn_on','turn_off','media_play','media_pause','toggle']; case 'lock': return ['lock','unlock']; default: return ['turn_on','turn_off']; } }
 	async _saveAdvanced(){ if(!this._pointsEnabled()) return; if(!this._advItem) return; const actions=(this._advSteps||[]).map(st=> st.type==='delay'? { type:'delay', seconds: Number(st.seconds||0) } : { type:'entity_service', entity_id: st.entity_id, op: st.op||'turn_on' }); await this.hass.callService('chores4kids','update_shop_item',{ item_id: this._advItem.id, actions }); this._advItem=null; this._advSteps=[]; this.requestUpdate(); }
 	async _completeNow(task){
-		if(!task||!task.id) return;
-		if (this._isTaskBusy(task.id)) return;
-		this._setTaskBusy(task.id, true);
-		try{
-			const next = 'awaiting_approval';
-			// Trigger konfetti + record completion timestamp (same behavior as completing via in_progress)
-			console.log('Triggering confetti!');
-			this._playCompletionSound();
-			if (this._confettiEnabled()) this._triggerConfetti();
-			const ts = Date.now();
-			console.log('Recording completion timestamp:', task.id, ts);
-			this._recordCompleted(task.id, ts);
-			this.requestUpdate();
-			await this.hass.callService('chores4kids','set_task_status',{ task_id: task.id, status: next, completed_ts: ts });
-		} finally {
-			this._setTaskBusy(task.id, false);
-		}
+		return this._changeChildTaskStatus(task, 'awaiting_approval');
 	}
-	async _advance(task){ 
-		if(!task||!task.id) return; 
-		if (this._isTaskBusy(task.id)) return;
+	async _advance(task){
+		return this._changeChildTaskStatus(task, task?.status === 'assigned' ? 'in_progress' : 'awaiting_approval');
+	}
+	async _changeChildTaskStatus(task, status){
+		if (!task?.id || this._isTaskBusy(task.id)) return;
 		this._setTaskBusy(task.id, true);
-		try{
-			const next=task.status==='assigned'? 'in_progress' : 'awaiting_approval'; 
-			// Trigger konfetti hvis opgaven bliver completed
-			if(next === 'awaiting_approval') {
-				console.log('Triggering confetti!');
+		try {
+			const payload = {task_id: task.id, status};
+			if (status === 'awaiting_approval') payload.completed_ts = Date.now();
+			await this.hass.callService('chores4kids', 'set_task_status', payload);
+			if (status === 'awaiting_approval') {
+				this._recordCompleted(task.id, payload.completed_ts);
 				this._playCompletionSound();
 				if (this._confettiEnabled()) this._triggerConfetti();
-				// Record completion timestamp for parent view
-				const ts = Date.now();
-				console.log('Recording completion timestamp:', task.id, ts);
-				this._recordCompleted(task.id, ts);
 				this.requestUpdate();
-				// Send timestamp to backend
-				await this.hass.callService('chores4kids','set_task_status',{ task_id: task.id, status: next, completed_ts: ts }); 
-			} else {
-				await this.hass.callService('chores4kids','set_task_status',{ task_id: task.id, status: next }); 
 			}
 		} finally {
 			this._setTaskBusy(task.id, false);

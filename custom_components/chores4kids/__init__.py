@@ -24,6 +24,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up the Chores4Kids integration."""
     store = KidsChoresStore(hass)
     await store.async_load()
+    # Publish the current day's assignments in the very first sensor snapshot.
+    await store.daily_rollover()
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN]["store"] = store
@@ -877,13 +879,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.services.async_register(DOMAIN, "purge_orphans", svc_purge_orphans)
 
-    # Schedule midnight rollover and run once on startup
+    # Bind midnight housekeeping to this entry's lifetime.
     async def _midnight_cb(now):
         await store.daily_rollover()
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
-    async_track_time_change(hass, _midnight_cb, hour=0, minute=0, second=0)
-    hass.async_create_task(store.daily_rollover())
+    entry.async_on_unload(async_track_time_change(hass, _midnight_cb, hour=0, minute=0, second=0))
 
     return True
 

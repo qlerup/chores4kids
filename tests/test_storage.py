@@ -84,5 +84,45 @@ class AutomationTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaisesRegex(ValueError, "task_not_assigned"):
             await self.store.approve_task("template")
 
+
+class FrontendSetupTests(unittest.IsolatedAsyncioTestCase):
+    async def test_copy_and_resource_hash_do_not_read_files_on_event_loop(self):
+        import asyncio
+        import hashlib
+        import tempfile
+        import threading
+        from unittest.mock import Mock, patch
+
+        frontend = load("frontend")
+        loop_thread = threading.get_ident()
+        resources = SimpleNamespace(store=object(), loaded=True, async_items=lambda: [],
+                                    async_create_item=AsyncMock(), async_update_item=AsyncMock())
+        with tempfile.TemporaryDirectory() as work:
+            root = Path(work)
+            src = root / "package/www" / frontend.JS_FILENAME
+            src.parent.mkdir(parents=True)
+            src.write_bytes(b"bundled card")
+            hass = SimpleNamespace(config=SimpleNamespace(path=lambda *p: str(root.joinpath(*p))),
+                                   async_add_executor_job=asyncio.to_thread,
+                                   data={"lovelace": {"resources": resources}})
+            deployed = root / "www" / frontend.JS_FILENAME
+            original_open = Path.open
+            def guarded_open(path, *args, **kwargs):
+                self.assertNotEqual(threading.get_ident(), loop_thread)
+                return original_open(path, *args, **kwargs)
+            with patch.object(frontend, "__file__", str(root / "package/frontend.py")), patch.object(Path, "open", guarded_open):
+                await frontend._ensure_js_in_www(hass)
+                await frontend._ensure_js_in_www(hass)
+                await frontend._ensure_lovelace_resource(hass)
+                legacy = Mock(async_load=AsyncMock(return_value=[]), async_save=AsyncMock())
+                with patch.object(frontend, "Store", return_value=legacy):
+                    hass.data = {}
+                    await frontend._ensure_lovelace_resource(hass)
+            token = frontend._token_from_hash(hashlib.sha256(src.read_bytes()).hexdigest())
+            self.assertEqual(deployed.read_bytes(), src.read_bytes())
+            expected = frontend.RESOURCE_URL + "?v=" + token
+            self.assertEqual(resources.async_create_item.await_args.args[0]["url"], expected)
+            self.assertEqual(legacy.async_save.await_args.args[0][0]["url"], expected)
+
 if __name__ == "__main__":
     unittest.main()

@@ -34,3 +34,26 @@ test('overdue reassign prompt cancels approve all',async()=>{
   await instance._approveMainAndBonus({id:'task',bonus_enabled:true});
   assert.deepEqual(calls,[]);assert.equal(instance._reassignTask.id,'task');
 });
+for (const method of ['_completeNow', '_advance']) {
+  test(method + ' only celebrates a confirmed completion', async () => {
+    const {instance} = card();
+    const events = [];
+    instance._recordCompleted = () => events.push('timestamp');
+    instance._playCompletionSound = () => events.push('sound');
+    instance._confettiEnabled = () => true;
+    instance._triggerConfetti = () => events.push('confetti');
+    const task = {id: 'instance', status: 'in_progress'};
+    instance.hass.callService = async () => { throw Error('task_not_found'); };
+    await assert.rejects(instance[method](task), /task_not_found/);
+    assert.deepEqual(events, []);
+    assert.equal(instance._isTaskBusy(task.id), false);
+    instance.hass.callService = async (domain, service, payload) => {
+      assert.equal(payload.task_id, task.id);
+      assert.equal(payload.status, 'awaiting_approval');
+      assert.ok(payload.completed_ts);
+      events.push('confirmed');
+    };
+    await instance[method](task);
+    assert.deepEqual(events, ['confirmed','timestamp','sound','confetti']);
+  });
+}
