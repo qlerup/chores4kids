@@ -2,8 +2,15 @@ import { LitElement, html, css } from "https://unpkg.com/lit?module";
 
 // Card distribution version: 3.2.4
 // Unified i18n (admin + child keys)
+const C4K_ADMIN_SECTIONS = {
+	children: 'section.children', categories: 'section.categories', create: 'section.new_task',
+	tasks: 'section.tasks', assigned: 'overview.title', approvals: 'lbl.awaiting',
+	finished: 'overview.finished_title', history: 'history.title', scoreboard: 'section.scoreboard', shop: 'shop.title',
+};
+
 const C4K_I18N = {
 	en: {
+		'editor.sections': 'Sections on this card',
 		'history.title': 'Activity history',
 		'history.from': 'From',
 		'history.through': 'Through',
@@ -148,6 +155,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Empty = default'
 	},
 	nl: {
+		'editor.sections': 'Onderdelen op deze kaart',
 		'history.title': 'Activiteitengeschiedenis',
 		'history.from': 'Van',
 		'history.through': 'Tot en met',
@@ -388,6 +396,7 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Leeg = standaard',
 	},
 	tr: {
+		'editor.sections': 'Bu karttaki bölümler',
 		'history.title': 'Etkinlik geçmişi',
 		'history.from': 'Başlangıç',
 		'history.through': 'Bitiş',
@@ -627,6 +636,7 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Varsayılanı kullanmak için boş bırakın',
 	},
 	da: {
+		'editor.sections': 'Sektioner på dette kort',
 		'history.title': 'Aktivitetshistorik',
 		'history.from': 'Fra',
 		'history.through': 'Til og med',
@@ -761,6 +771,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			sv: {
+		'editor.sections': 'Avsnitt på det här kortet',
 		'history.title': 'Aktivitetshistorik',
 		'history.from': 'Från',
 		'history.through': 'Till och med',
@@ -852,6 +863,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tomt = standard'
 		},
 			nb: {
+		'editor.sections': 'Seksjoner på dette kortet',
 		'history.title': 'Aktivitetshistorikk',
 		'history.from': 'Fra',
 		'history.through': 'Til og med',
@@ -943,6 +955,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			de: {
+		'editor.sections': 'Abschnitte auf dieser Karte',
 		'history.title': 'Aktivitätsverlauf',
 		'history.from': 'Von',
 		'history.through': 'Bis einschließlich',
@@ -1034,6 +1047,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Leer = Standard'
 		},
 			es: {
+		'editor.sections': 'Secciones de esta tarjeta',
 		'history.title': 'Historial de actividad',
 		'history.from': 'Desde',
 		'history.through': 'Hasta',
@@ -1125,6 +1139,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vacío = predeterminado'
 		},
 			fr: {
+		'editor.sections': 'Sections de cette carte',
 		'history.title': 'Historique des activités',
 		'history.from': 'Du',
 		'history.through': 'Au',
@@ -1216,6 +1231,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vide = par défaut'
 		},
 			fi: {
+		'editor.sections': 'Tämän kortin osiot',
 		'history.title': 'Tehtävähistoria',
 		'history.from': 'Alkaen',
 		'history.through': 'Asti',
@@ -1307,6 +1323,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tyhjä = oletus'
 		},
 			it: {
+		'editor.sections': 'Sezioni di questa scheda',
 		'history.title': 'Cronologia attività',
 		'history.from': 'Dal',
 		'history.through': 'Al',
@@ -2665,13 +2682,17 @@ class Chores4KidsDevCard extends LitElement {
 		const { children } = this._store; const totalKids = children.length;
 		const pointsEnabled = this._pointsEnabled();
 		const showScoreboard = pointsEnabled && (this.config?.show_scoreboard !== false);
+		const sections = this.config?.admin_sections;
+		const customized = Array.isArray(sections);
+		const visible = key => !customized || sections.includes(key);
 		return html`
 			<ha-card header="${this._t('card.admin_title')}">
 				<div class="card-content">
+					${visible('children') ? html`
 					<div class="row">
 						<input placeholder="${this._t('input.new_child_name')}" .value=${this._name||''} @input=${(e)=>this._name=e.target.value} />
 						<button class="btn-primary" @click=${this._addChild}>${this._t('btn.add_child')}</button>
-						${pointsEnabled ? html`<button class="btn-ghost" style="margin-left:auto; min-height:40px;" @click=${()=>this._shopModalOpen=true}>${this._t('shop.open')}</button>` : ''}
+						${pointsEnabled && !customized ? html`<button class="btn-ghost" style="margin-left:auto; min-height:40px;" @click=${()=>this._shopModalOpen=true}>${this._t('shop.open')}</button>` : ''}
 					</div>
 
 					<div class="list section">
@@ -2697,7 +2718,9 @@ class Chores4KidsDevCard extends LitElement {
 							</tbody>
 						</table></div>`}
 					</div>
+					` : ''}
 
+					${visible('categories') ? html`
 					<hr />
 
 					<!-- Categories management -->
@@ -2732,10 +2755,12 @@ class Chores4KidsDevCard extends LitElement {
 							</tbody>
 						</table></div>`}
 					</div>
+					` : ''}
 
+					${visible('create') || (visible('tasks') && this._editingTask) ? html`
 					<hr />
 					<h3 class="h3-row"><span class="collapsible" @click=${()=>this._toggleSection('newtask')}><ha-icon class="chev ${this._isCollapsed('newtask')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('section.new_task')}</span></h3>
-					${this._isCollapsed('newtask')? '' : html`<div class="row fields">
+					${!this._editingTask && this._isCollapsed('newtask')? '' : html`<div class="row fields">
 						<div class="form-field title">
 							<input class="${this._showTitleError? 'invalid':''}" placeholder="${this._t('ph.title')}" .value=${this._taskTitle||''} @input=${e=>{this._taskTitle=e.target.value; this.requestUpdate();}} />
 							<div class="error-space">${this._showTitleError? html`<span class="error-text">${this._t('err.title_required')}</span>`:''}</div>
@@ -2913,8 +2938,10 @@ class Chores4KidsDevCard extends LitElement {
 						`}
 					</div>
 				`}
+					` : ''}
 
 
+					${visible('tasks') ? html`
 					<hr />
 					<h3 class="h3-row">
 						<span class="collapsible" @click=${()=>this._toggleSection('tasks')}><ha-icon class="chev ${this._isCollapsed('tasks')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('section.tasks')}</span>
@@ -2968,7 +2995,9 @@ class Chores4KidsDevCard extends LitElement {
 							`)}
 						</tbody>
 						</table></div>`}
+					` : ''}
 
+					${visible('assigned') ? html`
 					<hr />
 					<h3 class="h3-row">
 						<span class="collapsible" @click=${()=>this._toggleSection('overview')}><ha-icon class="chev ${this._isCollapsed('overview')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('overview.title')}</span>
@@ -3008,7 +3037,9 @@ class Chores4KidsDevCard extends LitElement {
 							<div class="row" style="justify-content:flex-end;">${active.length>3? html`<button class="btn-primary" @click=${()=>this._tasksModalOpen=true}>${this._t('overview.show_all',{pending})}</button>`:''}</div>
 						`;
 					})()}
+					` : ''}
 
+					${visible('approvals') ? html`
 					<h3 class="h3-row">
 						<span class="collapsible" @click=${()=>this._toggleSection('awaiting')}><ha-icon class="chev ${this._isCollapsed('awaiting')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('lbl.awaiting')}</span>
 					</h3>
@@ -3035,7 +3066,9 @@ class Chores4KidsDevCard extends LitElement {
 							</table></div>
 						`;
 					})()}
+					` : ''}
 
+					${visible('finished') ? html`
 					<h3 class="h3-row">
 						<span class="collapsible" @click=${()=>this._toggleSection('finished')}><ha-icon class="chev ${this._isCollapsed('finished')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('overview.finished_title')}</span>
 					</h3>
@@ -3068,10 +3101,11 @@ class Chores4KidsDevCard extends LitElement {
 							</table></div>
 						`;
 					})()}
+					` : ''}
 
-				${this._renderHistory()}
+				${visible('history') ? this._renderHistory() : ''}
 
-				${showScoreboard ? html`
+				${visible('scoreboard') && showScoreboard ? html`
 					<hr />
 					<h3 class="h3-row"><span class="collapsible" @click=${()=>this._toggleSection('scoreboard')}><ha-icon class="chev ${this._isCollapsed('scoreboard')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('section.scoreboard')}</span></h3>
 					${this._isCollapsed('scoreboard')? '' : html`
@@ -3082,11 +3116,12 @@ class Chores4KidsDevCard extends LitElement {
 						</ol>
 					`}
 				` : ''}
+				${customized && visible('shop') && pointsEnabled ? html`<section class="shop-modal">${this._renderAdminShop()}</section>` : ''}
 				</div>
 
 				${pointsEnabled ? this._renderPointsModal() : ''}
 				${this._renderAllTasksModal()}
-				${pointsEnabled ? this._renderShopModal() : ''}
+				${!customized && pointsEnabled ? this._renderShopModal() : ''}
 			${this._renderAdvancedModal()}
 			${this._renderSortModal()}
 				${this._renderReassignModal()}
@@ -3219,6 +3254,13 @@ class Chores4KidsDevCard extends LitElement {
 		if (!this._pointsEnabled()) return '';
 		return html`<div class="overlay shop-admin-overlay ${this._shopModalOpen?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) this._shopModalOpen=false; }}>
 			<div class="modal shop-modal shop-admin-modal" @click=${e=>e.stopPropagation()}>
+				${this._renderAdminShop()}
+				<div class="row" style="justify-content:flex-end; margin-top:8px;"><button class="btn-ghost" @click=${()=>this._shopModalOpen=false}>${this._t('form.close')}</button></div>
+			</div>
+		</div>`;
+	}
+	_renderAdminShop(){
+		return html`
                 <h3>${this._t('shop.title')}</h3>
 				<div class="row fields">
 					<div class="form-field title"><input placeholder="${this._t('shop.item')}" .value=${this._shopTitle||''} @input=${e=>this._shopTitle=e.target.value} /></div>
@@ -3304,9 +3346,7 @@ class Chores4KidsDevCard extends LitElement {
 											<div class="kv"><b>${this._t('shop.price')}</b><b>${p.price} ${this._t('lbl.points')}</b></div>
 										</div>`; })}
 								</div>
-				<div class="row" style="justify-content:flex-end; margin-top:8px;"><button class="btn-ghost" @click=${()=>this._shopModalOpen=false}>${this._t('form.close')}</button></div>
-			</div>
-		</div>`;
+		`;
 	}
 	_renderAdvancedModal(){
 		return html`<div class="overlay ${this._advItem?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) this._advItem=null; }}>
@@ -4550,6 +4590,15 @@ class Chores4KidsDevCardEditor extends LitElement{
 			}
 		}catch{ /* ignore */ }
 	}
+	_setAdminSection(key, enabled){
+		const keys = Object.keys(C4K_ADMIN_SECTIONS);
+		const current = this._config.admin_sections;
+		const sections = keys.filter(k => k === key ? enabled : !Array.isArray(current) || current.includes(k));
+		const config = {...this._config, admin_sections: sections};
+		if (sections.length === keys.length) delete config.admin_sections;
+		this._config = config;
+		this._emit();
+	}
 	_getGlobalConfettiEnabled(){
 		try{
 			const a = this._getUiSensorAttrs?.() || {};
@@ -4887,6 +4936,15 @@ class Chores4KidsDevCardEditor extends LitElement{
 					</select>
 				</div>
 				${(cfg.mode||'admin')==='admin' ? html`
+					<fieldset class="admin-sections">
+						<legend>${this._t('editor.sections')}</legend>
+						${Object.entries(C4K_ADMIN_SECTIONS).map(([key, label]) => html`
+							<label><input type="checkbox" value=${key}
+								.checked=${!Array.isArray(cfg.admin_sections) || cfg.admin_sections.includes(key)}
+								@change=${e => this._setAdminSection(key, e.target.checked)}>
+								${this._t(label)}</label>
+						`)}
+					</fieldset>
 					<div class="form-field">
 						<label for="c4k-task-icon">${this._t('icon.library')} · ${this._t('shop.upload')}</label>
 						<input id="c4k-task-icon" type="file" accept=".svg,.png,.jpg,.jpeg,.webp" @change=${this._uploadTaskIcon}>
@@ -5196,6 +5254,10 @@ class Chores4KidsDevCardEditor extends LitElement{
 	}
 	static get styles(){
 		return css`
+		.admin-sections{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;border:1px solid var(--divider-color);border-radius:8px;padding:10px}
+		.admin-sections label{display:flex;align-items:center;gap:6px;min-height:32px}
+		.admin-sections input[type=checkbox]{width:auto}
+
 			.card-config{ display:grid; gap:12px; }
 			.section-box{ border:1px solid var(--divider-color); border-radius: var(--ha-card-border-radius, 12px); padding: 12px; display:grid; gap:10px; }
 			label{ display:block; font-weight:600; margin-bottom:4px; }

@@ -12,6 +12,7 @@ Give each child a Home Assistant dashboard where they can start chores, earn poi
 
 | Task | Start here |
 | --- | --- |
+| Split the parent dashboard into an approvals card, a shop and a setup card | [Parent widgets](https://qlerup.github.io/chores4kids/card/features/parent-widgets.html) |
 | Review which chores each child completed during a family week | [Activity history](https://qlerup.github.io/chores4kids/card/features/activity-history.html) |
 | Use a family reward name or show chores in columns | [Shared parent and child card settings](https://qlerup.github.io/chores4kids/card/features/appearance.html#set-a-family-reward-name-and-task-layout) |
 | Let a child record the same chore twice today | [Multiple completions per day](https://qlerup.github.io/chores4kids/card/features/tasks.html#complete-a-chore-several-times-a-day) |

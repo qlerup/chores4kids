@@ -5,6 +5,7 @@ Add **Chores4Kids** in the dashboard card editor. Use a separate card for each v
 | Option | What it controls |
 | --- | --- |
 | `mode: admin` | Manage children, categories, chores, approvals and rewards. The parent editor also exposes shared appearance and notification settings. |
+| `admin_sections` | Choose the sections shown on this parent card. Omit to use the full parent view. See [parent widgets](features/parent-widgets.md). |
 | `mode: kid` | Show the selected child’s chores, balance and shop. Set `child` to the child’s name. |
 | `mode: overview` | Show recent tasks on a separate dashboard card. |
 | `language` | Follow the viewer’s Home Assistant profile with `auto` or save one language on this card. |

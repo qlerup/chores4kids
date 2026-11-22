@@ -6,6 +6,14 @@ Choose a task below, or use **Find a feature or page** in the navigation. Each a
 
 <div class="grid cards" markdown>
 
+-   **[Split a parent dashboard into widgets](parent-widgets.md)**
+
+    Put assigned chores and approvals together, and manage rewards on a separate card.
+
+    [![An approvals card beside a shop card](../../images/parent-widgets.png)](../../images/configure-parent-widgets.gif)
+
+    [Play walkthrough](../../images/configure-parent-widgets.gif) | [Full-size GIF](../../images/configure-parent-widgets.gif)
+
 -   **[Review completed chores for a date range](activity-history.md)**
 
     Select a Saturday-to-Friday week and see each child’s completed tasks, approvals and earned points.

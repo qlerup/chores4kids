@@ -111,3 +111,20 @@ for (const method of ['_completeNow', '_advance']) {
     assert.deepEqual(events, ['confirmed','timestamp','sound','confetti']);
   });
 }
+
+test('parent section choices are local and selecting every section restores the full view', () => {
+  const Editor = registry.get('chores4kids-card-editor');
+  const review = new Editor();
+  const shop = new Editor();
+  review.setConfig({mode: 'admin', admin_sections: ['assigned'], language: 'da'});
+  shop.setConfig({mode: 'admin', admin_sections: ['shop']});
+  review._emit = () => {};
+  review._setAdminSection('approvals', true);
+  assert.deepEqual(Array.from(review._config.admin_sections), ['assigned', 'approvals']);
+  assert.deepEqual(Array.from(shop._config.admin_sections), ['shop']);
+  for (const key of ['children','categories','create','tasks','finished','history','scoreboard','shop']) {
+    review._setAdminSection(key, true);
+  }
+  assert.equal(Object.hasOwn(review._config, 'admin_sections'), false);
+  assert.equal(review._config.language, 'da');
+});
