@@ -4,6 +4,13 @@ import { LitElement, html, css } from "https://unpkg.com/lit?module";
 // Unified i18n (admin + child keys)
 const C4K_I18N = {
 	en: {
+		'history.title': 'Activity history',
+		'history.from': 'From',
+		'history.through': 'Through',
+		'history.empty': 'No completions in this period.',
+		'history.error': 'Could not load activity history.',
+		'history.refresh': 'Refresh',
+		'history.loading': 'Loading…',
 		'editor.unit_name': 'Reward unit name',
 		'editor.task_columns': 'Task columns',
 		'editor.columns_auto': 'Auto',
@@ -141,6 +148,13 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Empty = default'
 	},
 	nl: {
+		'history.title': 'Activiteitengeschiedenis',
+		'history.from': 'Van',
+		'history.through': 'Tot en met',
+		'history.empty': 'Geen voltooide taken in deze periode.',
+		'history.error': 'Laden van de geschiedenis mislukt.',
+		'history.refresh': 'Vernieuwen',
+		'history.loading': 'Laden…',
 		'editor.unit_name': 'Naam van de beloningseenheid',
 		'editor.task_columns': 'Taakkolommen',
 		'editor.columns_auto': 'Automatisch',
@@ -374,6 +388,13 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Leeg = standaard',
 	},
 	tr: {
+		'history.title': 'Etkinlik geçmişi',
+		'history.from': 'Başlangıç',
+		'history.through': 'Bitiş',
+		'history.empty': 'Bu dönemde tamamlanan görev yok.',
+		'history.error': 'Etkinlik geçmişi yüklenemedi.',
+		'history.refresh': 'Yenile',
+		'history.loading': 'Yükleniyor…',
 		'editor.unit_name': 'Ödül biriminin adı',
 		'editor.task_columns': 'Görev sütunları',
 		'editor.columns_auto': 'Otomatik',
@@ -606,6 +627,13 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Varsayılanı kullanmak için boş bırakın',
 	},
 	da: {
+		'history.title': 'Aktivitetshistorik',
+		'history.from': 'Fra',
+		'history.through': 'Til og med',
+		'history.empty': 'Ingen udførte opgaver i perioden.',
+		'history.error': 'Aktivitetshistorikken kunne ikke hentes.',
+		'history.refresh': 'Opdater',
+		'history.loading': 'Henter…',
 		'editor.unit_name': 'Navn på belønningsenhed',
 		'editor.task_columns': 'Opgavekolonner',
 		'editor.columns_auto': 'Automatisk',
@@ -733,6 +761,13 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			sv: {
+		'history.title': 'Aktivitetshistorik',
+		'history.from': 'Från',
+		'history.through': 'Till och med',
+		'history.empty': 'Inga slutförda uppgifter under perioden.',
+		'history.error': 'Kunde inte hämta historiken.',
+		'history.refresh': 'Uppdatera',
+		'history.loading': 'Hämtar…',
 		'editor.unit_name': 'Namn på belöningsenheten',
 		'editor.task_columns': 'Uppgiftskolumner',
 		'editor.columns_auto': 'Automatiskt',
@@ -817,6 +852,13 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tomt = standard'
 		},
 			nb: {
+		'history.title': 'Aktivitetshistorikk',
+		'history.from': 'Fra',
+		'history.through': 'Til og med',
+		'history.empty': 'Ingen fullførte oppgaver i perioden.',
+		'history.error': 'Kunne ikke hente historikken.',
+		'history.refresh': 'Oppdater',
+		'history.loading': 'Laster…',
 		'editor.unit_name': 'Navn på belønningsenhet',
 		'editor.task_columns': 'Oppgavekolonner',
 		'editor.columns_auto': 'Automatisk',
@@ -901,6 +943,13 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			de: {
+		'history.title': 'Aktivitätsverlauf',
+		'history.from': 'Von',
+		'history.through': 'Bis einschließlich',
+		'history.empty': 'Keine erledigten Aufgaben in diesem Zeitraum.',
+		'history.error': 'Verlauf konnte nicht geladen werden.',
+		'history.refresh': 'Aktualisieren',
+		'history.loading': 'Lädt…',
 		'editor.unit_name': 'Name der Belohnungseinheit',
 		'editor.task_columns': 'Aufgabenspalten',
 		'editor.columns_auto': 'Automatisch',
@@ -985,6 +1034,13 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Leer = Standard'
 		},
 			es: {
+		'history.title': 'Historial de actividad',
+		'history.from': 'Desde',
+		'history.through': 'Hasta',
+		'history.empty': 'No hay tareas completadas en este periodo.',
+		'history.error': 'No se pudo cargar el historial.',
+		'history.refresh': 'Actualizar',
+		'history.loading': 'Cargando…',
 		'editor.unit_name': 'Nombre de la unidad de recompensa',
 		'editor.task_columns': 'Columnas de tareas',
 		'editor.columns_auto': 'Automático',
@@ -1069,6 +1125,13 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vacío = predeterminado'
 		},
 			fr: {
+		'history.title': 'Historique des activités',
+		'history.from': 'Du',
+		'history.through': 'Au',
+		'history.empty': 'Aucune tâche terminée sur cette période.',
+		'history.error': 'Impossible de charger l’historique.',
+		'history.refresh': 'Actualiser',
+		'history.loading': 'Chargement…',
 		'editor.unit_name': 'Nom de l’unité de récompense',
 		'editor.task_columns': 'Colonnes de tâches',
 		'editor.columns_auto': 'Automatique',
@@ -1153,6 +1216,13 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vide = par défaut'
 		},
 			fi: {
+		'history.title': 'Tehtävähistoria',
+		'history.from': 'Alkaen',
+		'history.through': 'Asti',
+		'history.empty': 'Ei suorituksia tällä aikavälillä.',
+		'history.error': 'Historiaa ei voitu ladata.',
+		'history.refresh': 'Päivitä',
+		'history.loading': 'Ladataan…',
 		'editor.unit_name': 'Palkintoyksikön nimi',
 		'editor.task_columns': 'Tehtäväsarakkeet',
 		'editor.columns_auto': 'Automaattinen',
@@ -1237,6 +1307,13 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tyhjä = oletus'
 		},
 			it: {
+		'history.title': 'Cronologia attività',
+		'history.from': 'Dal',
+		'history.through': 'Al',
+		'history.empty': 'Nessuna attività completata in questo periodo.',
+		'history.error': 'Impossibile caricare la cronologia.',
+		'history.refresh': 'Aggiorna',
+		'history.loading': 'Caricamento…',
 		'editor.unit_name': 'Nome dell’unità di ricompensa',
 		'editor.task_columns': 'Colonne delle attività',
 		'editor.columns_auto': 'Automatico',
@@ -1920,6 +1997,10 @@ class Chores4KidsDevCard extends LitElement {
 	}
 
 	updated(changedProps){
+		if (this._historyOpen && this._mode === 'admin' && changedProps.has('hass')) {
+			const snapshot = this.hass?.states?.[this._idTasks];
+			if (snapshot !== this._historySnapshot) this._loadHistory();
+		}
 		// Ensure CSS variables follow both config changes and backend state updates.
 		if (changedProps?.has?.('hass') || changedProps?.has?.('config')){
 			this._applyColorVars();
@@ -2527,6 +2608,59 @@ class Chores4KidsDevCard extends LitElement {
 		if (t?.status !== 'approved') return '';
 		return html`<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._approveBonusOnly(t)}>${this._t('btn.approve_bonus')}</button>`;
 	}
+	async _loadHistory() {
+		const request = this._historyRequest = (this._historyRequest || 0) + 1;
+		this._historySnapshot = this.hass?.states?.[this._idTasks];
+		this._historyRows = null;
+		this._historyError = false;
+		this.requestUpdate();
+		try {
+			const {response} = await this.hass.callWS({
+				type:'call_service', domain:'chores4kids', service:'get_activity_history', return_response:true,
+				service_data:{start:this._historyStart, end:this._historyEnd}
+			});
+			if (this._historyRequest !== request) return;
+			this._historyStart = response.start;
+			this._historyEnd = response.end;
+			this._historyRows = response.entries;
+		} catch {
+			if (this._historyRequest !== request) return;
+			this._historyError = true;
+		}
+		this.requestUpdate();
+	}
+
+	_renderHistory() {
+		const toggle = () => {
+			this._historyOpen = !this._historyOpen;
+			if (this._historyOpen) this._loadHistory();
+			this.requestUpdate();
+		};
+		const columns = ['shop.date','shop.child','ph.title','th.status'];
+		if (this._pointsEnabled()) columns.push('th.points');
+		const formatter = new Intl.DateTimeFormat(this._locale(), {
+			timeZone:this.hass?.config?.time_zone, dateStyle:'medium', timeStyle:'short'
+		});
+		return html`<h3><button type="button" class="btn-ghost" aria-expanded=${!!this._historyOpen} @click=${toggle}>
+			${this._t('history.title')}</button></h3>
+			${this._historyOpen ? html`<div class="row">
+				<label>${this._t('history.from')} <input type="date" .value=${this._historyStart || ''} max=${this._historyEnd || ''}
+					@change=${e=>{this._historyStart=e.target.value; this._loadHistory();}}></label>
+				<label>${this._t('history.through')} <input type="date" .value=${this._historyEnd || ''} min=${this._historyStart || ''}
+					@change=${e=>{this._historyEnd=e.target.value; this._loadHistory();}}></label>
+				<button class="btn-ghost" @click=${()=>this._loadHistory()}>${this._t('history.refresh')}</button>
+			</div>
+			${this._historyRows?.length ? html`<div class="table-wrap"><table><thead><tr>
+				${columns.map(key=>html`<th>${this._t(key)}</th>`)}
+			</tr></thead><tbody>${this._historyRows.map(row=>html`<tr>
+				<td data-label=${this._t('shop.date')}>${formatter.format(row.completed_ts)}</td>
+				<td data-label=${this._t('shop.child')}>${row.child_name}</td>
+				<td data-label=${this._t('ph.title')}>${row.title}${row.bonus_title ? ' · '+this._t('lbl.bonus')+' · '+row.bonus_title : ''}</td>
+				<td data-label=${this._t('th.status')}><span class="badge status-${row.status}">${this._statusLabel(row.status)}</span></td>
+				${this._pointsEnabled() ? html`<td data-label=${this._t('th.points')}>${row.points ?? '—'}</td>` : ''}
+			</tr>`)}</tbody></table></div>` : html`<p role="status">${this._t(this._historyError ? 'history.error' : this._historyRows ? 'history.empty' : 'history.loading')}</p>`}` : ''}`;
+	}
+
 	_renderAdmin(){
 		const { children } = this._store; const totalKids = children.length;
 		const pointsEnabled = this._pointsEnabled();
@@ -2934,6 +3068,8 @@ class Chores4KidsDevCard extends LitElement {
 							</table></div>
 						`;
 					})()}
+
+				${this._renderHistory()}
 
 				${showScoreboard ? html`
 					<hr />

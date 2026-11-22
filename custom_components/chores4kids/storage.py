@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
-from datetime import timedelta, datetime, timezone
+from datetime import date, timedelta, datetime, timezone
 from uuid import uuid4
 import os
 import asyncio
@@ -127,6 +127,7 @@ class KidsChoresStore:
         self._store = Store(hass, STORAGE_VERSION, STORAGE_KEY)
         self.children: List[Child] = []
         self.tasks: List[Task] = []
+        self.activity_history: list[dict] = []
         self.categories: List[Category] = []
         self.items: List["ShopItem"] = []
         self.purchases: List["Purchase"] = []
@@ -166,6 +167,16 @@ class KidsChoresStore:
                 pass
             migrated.append(Task(**t))
         self.tasks = migrated
+        if "activity_history" in data:
+            self.activity_history = list(data["activity_history"])
+        else:
+            # Recover retained approvals before the first startup rollover.
+            # Older versions did not store the exact amount awarded per task.
+            for task in migrated:
+                if task.assigned_to and task.status == STATUS_APPROVED:
+                    self._archive_completion(task, None)
+                if task.assigned_to and task.bonus_approved:
+                    self._archive_completion(task, None, bonus=True)
         # Optional keys for backwards compatibility
         self.items = [ShopItem(**i) for i in data.get("items", [])]
         self.purchases = [Purchase(**p) for p in data.get("purchases", [])]
@@ -236,6 +247,7 @@ class KidsChoresStore:
             "version": STORAGE_VERSION,
             "children": [asdict(c) for c in self.children],
             "tasks": [asdict(t) for t in self.tasks],
+            "activity_history": self.activity_history.copy(),
             "categories": [asdict(c) for c in self.categories],
             "items": [asdict(i) for i in self.items],
             "purchases": [asdict(p) for p in self.purchases],
@@ -1040,9 +1052,9 @@ class KidsChoresStore:
             await self.async_save()
             raise ValueError("task_already_claimed")
 
+        if status == STATUS_AWAITING and t.completed_ts is None:
+            t.completed_ts = int(dt_util.utcnow().timestamp() * 1000)
         if status == STATUS_AWAITING and t.multiple_per_day and t.assigned_to:
-            if t.completed_ts is None:
-                t.completed_ts = int(dt_util.utcnow().timestamp() * 1000)
             self._renew_occurrence(t)
 
         # If the task is configured to skip approval, auto-approve when it would
@@ -1103,6 +1115,48 @@ class KidsChoresStore:
             pass
         child.points += earned
 
+    def _completion_row(self, task: Task, points: Optional[int], bonus: bool) -> Optional[dict]:
+        ts = task.bonus_completed_ts if bonus else task.completed_ts
+        approved = task.bonus_approved_at if bonus else task.approved_at
+        try:
+            instant = (datetime.fromtimestamp(int(ts) / 1000, timezone.utc) if ts is not None
+                       else datetime.fromisoformat(approved))
+        except (TypeError, ValueError, OverflowError, OSError):
+            return None
+        name = next((c.name for c in self.children if c.id == task.assigned_to), task.assigned_to)
+        return {
+            "task_id": task.id, "title": task.title,
+            "bonus_title": task.bonus_title if bonus else None,
+            "child_id": task.assigned_to, "child_name": name,
+            "completed_ts": int(instant.timestamp() * 1000),
+            "day": dt_util.as_local(instant).date().isoformat(), "points": points,
+        }
+
+    def _archive_completion(self, task: Task, points: Optional[int], bonus: bool = False) -> None:
+        row = self._completion_row(task, points, bonus)
+        if row:
+            self.activity_history.append({**row, "status": STATUS_APPROVED})
+
+    def get_activity_history(self, start: Optional[str], end: Optional[str]) -> dict:
+        today = dt_util.now().date()
+        last = date.fromisoformat(end) if end else today
+        first = date.fromisoformat(start) if start else last - timedelta(days=6)
+        if first > last:
+            raise ValueError("invalid_activity_range")
+        start_day, end_day = first.isoformat(), last.isoformat()
+        rows = [r for r in self.activity_history if start_day <= r["day"] <= end_day]
+        for task in self.tasks:
+            if not task.assigned_to:
+                continue
+            for bonus, pending in ((False, task.status == STATUS_AWAITING),
+                                   (True, bool(task.bonus_completed_ts) and not task.bonus_approved)):
+                if pending:
+                    row = self._completion_row(task, 0, bonus)
+                    if row and start_day <= row["day"] <= end_day:
+                        rows.append({**row, "status": STATUS_AWAITING})
+        rows.sort(key=lambda row: row["completed_ts"], reverse=True)
+        return {"start": start_day, "end": end_day, "entries": rows}
+
     async def set_task_bonus_completed(self, task_id: str, completed_ts: Optional[int] = None):
         t = self._get_task(task_id)
         if not bool(getattr(t, "bonus_enabled", False)):
@@ -1135,6 +1189,7 @@ class KidsChoresStore:
         t.bonus_approved = True
         t.bonus_approved_at = datetime.now(timezone.utc).isoformat()
         earned = int(getattr(t, "bonus_points", 0) or 0)
+        self._archive_completion(t, earned, bonus=True)
         if earned:
             self._add_earned_points(child, earned)
         await self.async_save()
@@ -1199,6 +1254,7 @@ class KidsChoresStore:
         t.time_bonus_awarded_ts = int(dt_util.utcnow().timestamp() * 1000) if time_bonus else None
 
         earned = int(t.points) + int(bonus) + int(time_bonus)
+        self._archive_completion(t, earned)
         if earned:
             self._add_earned_points(child, earned)
 

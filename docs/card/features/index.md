@@ -6,6 +6,14 @@ Choose a task below, or use **Find a feature or page** in the navigation. Each a
 
 <div class="grid cards" markdown>
 
+-   **[Review completed chores for a date range](activity-history.md)**
+
+    Select a Saturday-to-Friday week and see each child’s completed tasks, approvals and earned points.
+
+    [![The parent’s activity history for a family week](../../images/activity-history.png)](../../images/review-activity.gif)
+
+    [Play walkthrough](../../images/review-activity.gif) | [Full-size GIF](../../images/review-activity.gif)
+
 -   **[Complete and approve a task](tasks.md)**
 
     Follow the child's start and finish actions, then approve the occurrence on the parent card.

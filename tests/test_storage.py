@@ -57,6 +57,7 @@ class AutomationTests(unittest.IsolatedAsyncioTestCase):
         self.template = storage.Task("template", "Tidy", 5)
         self.instance = storage.Task("instance", "Tidy", 5, assigned_to="child", repeat_template_id="template")
         self.store.tasks = [self.template, self.instance]
+        self.store.activity_history = []
         self.store.async_save = AsyncMock()
 
     async def test_multiple_completions_are_independent_and_rewarded_once(self):
@@ -96,6 +97,31 @@ class AutomationTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(successor.completed_ts)
         await self.store.set_task_status(successor.id, "awaiting_approval", 2000)
         self.assertEqual(self.child.points, 10)
+
+    async def test_history_tracks_occurrences_bonus_and_actual_awards_across_rollover(self):
+        self.instance.multiple_per_day = self.instance.bonus_enabled = True
+        self.instance.bonus_points, self.instance.bonus_title = 3, "Sort recycling"
+        ts = int(datetime(2025, 2, 8, 12, tzinfo=timezone.utc).timestamp() * 1000)
+        self.instance.created = "2025-02-08T08:00:00+00:00"
+        await self.store.set_task_status("instance", "awaiting_approval", ts)
+        await self.store.set_task_bonus_completed("instance", ts + 60_000)
+        second = self.store.tasks[-1]
+        await self.store.set_task_status(second.id, "awaiting_approval", ts + 120_000)
+        week = lambda: self.store.get_activity_history("2025-02-08", "2025-02-14")["entries"]
+        self.assertEqual([r["points"] for r in week()], [0, 0, 0])
+        await self.store.approve_bonus_task("instance")
+        await self.store.approve_task("instance")
+        await self.store.approve_task("instance")
+        self.child.name = "New name"
+        await self.store.daily_rollover()
+        self.assertNotIn(self.instance, self.store.tasks)
+        rows = week()
+        self.assertEqual([r["points"] for r in rows], [0, 3, 5])
+        self.assertEqual(rows[1]["bonus_title"], "Sort recycling")
+        self.assertEqual(rows[2]["child_name"], "Child")
+        self.assertEqual(self.store.get_activity_history("2025-02-09", "2025-02-14")["entries"], [])
+        with self.assertRaises(ValueError):
+            self.store.get_activity_history("2025-02-10", "2025-02-08")
 
     async def test_template_and_child_approves_assigned_copy(self):
         await self.store.approve_task("template", child_id="child")

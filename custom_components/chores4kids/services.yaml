@@ -411,3 +411,13 @@ upload_task_icon:
     image:
       required: true
       description: Base64-encoded 128 × 128 PNG from the card editor.
+get_activity_history:
+  name: Get activity history
+  description: Return completed chores in an inclusive local date range. Defaults to the last seven days.
+  fields:
+    start:
+      selector:
+        date:
+    end:
+      selector:
+        date:

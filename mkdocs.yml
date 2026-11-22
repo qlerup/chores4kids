@@ -29,6 +29,7 @@ nav:
   - Feature guides:
       - card/features/index.md
       - Tasks and schedules: card/features/tasks.md
+      - Activity history: card/features/activity-history.md
       - Rewards and points: card/features/rewards.md
       - Task icons and appearance: card/features/appearance.md
       - Notifications: card/features/notifications.md

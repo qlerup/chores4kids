@@ -14,7 +14,7 @@ Check that points are enabled, the item is active and its image is accessible on
 
 ## Yesterday’s completed task has disappeared
 
-The daily rollover cleans up older approved task instances. **Finished tasks** shows the retained tasks. A completion still awaiting approval survives rollover. The reward shop has a separate purchase history.
+Open [Activity history](card/features/activity-history.md) on the parent card and select the dates you want. **Finished tasks** shows retained task instances, while activity history keeps approved completions after daily cleanup. The shop has a separate purchase history.
 
 ## An automation finds several copies of a task
 

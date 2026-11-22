@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.const import Platform
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers import entity_registry as er
@@ -44,6 +44,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
     hass.services.async_register(DOMAIN, "force_rollover", svc_force_rollover)
+
+    async def svc_activity_history(call: ServiceCall):
+        return store.get_activity_history(call.data.get("start"), call.data.get("end"))
+
+    hass.services.async_register(DOMAIN, "get_activity_history", svc_activity_history,
+                                 supports_response=SupportsResponse.ONLY)
 
 
     def _get_lang_key() -> str:

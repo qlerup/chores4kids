@@ -23,6 +23,18 @@ data:
   multiple_per_day: true
 ```
 
+## Read activity history
+
+Use `chores4kids.get_activity_history` to read completions within inclusive local dates. Omit both dates for the last seven days. The response contains `start`, `end` and `entries`. Each entry includes the task and child IDs, their display names, completion timestamp in milliseconds, local day, status, awarded points and any bonus task title.
+
+```yaml
+action: chores4kids.get_activity_history
+data:
+  start: "2026-11-14"
+  end: "2026-11-20"
+response_variable: family_activity
+```
+
 ## Action directory
 
 All names below use the `chores4kids.` prefix.
