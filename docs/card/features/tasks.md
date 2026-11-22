@@ -10,6 +10,18 @@ The child selects **Start task** and then **Complete task**. The parent sees the
 
 [Play walkthrough](../../images/complete-a-task.gif) | [Full-size GIF](../../images/complete-a-task.gif)
 
+## Deduct points for a missed deadline
+
+On the parent card, create or edit a task and enable **Deduct points if late**. Choose a positive whole number to deduct. The normal reward can be zero. Leave the time empty to use the end of the day in Home Assistant’s time zone. Without a due date, the deadline falls on the assignment day. New and existing tasks start with deductions turned off.
+
+![The parent enables a two-point deduction on a zero-point task](../../images/deadline-deduction-setting.png)
+
+For example, Emma starts with 12 points. Completing *Pack the school bag* by the deadline keeps her at 12, even if a parent approves it later. Missing the deadline takes her to 10. Each missed deadline appears once in **Activity history**, including after a restart. The full deduction applies even if it takes the balance below zero.
+
+[![Activity history with the missed deadline and its deduction](../../images/deadline-deduction-history.png)](../../images/deadline-deduction.gif)
+
+[Play walkthrough](../../images/deadline-deduction.gif) | [Full-size GIF](../../images/deadline-deduction.gif)
+
 ## Complete a chore several times a day
 
 Turn on **Allow multiple completions per day** in the task form. For example, Emma can empty the dishwasher after breakfast and again after dinner. A fresh occurrence appears immediately after each completion. Each has its own ID and can be approved independently, even if the morning task is still waiting.

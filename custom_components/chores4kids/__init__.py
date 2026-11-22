@@ -541,6 +541,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             categories=call.data.get("categories"),
             fastest_wins=call.data.get("fastest_wins"),
             schedule_mode=call.data.get("schedule_mode"),
+            penalty_points=call.data.get("penalty_points"),
+            penalty_time=call.data.get("penalty_time"),
             mark_overdue=call.data.get("mark_overdue"),
         )
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
@@ -604,6 +606,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             skip_approval=call.data.get("skip_approval"),
             categories=call.data.get("categories"),
             fastest_wins=call.data.get("fastest_wins"),
+            penalty_points=call.data.get("penalty_points"),
+            penalty_time=call.data.get("penalty_time"),
             mark_overdue=call.data.get("mark_overdue"),
         )
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
@@ -943,6 +947,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 dev_registry.async_remove_device(device.id)
 
     hass.services.async_register(DOMAIN, "purge_orphans", svc_purge_orphans)
+
+    async def _deadline_tick(now):
+        if store.settle_due_penalties(now):
+            await store.async_save()
+            async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
+
+    entry.async_on_unload(async_track_time_change(hass, _deadline_tick, second=1))
 
     # Bind midnight housekeeping to this entry's lifetime.
     async def _midnight_cb(now):

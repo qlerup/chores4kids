@@ -60,6 +60,42 @@ class AutomationTests(unittest.IsolatedAsyncioTestCase):
         self.store.activity_history = []
         self.store.async_save = AsyncMock()
 
+    async def test_deadline_opt_in_and_restart(self):
+        self.store.enable_points = True
+        self.store.categories = []
+        today = dt.now().date()
+        future = (today + storage.timedelta(days=2)).isoformat()
+        template = await self.store.add_task("Pack bag", 0, due=future)
+        await self.store.assign_task(template.id, self.child.id)
+        task = self.store.tasks[-1]
+        self.assertEqual(task.penalty_deadline, 0)
+        await self.store.update_task(template.id, penalty_time="20:00", penalty_points=2)
+        deadline = datetime.fromisoformat(future + "T20:00:00+00:00")
+        self.assertEqual(task.penalty_deadline, int(deadline.timestamp() * 1000))
+        late = deadline + storage.timedelta(minutes=1)
+        self.assertFalse(self.store.settle_due_penalties(deadline))
+        self.assertTrue(self.store.settle_due_penalties(late))
+        self.store.tasks = [storage.Task(**storage.asdict(task))]
+        self.assertFalse(self.store.settle_due_penalties(late))
+        self.assertEqual(self.child.points, -2)
+        self.assertEqual(self.store.get_activity_history(future, future)["entries"][0]["status"], "deadline_missed")
+
+    async def test_deadline_uses_submission_and_excludes_claimed_copies(self):
+        self.store.enable_points = True
+        now = dt.now()
+        deadline = int(now.timestamp()*1000) - 1000
+        self.instance.penalty_deadline = deadline
+        self.instance.penalty_points = 2
+        await self.store.set_task_status(self.instance.id, "awaiting_approval", deadline)
+        await self.store.approve_task(self.instance.id)
+        self.assertEqual(self.child.points, 5)
+        late = storage.replace(self.instance, id="late", completed_ts=deadline+1, penalty_settled=False)
+        taken = storage.replace(late, id="taken", fastest_wins_claimed_by_child_id="other")
+        self.store.tasks.extend([late, taken])
+        self.store.settle_due_penalties(now)
+        self.assertEqual(self.child.points, 3)
+        self.assertEqual([r["task_id"] for r in self.store.activity_history if r["points"] < 0], ["late"])
+
     async def test_reward_delivery_is_snapshotted_and_idempotent(self):
         self.store.items = []
         self.store.purchases = []

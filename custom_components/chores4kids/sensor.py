@@ -183,6 +183,8 @@ class KidsChoresPointsSensor(SensorEntity):
             "fastest_wins_claimed_by_child_id": getattr(t, "fastest_wins_claimed_by_child_id", None),
             "fastest_wins_claimed_by_child_name": getattr(t, "fastest_wins_claimed_by_child_name", None),
             "fastest_wins_claimed_ts": getattr(t, "fastest_wins_claimed_ts", None),
+            "penalty_deadline": t.penalty_deadline if not t.penalty_settled else 0,
+            "penalty_points": t.penalty_points, "penalty_time": t.penalty_time,
             "mark_overdue": getattr(t, "mark_overdue", True),
         } for t in tasks]
         return {
@@ -266,6 +268,8 @@ class Chores4KidsAllTasksSensor(SensorEntity):
             "fastest_wins_claimed_by_child_id": getattr(t, "fastest_wins_claimed_by_child_id", None),
             "fastest_wins_claimed_by_child_name": getattr(t, "fastest_wins_claimed_by_child_name", None),
             "fastest_wins_claimed_ts": getattr(t, "fastest_wins_claimed_ts", None),
+            "penalty_deadline": t.penalty_deadline if not t.penalty_settled else 0,
+            "penalty_points": t.penalty_points, "penalty_time": t.penalty_time,
             "mark_overdue": getattr(t, "mark_overdue", True),
         } for t in self._store.tasks]
         categories = [

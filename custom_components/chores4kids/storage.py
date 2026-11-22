@@ -120,6 +120,11 @@ class Task:
     mark_overdue: bool = True
     multiple_per_day: bool = False
     occurrence_renewed: bool = False
+    penalty_points: int = 0
+    penalty_time: str = ""
+    penalty_deadline: int = 0  # Unix milliseconds for this assigned occurrence
+    penalty_settled: bool = False
+    penalty_template_id: Optional[str] = None
 
 class KidsChoresStore:
     def __init__(self, hass: HomeAssistant):
@@ -453,6 +458,8 @@ class KidsChoresStore:
         _set("kid_task_button_size", kid_task_button_size)
 
         if enable_points is not None:
+            if bool(enable_points) != self.enable_points:
+                self.settle_due_penalties(dt_util.now())
             self.enable_points = bool(enable_points)
 
         if confetti_enabled is not None:
@@ -541,6 +548,9 @@ class KidsChoresStore:
         schedule_mode: Optional[str] = None,
         mark_overdue: Optional[bool] = None,
         multiple_per_day: Optional[bool] = None,
+        penalty_points: Optional[int] = None,
+        penalty_time: Optional[str] = None,
+        penalty_template_id: Optional[str] = None,
     ) -> Task:
         tid = str(uuid4())
         # normalize repeat days to list[int]
@@ -699,6 +709,8 @@ class KidsChoresStore:
         except Exception:
             t.categories = []
 
+        t.penalty_template_id = penalty_template_id
+        self._configure_penalty(t, penalty_points, penalty_time)
         self.tasks.append(t)
 
         # If this is an unassigned repeat template with early-bonus enabled, create upcoming
@@ -857,6 +869,7 @@ class KidsChoresStore:
             inst.bonus_enabled = bool(getattr(template, "bonus_enabled", False))
             inst.bonus_title = str(getattr(template, "bonus_title", "") or "").strip()
             inst.bonus_points = int(getattr(template, "bonus_points", 0) or 0)
+            self._configure_penalty(inst, template.penalty_points, template.penalty_time)
             self.tasks.append(inst)
 
     async def assign_task(self, task_id: str, child_id: str):
@@ -904,12 +917,18 @@ class KidsChoresStore:
                 fastest_wins=bool(getattr(t, "fastest_wins", False)),
                 fastest_wins_template_id=(t.id if bool(getattr(t, "fastest_wins", False)) else None),
                 schedule_mode=getattr(t, "schedule_mode", None),
+                penalty_template_id=t.id, penalty_points=t.penalty_points, penalty_time=t.penalty_time,
                 mark_overdue=getattr(t, "mark_overdue", True),
             )
             # add_task persists; nothing else to do
             return
         # If the task is already assigned, reassign it to the new child
+        self._settle_penalty(t, dt_util.now())
         t.assigned_to = child_id
+        if t.penalty_points:
+            t.created = datetime.now(timezone.utc).isoformat()
+        t.penalty_settled = False
+        self._configure_penalty(t, None, None, True)
         t.status = STATUS_ASSIGNED
         await self.async_save()
 
@@ -1054,6 +1073,7 @@ class KidsChoresStore:
 
         if status == STATUS_AWAITING and t.completed_ts is None:
             t.completed_ts = int(dt_util.utcnow().timestamp() * 1000)
+        self._settle_penalty(t, dt_util.now())
         if status == STATUS_AWAITING and t.multiple_per_day and t.assigned_to:
             self._renew_occurrence(t)
 
@@ -1085,7 +1105,7 @@ class KidsChoresStore:
         if task.occurrence_renewed:
             return
         successor = replace(
-            task, id=str(uuid4()), status=STATUS_ASSIGNED,
+            task, id=str(uuid4()), status=STATUS_ASSIGNED, penalty_deadline=0, penalty_settled=True,
             created=datetime.now(timezone.utc).isoformat(), approved_at=None,
             completed_ts=None, carried_over=False, bonus_completed_ts=None,
             bonus_approved=False, bonus_approved_at=None, time_bonus_awarded=0,
@@ -1204,6 +1224,8 @@ class KidsChoresStore:
         if t.status != STATUS_AWAITING:
             # allow approving from other states but normalize
             pass
+        self._settle_penalty(t, dt_util.now())
+        t.penalty_settled = True
         if t.multiple_per_day:
             self._renew_occurrence(t)
         t.status = STATUS_APPROVED
@@ -1311,6 +1333,7 @@ class KidsChoresStore:
                         inst.bonus_enabled = bool(getattr(template, "bonus_enabled", False))
                         inst.bonus_title = str(getattr(template, "bonus_title", "") or "").strip()
                         inst.bonus_points = int(getattr(template, "bonus_points", 0) or 0)
+                        self._configure_penalty(inst, template.penalty_points, template.penalty_time)
                         self.tasks.append(inst)
         except Exception:
             pass
@@ -1438,6 +1461,8 @@ class KidsChoresStore:
         fastest_wins: Optional[bool] = None,
         mark_overdue: Optional[bool] = None,
         multiple_per_day: Optional[bool] = None,
+        penalty_points: Optional[int] = None,
+        penalty_time: Optional[str] = None,
     ):
         """Update core editable fields on a task.
 
@@ -1459,6 +1484,7 @@ class KidsChoresStore:
                 pass
         if description is not None:
             t.description = str(description).strip()
+        due_changed = due is not None and (str(due).strip() or None) != t.due
         if due is not None:
             t.due = str(due).strip() or None
         if time_bonus_enabled is not None:
@@ -1536,6 +1562,8 @@ class KidsChoresStore:
         if mark_overdue is not None:
             t.mark_overdue = bool(mark_overdue)
 
+        self._configure_penalty(t, penalty_points, penalty_time, due_changed)
+
         # Keep already spawned repeat instances in sync with the template.
         # This addresses the UX expectation that editing a task under "Tasks" updates the
         # already assigned tasks that were created from it.
@@ -1545,12 +1573,18 @@ class KidsChoresStore:
                 for inst in self.tasks:
                     if not getattr(inst, "assigned_to", None):
                         continue
-                    if getattr(inst, "repeat_template_id", None) != t.id:
-                        continue
                     if getattr(inst, "status", None) not in active_statuses:
                         # Keep approved history immutable
                         continue
 
+                    linked = inst.repeat_template_id == t.id
+                    if not linked and inst.penalty_template_id != t.id:
+                        continue
+                    if due_changed and (inst.penalty_points or t.penalty_points):
+                        inst.due = t.due
+                    self._configure_penalty(inst, t.penalty_points, t.penalty_time, due_changed)
+                    if not linked:
+                        continue
                     inst.title = t.title
                     inst.points = int(t.points)
                     inst.description = getattr(t, "description", "") or ""
@@ -1581,6 +1615,51 @@ class KidsChoresStore:
             pass
         await self.async_save()
 
+    def _configure_penalty(self, task, points, clock, reschedule=False):
+        amount = task.penalty_points if points is None else int(points)
+        clock = task.penalty_time if clock is None else str(clock).strip()
+        if amount < 0 or (clock and not re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", clock)):
+            raise ValueError("Invalid deadline deduction")
+        if not reschedule and (amount, clock) == (task.penalty_points, task.penalty_time):
+            return
+        task.penalty_points, task.penalty_time = amount, clock
+        task.penalty_deadline = 0
+        if not amount or not task.assigned_to or task.penalty_settled:
+            return
+        now = dt_util.now()
+        try:
+            day = (date.fromisoformat(task.due[:10]) if task.due else
+                   dt_util.as_local(datetime.fromisoformat(task.created)).date())
+        except (ValueError, TypeError):
+            return
+        deadline = datetime.fromisoformat(f"{day}T{clock or '23:59:59.999'}").replace(tzinfo=now.tzinfo)
+        if deadline.timestamp() >= now.timestamp():
+            task.penalty_deadline = int(deadline.timestamp() * 1000)
+
+    def _settle_penalty(self, task, now):
+        deadline = task.penalty_deadline
+        if task.penalty_settled or not deadline or now.timestamp() * 1000 <= deadline:
+            return False
+        task.penalty_settled = True
+        timely = task.completed_ts is not None and task.completed_ts <= deadline
+        taken = task.fastest_wins_claimed_by_child_id not in (None, task.assigned_to)
+        child = next((c for c in self.children if c.id == task.assigned_to), None)
+        if child and not timely and not taken and self.enable_points:
+            child.points -= task.penalty_points
+            self.activity_history.append({
+                "task_id": task.id, "title": task.title, "child_id": child.id, "child_name": child.name,
+                "status": "deadline_missed", "points": -task.penalty_points, "completed_ts": deadline,
+                "day": dt_util.as_local(datetime.fromtimestamp(deadline / 1000, timezone.utc)).date().isoformat(),
+            })
+        return True
+
+    def settle_due_penalties(self, now):
+        changed = False
+        for task in self.tasks:
+            if self._settle_penalty(task, now):
+                changed = True
+        return changed
+
     async def daily_rollover(self):
         """Midnight housekeeping: start fresh each day.
 
@@ -1591,6 +1670,7 @@ class KidsChoresStore:
 
 
         now = dt_util.now()  # aware, local
+        self.settle_due_penalties(now)
         today = now.date()
         weekday = now.weekday()  # 0=Mon..6=Sun
 
@@ -1634,6 +1714,7 @@ class KidsChoresStore:
                 "skip_approval": getattr(t, "skip_approval", False),
                 "categories": list(getattr(t, "categories", []) or []),
                 "targets": [x for x in targets if x],
+                "penalty_points": t.penalty_points, "penalty_time": t.penalty_time,
                 "mark_overdue": getattr(t, "mark_overdue", True),
                 "fastest_wins": bool(getattr(t, "fastest_wins", False)),
             })
@@ -1665,9 +1746,14 @@ class KidsChoresStore:
             # If created is missing/invalid, treat it as "old" so it doesn't stick around forever.
             is_older = (created_date is None) or (created_date < today)
             if is_older:
+                if not t.penalty_settled and t.penalty_deadline and t.status != STATUS_APPROVED:
+                    kept.append(t)
+                    continue
                 if (t.multiple_per_day and t.status in (STATUS_ASSIGNED, STATUS_IN_PROGRESS)
                         and t.repeat_template_id not in scheduled_ids and not t.fastest_wins_claimed_by_child_id):
                     t.created = datetime.now(timezone.utc).isoformat()
+                    t.penalty_settled = False
+                    self._configure_penalty(t, None, None, True)
                     kept.append(t)
                     continue
                 if getattr(t, "status", None) == STATUS_AWAITING:
@@ -1770,6 +1856,7 @@ class KidsChoresStore:
                             quick_complete=tpl.get("quick_complete", False),
                             skip_approval=tpl.get("skip_approval", False),
                             categories=list(tpl.get("categories") or []),
+                            penalty_points=tpl["penalty_points"], penalty_time=tpl["penalty_time"],
                             mark_overdue=tpl.get("mark_overdue", True),
                             fastest_wins=bool(tpl.get("fastest_wins", False)),
                             fastest_wins_template_id=(tpl_id if tpl.get("fastest_wins") else None),
@@ -1824,6 +1911,7 @@ class KidsChoresStore:
                         quick_complete=tpl.get("quick_complete", False),
                         skip_approval=tpl.get("skip_approval", False),
                         categories=list(tpl.get("categories") or []),
+                        penalty_points=tpl["penalty_points"], penalty_time=tpl["penalty_time"],
                         mark_overdue=tpl.get("mark_overdue", True),
                         fastest_wins=bool(tpl.get("fastest_wins", False)),
                         fastest_wins_template_id=(tpl_id if tpl.get("fastest_wins") else None),
