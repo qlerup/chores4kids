@@ -1,0 +1,50 @@
+use_directory_urls: false
+site_url: https://qlerup.github.io/chores4kids/
+site_name: Chores4Kids
+repo_name: qlerup/chores4kids
+repo_url: https://github.com/qlerup/chores4kids
+theme:
+  name: material
+  features:
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+hooks:
+  - scripts/feature_nav.py
+plugins:
+  - search
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+  - attr_list
+  - md_in_html
+nav:
+  - Home: index.md
+  - Getting started:
+      - Installation: getting-started/installation.md
+      - Quick start: getting-started/quick-start.md
+  - Feature guides:
+      - card/features/index.md
+      - Tasks and schedules: card/features/tasks.md
+      - Rewards and points: card/features/rewards.md
+      - Task icons and appearance: card/features/appearance.md
+      - Notifications: card/features/notifications.md
+  - Card:
+      - Configuration: card/configuration.md
+      - Examples: card/examples.md
+      - Internationalization: card/internationalization.md
+  - Integration:
+      - Entities: integration/entities.md
+      - Services: integration/services.md
+  - Help:
+      - Troubleshooting: troubleshooting.md
+      - Support: support.md
+      - License: license.md
+extra_css:
+  - styles/guide.css
+extra_javascript:
+  - scripts/walkthroughs.js
+  - scripts/feature-menu.js
