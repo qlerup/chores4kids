@@ -132,6 +132,7 @@ class KidsChoresStore:
         self.purchases: List["Purchase"] = []
         # Global UI settings (shared across users/devices via HA storage)
         self.ui_colors: Dict[str, str] = {}
+        self.task_icons: Dict[str, str] = {}
         self.enable_points: bool = True
         self.confetti_enabled: bool = True
         self.notify_service: str = ""
@@ -144,6 +145,7 @@ class KidsChoresStore:
         if not data:
             return
         self.children = [Child(**c) for c in data.get("children", [])]
+        self.task_icons = dict(data.get("task_icons", {}))
         self.categories = [Category(**c) for c in data.get("categories", [])]
         # Migrate tasks: if early bonus was configured before the explicit toggle existed,
         # enable it automatically so behavior remains unchanged.
@@ -234,6 +236,7 @@ class KidsChoresStore:
             "items": [asdict(i) for i in self.items],
             "purchases": [asdict(p) for p in self.purchases],
             "ui_colors": dict(self.ui_colors or {}),
+            "task_icons": dict(self.task_icons),
             "enable_points": bool(getattr(self, "enable_points", True)),
             "confetti_enabled": bool(getattr(self, "confetti_enabled", True)),
             "notify_service": str(getattr(self, "notify_service", "") or ""),
@@ -382,6 +385,12 @@ class KidsChoresStore:
         notify_service: Optional[str] = None,
         notify_services: Optional[List[str]] = None,
         notify_service_settings: Optional[Dict[str, Any]] = None,
+        awaiting_approval_bg: Optional[str] = None,
+        awaiting_approval_text: Optional[str] = None,
+        taken_bg: Optional[str] = None,
+        taken_text: Optional[str] = None,
+        approved_bg: Optional[str] = None,
+        approved_text: Optional[str] = None,
     ) -> Dict[str, str]:
         """Set global UI colors. Empty string clears a value."""
         def _set(key: str, value: Optional[str]):
@@ -394,6 +403,12 @@ class KidsChoresStore:
             else:
                 self.ui_colors[key] = v
 
+        _set("awaiting_approval_bg", awaiting_approval_bg)
+        _set("awaiting_approval_text", awaiting_approval_text)
+        _set("taken_bg", taken_bg)
+        _set("taken_text", taken_text)
+        _set("approved_bg", approved_bg)
+        _set("approved_text", approved_text)
         _set("start_task_bg", start_task_bg)
         _set("complete_task_bg", complete_task_bg)
         _set("kid_points_bg", kid_points_bg)

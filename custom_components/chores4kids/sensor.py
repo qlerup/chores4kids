@@ -305,11 +305,18 @@ class Chores4KidsUiSensor(SensorEntity):
         colors = getattr(self._store, "ui_colors", {}) or {}
         # expose explicit keys for stable frontend lookup
         return {
+            "task_icons": dict(self._store.task_icons),
             "enable_points": bool(getattr(self._store, "enable_points", True)),
             "confetti_enabled": bool(getattr(self._store, "confetti_enabled", True)),
             "notify_service": str(getattr(self._store, "notify_service", "") or ""),
             "notify_services": list(getattr(self._store, "notify_services", []) or []),
             "notify_service_settings": dict(getattr(self._store, "notify_service_settings", {}) or {}),
+            "awaiting_approval_bg": colors.get("awaiting_approval_bg", ""),
+            "awaiting_approval_text": colors.get("awaiting_approval_text", ""),
+            "taken_bg": colors.get("taken_bg", ""),
+            "taken_text": colors.get("taken_text", ""),
+            "approved_bg": colors.get("approved_bg", ""),
+            "approved_text": colors.get("approved_text", ""),
             "start_task_bg": colors.get("start_task_bg", ""),
             "complete_task_bg": colors.get("complete_task_bg", ""),
             "kid_points_bg": colors.get("kid_points_bg", ""),

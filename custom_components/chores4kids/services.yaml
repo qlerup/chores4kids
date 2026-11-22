@@ -316,6 +316,18 @@ set_ui_colors:
       required: false
       description: Enable/disable the points feature globally (synced across users/devices).
       example: true
+    awaiting_approval_bg:
+      required: false
+    awaiting_approval_text:
+      required: false
+    taken_bg:
+      required: false
+    taken_text:
+      required: false
+    approved_bg:
+      required: false
+    approved_text:
+      required: false
     start_task_bg:
       required: false
       description: Background color for the "Start task" button (CSS color, e.g. #00AEEF).
@@ -383,3 +395,13 @@ delete_uploaded_file:
 delete_completion_sound:
   name: Delete completion sound
   description: Deletes completion sound files in /config/www/chores4kids (completion.* and legacy completion_<timestamp>.*).
+upload_task_icon:
+  name: Upload task icon
+  description: Save a shared task icon from the parent card editor.
+  fields:
+    label:
+      required: true
+      description: Display name in the icon picker.
+    image:
+      required: true
+      description: Base64-encoded 128 × 128 PNG from the card editor.

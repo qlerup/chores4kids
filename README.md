@@ -165,6 +165,12 @@ In the parent card, enable **Allow multiple completions per day** when creating 
 
 Open the task icon picker and enter the full icon ID in the search field, for example `custom:braces`. Select the preview tile and save the task. The icon pack must already be installed and available in the Home Assistant frontend displaying the card.
 
+To use your own artwork directly, open the **visual editor for a parent card → Task icons → Upload image**. Select an SVG, PNG, JPEG, or WebP file. The filename becomes its label. In the task form, choose **Choose icon → Task icons**, select the image, and save the task. Home Assistant stores a transparent 128 × 128 PNG shared by the family's dashboards. No icon pack is needed for uploaded images.
+
+### Customize child card status colors
+
+Open the **parent card editor → Colors** and expand **Awaiting approval**, **Taken**, or **Approved**. Choose a background and text color for each status. The settings apply across child cards, including the corresponding bonus task statuses. **Clear** restores the theme color for that field.
+
 If **Auto-assign** is active, manual assignment can be disabled for that task (the UI will indicate this).
 
 ---

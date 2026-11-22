@@ -711,6 +711,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Backwards/alias
     hass.services.async_register(DOMAIN, "reset_shop_history", svc_clear_shop_history)
 
+    async def svc_upload_task_icon(call: ServiceCall):
+        from .task_icons import save_task_icon
+
+        label = str(call.data["label"]).strip()[:80]
+        if not label:
+            raise ValueError("missing_icon_label")
+        icon_id = await hass.async_add_executor_job(
+            save_task_icon, hass.config.path("www", "chores4kids", "icons"), call.data["image"]
+        )
+        store.task_icons[icon_id] = label
+        await store.async_save()
+        async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
+
+    hass.services.async_register(DOMAIN, "upload_task_icon", svc_upload_task_icon)
+
     # Upload images for shop items into /config/www/chores4kids
     async def svc_upload_shop_image(call: ServiceCall):
         import os, base64, re
@@ -830,6 +845,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Global UI colors (shared across devices/users)
     async def svc_set_ui_colors(call: ServiceCall):
         await store.set_ui_colors(
+            awaiting_approval_bg=call.data.get("awaiting_approval_bg"),
+            awaiting_approval_text=call.data.get("awaiting_approval_text"),
+            taken_bg=call.data.get("taken_bg"),
+            taken_text=call.data.get("taken_text"),
+            approved_bg=call.data.get("approved_bg"),
+            approved_text=call.data.get("approved_text"),
             start_task_bg=call.data.get("start_task_bg"),
             complete_task_bg=call.data.get("complete_task_bg"),
             kid_points_bg=call.data.get("kid_points_bg"),

@@ -4,6 +4,7 @@ import { LitElement, html, css } from "https://unpkg.com/lit?module";
 // Unified i18n (admin + child keys)
 const C4K_I18N = {
 	en: {
+		'icon.library': 'Task icons', 'icon.upload_failed': 'Upload failed',
 		'ui.multiple_per_day': 'Allow multiple completions per day',
 		'editor.language_name': 'English', 'editor.language': 'Language', 'editor.language_auto': 'Auto detect',
 		// Shared/admin
@@ -123,6 +124,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Empty = default'
 	},
 	nl: {
+		'icon.library': 'Taakpictogrammen', 'icon.upload_failed': 'Uploaden mislukt',
 		'ui.multiple_per_day': 'Meerdere keren per dag uitvoeren',
 		'editor.language_name': 'Nederlands', 'editor.language': 'Taal', 'editor.language_auto': 'Automatisch detecteren',
 		'overview.title': 'Toegewezen taken',
@@ -338,6 +340,7 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Leeg = standaard',
 	},
 	tr: {
+		'icon.library': 'Görev simgeleri', 'icon.upload_failed': 'Yükleme başarısız',
 		'ui.multiple_per_day': 'Günde birden fazla kez tamamlanabilir',
 		'editor.language_name': 'Türkçe', 'editor.language': 'Dil', 'editor.language_auto': 'Otomatik algıla',
 		'overview.title': 'Atanan görevler',
@@ -552,6 +555,7 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Varsayılanı kullanmak için boş bırakın',
 	},
 	da: {
+		'icon.library': 'Opgaveikoner', 'icon.upload_failed': 'Upload mislykkedes',
 		'ui.multiple_per_day': 'Kan udføres flere gange om dagen',
 		'editor.language_name': 'Dansk', 'editor.language': 'Sprog', 'editor.language_auto': 'Registrer automatisk',
 		'overview.title': 'Tildelte opgaver',
@@ -661,6 +665,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			sv: {
+		'icon.library': 'Uppgiftsikoner', 'icon.upload_failed': 'Uppladdningen misslyckades',
 		'ui.multiple_per_day': 'Kan utföras flera gånger om dagen',
 		'editor.language_name': 'Svenska', 'editor.language': 'Språk', 'editor.language_auto': 'Identifiera automatiskt',
 			'overview.title': 'Tilldelade uppgifter', 'overview.show_all': 'Visa alla ({pending} väntar)', 'overview.none': 'Inga uppgifter ännu.',
@@ -727,6 +732,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tomt = standard'
 		},
 			nb: {
+		'icon.library': 'Oppgaveikoner', 'icon.upload_failed': 'Opplastingen mislyktes',
 		'ui.multiple_per_day': 'Kan utføres flere ganger om dagen',
 		'editor.language_name': 'Norsk bokmål', 'editor.language': 'Språk', 'editor.language_auto': 'Oppdag automatisk',
 				'overview.title':'Tildelte oppgaver','overview.show_all':'Vis alle ({pending} venter)','overview.none':'Ingen oppgaver ennå.',
@@ -793,6 +799,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			de: {
+		'icon.library': 'Aufgabensymbole', 'icon.upload_failed': 'Hochladen fehlgeschlagen',
 		'ui.multiple_per_day': 'Mehrmals täglich erledigen',
 		'editor.language_name': 'Deutsch', 'editor.language': 'Sprache', 'editor.language_auto': 'Automatisch erkennen',
 				'overview.title':'Zugewiesene Aufgaben','overview.show_all':'Alle anzeigen ({pending} ausstehend)','overview.none':'Noch keine Aufgaben.',
@@ -859,6 +866,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Leer = Standard'
 		},
 			es: {
+		'icon.library': 'Iconos de tareas', 'icon.upload_failed': 'Error al subir',
 		'ui.multiple_per_day': 'Permitir varias veces al día',
 		'editor.language_name': 'Español', 'editor.language': 'Idioma', 'editor.language_auto': 'Detectar automáticamente',
 				'overview.title':'Tareas asignadas','overview.show_all':'Ver todas ({pending} pendientes)','overview.none':'Aún no hay tareas.',
@@ -925,6 +933,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vacío = predeterminado'
 		},
 			fr: {
+		'icon.library': 'Icônes des tâches', 'icon.upload_failed': 'Échec du téléversement',
 		'ui.multiple_per_day': 'Autoriser plusieurs fois par jour',
 		'editor.language_name': 'Français', 'editor.language': 'Langue', 'editor.language_auto': 'Détection automatique',
 				'overview.title':'Tâches assignées','overview.show_all':'Tout afficher ({pending} en attente)','overview.none':'Aucune tâche pour le moment.',
@@ -991,6 +1000,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vide = par défaut'
 		},
 			fi: {
+		'icon.library': 'Tehtäväkuvakkeet', 'icon.upload_failed': 'Lataus epäonnistui',
 		'ui.multiple_per_day': 'Salli useita suorituksia päivässä',
 		'editor.language_name': 'Suomi', 'editor.language': 'Kieli', 'editor.language_auto': 'Tunnista automaattisesti',
 				'overview.title':'Määritetyt tehtävät','overview.show_all':'Näytä kaikki ({pending} odottaa)','overview.none':'Ei vielä tehtäviä.',
@@ -1057,6 +1067,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tyhjä = oletus'
 		},
 			it: {
+		'icon.library': 'Icone delle attività', 'icon.upload_failed': 'Caricamento non riuscito',
 		'ui.multiple_per_day': 'Consenti più completamenti al giorno',
 		'editor.language_name': 'Italiano', 'editor.language': 'Lingua', 'editor.language_auto': 'Rilevamento automatico',
 				'overview.title':'Attività assegnate','overview.show_all':'Mostra tutto ({pending} in attesa)','overview.none':'Nessuna attività.',
@@ -1123,6 +1134,15 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vuoto = predefinito'
 		}
 };
+function c4kTaskIcon(id, className = '') {
+	if (!id) return '';
+	if (/^\/local\/chores4kids\/icons\/[a-f0-9]{64}\.png$/.test(id)) {
+		return html`<img class=${className} src=${id} width="24" height="24" alt="" style="vertical-align:middle;object-fit:contain">`;
+	}
+	return html`<ha-icon class=${className} icon=${id}></ha-icon>`;
+}
+
+const C4K_COLOR_STATES = ['awaiting_approval', 'taken', 'approved'];
 const C4K_LANG_ALIAS = { no: 'nb' };
 try {
 	const __EN = C4K_I18N.en || {};
@@ -1408,6 +1428,7 @@ class Chores4KidsDevCard extends LitElement {
 		.task:hover{ background: color-mix(in srgb, var(--primary-color) 6%, transparent); }
 		.task-icon{ display:flex; align-items:center; justify-content:center; width: 48px; }
 		.task-icon ha-icon{ --mdc-icon-size: 40px; width: 40px; height: 40px; opacity: .95; }
+		.task-icon img{ width:40px; height:40px; }
 		.title{ font-weight:700; }
 		.task .title{ font-size: var(--c4k-kid-task-title-size, 1rem); }
 		.title.completed{ text-decoration: line-through; }
@@ -1443,6 +1464,9 @@ class Chores4KidsDevCard extends LitElement {
 		.img-preview{ width:72px; height:72px; border-radius:10px; border:1px solid var(--divider-color); background: color-mix(in srgb, var(--primary-color) 6%, transparent); object-fit:cover; }
 		.file-hidden{ display:none; }
 		/* Child shop grid – responsive */
+		.task .status-awaiting_approval, .bonus-subtask .status-awaiting_approval { background: var(--c4k-awaiting_approval_bg, color-mix(in srgb, var(--warning-color, #ffb300) 20%, transparent)); color: var(--c4k-awaiting_approval_text, var(--primary-text-color)); }
+		.task .status-taken, .bonus-subtask .status-taken { background: var(--c4k-taken_bg, color-mix(in srgb, var(--deep-orange-color, #ef6c00) 20%, transparent)); color: var(--c4k-taken_text, var(--primary-text-color)); }
+		.task .status-approved, .bonus-subtask .status-approved { background: var(--c4k-approved_bg, color-mix(in srgb, var(--success-color, #43a047) 20%, transparent)); color: var(--c4k-approved_text, var(--primary-text-color)); }
 		.shop-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap:12px; width:100%; box-sizing:border-box; }
 		@media (max-width: 900px){
 			.shop-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
@@ -1729,6 +1753,7 @@ class Chores4KidsDevCard extends LitElement {
 			}
 			const a = s?.attributes || {};
 			const out = {
+				task_icons: a.task_icons || {},
 				start_task_bg: a.start_task_bg,
 				complete_task_bg: a.complete_task_bg,
 				kid_points_bg: a.kid_points_bg,
@@ -1743,6 +1768,10 @@ class Chores4KidsDevCard extends LitElement {
 				kid_task_points_size: a.kid_task_points_size,
 				kid_task_button_size: a.kid_task_button_size,
 			};
+			for (const state of C4K_COLOR_STATES) {
+				out[state + '_bg'] = a[state + '_bg'];
+				out[state + '_text'] = a[state + '_text'];
+			}
 			if (typeof a.enable_points === 'boolean') out.enable_points = a.enable_points;
 			if (typeof a.confetti_enabled === 'boolean') out.confetti_enabled = a.confetti_enabled;
 			return out;
@@ -1756,6 +1785,12 @@ class Chores4KidsDevCard extends LitElement {
 				else this.style.removeProperty(name);
 			};
 			const global = this._getBackendUiColors();
+			for (const state of C4K_COLOR_STATES) {
+				for (const part of ['bg', 'text']) {
+					const key = state + '_' + part;
+					setVar('--c4k-' + key, this.config?.[key] || global[key]);
+				}
+			}
 			setVar('--c4k-start-task-bg', this.config?.start_task_bg || global.start_task_bg);
 			setVar('--c4k-complete-task-bg', this.config?.complete_task_bg || global.complete_task_bg);
 			setVar('--c4k-kid-points-bg', this.config?.kid_points_bg || global.kid_points_bg);
@@ -2517,7 +2552,7 @@ class Chores4KidsDevCard extends LitElement {
 						<tbody @click=${()=>{ this._openAssignMenuFor = null; this._assignMenuStyle=''; }}>
 										${this._sortTasks(this._store.allTasks.filter(t=>!t.assigned_to), false).map(t=> html`
 								<tr data-task="${t.id}">
-									<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${t.icon? html` <ha-icon class="inline-ico" icon="${t.icon}"></ha-icon>`:''}</td>
+									<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}</td>
 								${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
 									<td data-label="${this._t('th.categories')}">
 										${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const cats=this._orderedCategories(ids); return cats.length? cats.map(c=> this._renderCategoryChip(c)) : html`—`; })()}
@@ -2573,7 +2608,7 @@ class Chores4KidsDevCard extends LitElement {
 						const sorted=this._sortTasks(active, true);
 						const top=sorted.slice(0,3); const pending=allAssigned.filter(t=>t.status==='awaiting_approval').length;
 						const row=(t)=> html`<tr>
-							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${t.icon? html` <ha-icon class="inline-ico" icon="${t.icon}"></ha-icon>`:''}</td>
+							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}</td>
 							${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
 							<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=this._orderedCategoryNames(ids); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
 							<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
@@ -2610,7 +2645,7 @@ class Chores4KidsDevCard extends LitElement {
 						if(!awaiting.length) return html`<i>${this._t('overview.none_active')}</i>`;
 						const sorted=this._sortTasks(awaiting, true);
 						const row=(t)=> html`<tr>
-							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${t.icon? html` <ha-icon class="inline-ico" icon="${t.icon}"></ha-icon>`:''}</td>
+							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}</td>
 							${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
 							<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=this._orderedCategoryNames(ids); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
 							<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
@@ -2637,7 +2672,7 @@ class Chores4KidsDevCard extends LitElement {
 						if(!finished.length) return html`<i>${this._t('overview.finished_none')}</i>`;
 						const sorted=this._sortTasks(finished, true);
 						const row=(t)=> html`<tr>
-							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${t.icon? html` <ha-icon class="inline-ico" icon="${t.icon}"></ha-icon>`:''}</td>
+							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}</td>
 							${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
 							<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=this._orderedCategoryNames(ids); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
 								<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
@@ -2696,7 +2731,7 @@ class Chores4KidsDevCard extends LitElement {
 						const sorted=this._sortTasks(all, true);
 						const top=sorted.slice(0,3); const pending=all.filter(t=>t.status==='awaiting_approval').length;
 						const row=(t)=> html`<tr>
-							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${t.icon? html` <ha-icon class="inline-ico" icon="${t.icon}"></ha-icon>`:''}</td>
+							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}</td>
 							${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
 							<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=(this._store.categories||[]).filter(c=> ids.includes(c.id)).map(c=> c.name); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
 							<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
@@ -2759,7 +2794,7 @@ class Chores4KidsDevCard extends LitElement {
 							const parse=(x)=>{ try{ return x? new Date(x).getTime():0; }catch{return 0;} };
 							const sorted=this._sortTasks(all, true);
 							return sorted.map((t)=> html`<tr>
-								<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${t.icon? html` <ha-icon class="inline-ico" icon="${t.icon}"></ha-icon>`:''}</td>
+								<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}</td>
 								${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
 								<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=this._orderedCategoryNames(ids); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
 								<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
@@ -2943,14 +2978,16 @@ class Chores4KidsDevCard extends LitElement {
 					const q=iconId.toLowerCase();
 					const filter=(arr)=> arr.filter(i=> i.id.toLowerCase().includes(q) || (i.label||'').toLowerCase().includes(q)); 
 					const customIcons = (this._customIcons||[]).map(c=> ({id:c.id, label:c.label}));
-					const allIcons = [...customIcons, ...C4K_ICON_SET];
+					const uploaded = Object.entries(this._getBackendUiColors().task_icons || {}).map(([id, label])=>({id, label}));
+					const allIcons = [...uploaded, ...customIcons, ...C4K_ICON_SET];
 					const recent=filter((this._iconRecents||[]).map(id=> {const found = allIcons.find(x=>x.id===id); return {id, label: found?.label || id};})).slice(0,12); 
 					const base=filter(C4K_ICON_SET);
 					const custom=filter(customIcons);
-					const tile=(i)=> html`<button class="btn-ghost" style="display:flex;align-items:center;gap:8px;border:1px solid var(--divider-color);border-radius:8px;padding:8px;" @click=${()=> this._pickIcon(i.id)}><ha-icon icon="${i.id}"></ha-icon><small>${i.label||i.id}</small></button>`; 
+					const tile=(i)=> html`<button class="btn-ghost" style="display:flex;align-items:center;gap:8px;border:1px solid var(--divider-color);border-radius:8px;padding:8px;" @click=${()=> this._pickIcon(i.id)}>${c4kTaskIcon(i.id)}<small>${i.label||i.id}</small></button>`;
 					const customTile = html`<button class="btn-primary" style="display:flex;align-items:center;gap:8px;border:1px solid var(--divider-color);border-radius:8px;padding:8px;" @click=${()=> this._openCustomIconModal()}><ha-icon icon="mdi:plus-circle"></ha-icon><small>Custom</small></button>`;
 					return html`
 						${/^[a-z][a-z0-9_-]*:[a-z0-9][a-z0-9_.-]*$/i.test(iconId) && !allIcons.some(i=>i.id===iconId) ? tile({id:iconId}) : ''}
+						${filter(uploaded).length ? html`<h4>${this._t('icon.library')}</h4><div class="row">${filter(uploaded).map(tile)}</div>` : ''}
 						${recent.length? html`<div style="font-size:.9rem;color:var(--secondary-text-color);margin:6px 0;">Recent</div>`:''}${recent.length? html`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${recent.map(tile)}</div>`:''}
 						${custom.length? html`<div style="font-size:.9rem;color:var(--secondary-text-color);margin:6px 0;">Custom</div>`:''}
 						${custom.length? html`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${custom.map(tile)}</div>`:''}
@@ -3364,7 +3401,7 @@ class Chores4KidsDevCard extends LitElement {
 						const hasTaskIcon = !!t?.icon;
 						return html`
 							<div class="task ${isOverdue?'task-overdue':''} ${hasTaskIcon?'has-icon':'no-icon'}" style="${rowStyle} cursor:${t.description?'pointer':'default'};" @click=${(e)=>this._openTaskDescription(t,e)}>
-								<div class="task-icon">${t.icon? html`<ha-icon icon="${t.icon}"></ha-icon>`:''}</div>
+								<div class="task-icon">${c4kTaskIcon(t.icon)}</div>
 								<div>
 									<div class="title ${t.status==='approved' ? 'completed' : ''}">${t.title}</div>
 									<div class="meta">
@@ -3372,16 +3409,15 @@ class Chores4KidsDevCard extends LitElement {
 										${t?.due ? html`<span class="chip chip-deadline">${this._t('lbl.deadline',{date: this._formatDueDate(t.due)})}</span>` : ''}
 										${(pointsEnabled && bonusBy) ? html`<span class="${bonusClass}">${this._t('lbl.early_bonus_by',{ points: Number(t.early_bonus_points||0), date: bonusBy })}</span>` : ''}
 										${(pointsEnabled && !!t?.time_bonus_enabled	&& String(t?.time_bonus_before||'').trim() && Number(t?.time_bonus_points||0) > 0 && !t?.carried_over) ? html`<span class="chip chip-bonus">+${Number(t.time_bonus_points)} ${this._t('lbl.points')} if before ${String(t.time_bonus_before).trim()}</span>` : ''}
-										${isTakenByOther ? html`<span class="chip chip-deadline">${this._t('lbl.taken_by',{name: claimedByName||'—'})}</span>` : ''}
 										${this._isTaskOverdue(t)? html` <span class="chip status-overdue">${this._t('status.overdue')}</span>`:''}
 									</div>
 								</div>
 								<div class="actions" style="display:flex; flex-direction:column; gap:6px;">
-									${isTakenByOther ? html`<button class="btn" disabled>${this._t('lbl.taken_by',{name: claimedByName||'—'})}</button>`
+									${isTakenByOther ? html`<span class="chip status-taken">${this._t('lbl.taken_by',{name: claimedByName||'—'})}</span>`
 										: t.status==="assigned" ? (t.quick_complete ? html`<button class="btn-primary task-done" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._completeNow(t)}>${this._t('btn.task_done')}</button>` : html`<button class="btn-primary start-task" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._advance(t)}>${this._t('btn.start_task')}</button>`)
 										: t.status==="in_progress" ? html`<button class="btn-primary complete-task" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._advance(t)}>${this._t('btn.complete_task')}</button>`
 										: t.status==="awaiting_approval" ? html`<span class="chip status-awaiting_approval">${this._t('lbl.awaiting')}</span>`
-										: html`<button class="btn" disabled>✓ ${this._t('btn.done')}</button>`}
+										: html`<span class="chip status-approved">✓ ${this._t('btn.done')}</span>`}
 									${this.config?.debug_mode && !this._isTaskOverdue(t) && t.status!=="approved" ? html`
 										<button class="btn-ghost" style="font-size:0.75rem; padding:4px 8px;" @click=${()=>this._debugMarkOverdue(t)}>${this._t('debug.mark_overdue')}</button>
 									` : ''}
@@ -3396,7 +3432,7 @@ class Chores4KidsDevCard extends LitElement {
 											${bonusPoints>0 ? html`<span class="chip chip-points">+${bonusPoints} ${this._t('lbl.points')}</span>` : ''}
 										</div>
 										<div class="bonus-subtask-actions">
-											${bonusApproved ? html`<button class="btn" disabled>✓ ${this._t('btn.done')}</button>` : (bonusVisual==='done') ? html`<span class="chip status-awaiting_approval">${this._t('lbl.awaiting')}</span>` : bonusVisual==='in_progress' ? html`<button class="btn-primary complete-task" ?disabled=${!bonusMainDone} @click=${()=>this._onChildBonusVisualClick(t)}>${this._t('btn.complete_bonus')}</button>` : html`<button class="btn-primary start-task" ?disabled=${!bonusMainDone} @click=${()=>this._onChildBonusVisualClick(t)}>${this._t('btn.start_task')}</button>`}
+											${bonusApproved ? html`<span class="chip status-approved">✓ ${this._t('btn.done')}</span>` : (bonusVisual==='done') ? html`<span class="chip status-awaiting_approval">${this._t('lbl.awaiting')}</span>` : bonusVisual==='in_progress' ? html`<button class="btn-primary complete-task" ?disabled=${!bonusMainDone} @click=${()=>this._onChildBonusVisualClick(t)}>${this._t('btn.complete_bonus')}</button>` : html`<button class="btn-primary start-task" ?disabled=${!bonusMainDone} @click=${()=>this._onChildBonusVisualClick(t)}>${this._t('btn.start_task')}</button>`}
 										</div>
 									</div>
 								</div>
@@ -4211,6 +4247,34 @@ class Chores4KidsDevCardEditor extends LitElement{
 	}
 	_t(key, vars){ return c4kLocalize(key, c4kCardLocale(this._config?.language, this.hass), vars); }
 	_emit(){ this.dispatchEvent(new CustomEvent('config-changed',{ detail:{ config: this._config }, bubbles:true, composed:true })); }
+	async _uploadTaskIcon(event) {
+		const input = event.target;
+		const file = input.files?.[0];
+		if (!file) return;
+		input.disabled = true;
+		const url = URL.createObjectURL(file);
+		try {
+			const image = new Image();
+			image.src = url;
+			await image.decode();
+			const size = 128;
+			const canvas = document.createElement('canvas');
+			canvas.width = canvas.height = size;
+			const ctx = canvas.getContext('2d');
+			const scale = size / Math.max(image.naturalWidth, image.naturalHeight);
+			const width = image.naturalWidth * scale, height = image.naturalHeight * scale;
+			ctx.drawImage(image, (size-width)/2, (size-height)/2, width, height);
+			const label = file.name.replace(/\.[^.]+$/, '').trim() || file.name;
+			await this.hass.callService('chores4kids', 'upload_task_icon', {label, image: canvas.toDataURL('image/png').split(',')[1]});
+		} catch {
+			alert(this._t('icon.upload_failed'));
+		} finally {
+			URL.revokeObjectURL(url);
+			input.disabled = false;
+			input.value = '';
+		}
+	}
+
 	async _onSoundUpload(e) {
 		const file = e.target?.files?.[0];
 		if(!file) return;
@@ -4447,6 +4511,11 @@ class Chores4KidsDevCardEditor extends LitElement{
 				</div>
 				${(cfg.mode||'admin')==='admin' ? html`
 					<div class="form-field">
+						<label for="c4k-task-icon">${this._t('icon.library')} · ${this._t('shop.upload')}</label>
+						<input id="c4k-task-icon" type="file" accept=".svg,.png,.jpg,.jpeg,.webp" @change=${this._uploadTaskIcon}>
+						<div>${Object.entries(this._getUiSensorAttrs().task_icons || {}).map(([id, label])=>html`<span>${c4kTaskIcon(id)} ${label} </span>`)}</div>
+					</div>
+					<div class="form-field">
 						<label>${this._t('editor.confetti')}</label>
 						<label style="display:flex;align-items:center;gap:8px;">
 							<span>${this._t('ui.toggle_off_on')}</span>
@@ -4556,7 +4625,22 @@ class Chores4KidsDevCardEditor extends LitElement{
 					<div class="form-field">
 						<label>${this._t('editor.colors')}</label>
 						<div style="display:grid; gap:12px; margin-top:8px;">
-						<ha-expansion-panel .header=${this._t('editor.color_group_start')} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
+						${C4K_COLOR_STATES.map(state => html`<ha-expansion-panel .header=${this._t('status.' + state)}>
+								${['bg','text'].map(part => {
+									const key = state + '_' + part;
+									const value = cfg[key] ?? this._getUiSensorAttrs()[key] ?? '';
+									const save = color => {
+										this._config = {...this._config, [key]: color};
+										this._saveGlobalUiSettings({[key]: color});
+										this._emit();
+									};
+									return html`<label>${this._t('editor.color_field_' + part)}
+										<input type="color" .value=${value || '#000000'} @change=${e=>save(e.target.value)}>
+										<button type="button" @click=${()=>save('')}>${this._t('form.clear')}</button>
+									</label>`;
+								})}
+							</ha-expansion-panel>`)}
+							<ha-expansion-panel .header=${this._t('editor.color_group_start')} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
 							<div style="padding:10px;">
 								<div class="form-field" style="margin-top:6px;">
 									<label style="font-weight:600;">${this._t('editor.color_field_bg')}</label>
