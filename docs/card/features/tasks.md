@@ -10,9 +10,21 @@ The child selects **Start task** and then **Complete task**. The parent sees the
 
 [Play walkthrough](../../images/complete-a-task.gif) | [Full-size GIF](../../images/complete-a-task.gif)
 
+## Set an optional due time
+
+Leave **Due time (optional)** empty for a chore that can be done at any time. For a school-day chore such as *Pack football kit*, enter **07:30** and select the repeat days as usual. Each scheduled copy carries that time. Parents see it beside the task, and children see it on their own cards, even when points are switched off.
+
+![Entering an optional due time on the parent card](../../images/optional-due-time.png)
+
+Edit the task and clear the time field to remove it. Setting a due time by itself does not deduct points. If you separately enable a deduction, its time field can override the task’s due time.
+
+[![The child's task with a 07:30 deadline](../../images/child-task-due-time.png)](../../images/set-task-due-time.gif)
+
+[Play walkthrough](../../images/set-task-due-time.gif) | [Full-size GIF](../../images/set-task-due-time.gif)
+
 ## Deduct points for a missed deadline
 
-On the parent card, create or edit a task and enable **Deduct points if late**. Choose a positive whole number to deduct. The normal reward can be zero. Leave the time empty to use the end of the day in Home Assistant’s time zone. Without a due date, the deadline falls on the assignment day. New and existing tasks start with deductions turned off.
+On the parent card, create or edit a task and enable **Deduct points if late**. Choose a positive whole number to deduct. The normal reward can be zero. Leave the deduction time empty to use the task’s due time, or the end of the day if both fields are empty, in Home Assistant’s time zone. Without a due date, the deadline falls on the assignment day. New and existing tasks start with deductions turned off.
 
 ![The parent enables a two-point deduction on a zero-point task](../../images/deadline-deduction-setting.png)
 

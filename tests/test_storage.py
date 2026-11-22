@@ -60,6 +60,23 @@ class AutomationTests(unittest.IsolatedAsyncioTestCase):
         self.store.activity_history = []
         self.store.async_save = AsyncMock()
 
+    async def test_optional_due_time_propagates_to_recurring_tasks(self):
+        self.store.tasks = []
+        template = await self.store.add_task("Pack kit", 0, schedule_mode="repeat",
+                                             repeat_days=[dt.now().weekday()], repeat_child_ids=["child"])
+        self.assertEqual(template.due_time, "")
+        await self.store.update_task(template.id, due_time="07:30")
+        await self.store.daily_rollover()
+        occurrence = next(t for t in self.store.tasks if t.assigned_to == "child")
+        self.assertEqual(occurrence.due_time, "07:30")
+        self.assertFalse(occurrence.penalty_points)
+        await self.store.update_task(template.id, title="Sports kit")
+        self.assertEqual(occurrence.due_time, "07:30")
+        with self.assertRaises(ValueError):
+            await self.store.update_task(template.id, due_time="24:05")
+        await self.store.update_task(template.id, due_time="")
+        self.assertEqual(occurrence.due_time, "")
+
     async def test_deadline_opt_in_and_restart(self):
         self.store.enable_points = True
         self.store.categories = []

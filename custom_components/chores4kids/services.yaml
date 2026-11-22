@@ -21,6 +21,11 @@ add_task:
       required: true
     description:
       required: false
+    due_time:
+      description: Optional local due time in HH:MM format. An empty string clears it.
+      example: "07:30"
+      selector:
+        text:
     due:
       required: false
       description: "Deadline as YYYY-MM-DD or ISO timestamp"
@@ -144,6 +149,11 @@ update_task:
       example: 10
     description:
       required: false
+    due_time:
+      description: Optional local due time in HH:MM format. An empty string clears it.
+      example: "07:30"
+      selector:
+        text:
     due:
       required: false
       description: "Deadline as YYYY-MM-DD or ISO timestamp"
