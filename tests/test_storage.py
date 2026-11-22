@@ -57,8 +57,45 @@ class AutomationTests(unittest.IsolatedAsyncioTestCase):
         self.template = storage.Task("template", "Tidy", 5)
         self.instance = storage.Task("instance", "Tidy", 5, assigned_to="child", repeat_template_id="template")
         self.store.tasks = [self.template, self.instance]
+        self.store.shop_lock_enabled = False
+        self.store.shop_require_approval = False
+        self.store.shop_exempt_categories = []
         self.store.activity_history = []
         self.store.async_save = AsyncMock()
+
+    async def test_shop_lock_uses_child_status_and_protects_checkout(self):
+        self.store.items = [storage.ShopItem("movie", "Movie", 2)]
+        self.store.purchases = []
+        self.child.points = 10
+        self.instance.multiple_per_day = True
+        self.instance.bonus_enabled = True
+        self.instance.carried_over = True
+        self.store.shop_lock_enabled = True
+        self.store.shop_exempt_categories = ["optional"]
+        self.store.tasks.extend([
+            storage.Task("extra", "Drawing", 1, assigned_to="child", categories=["optional"]),
+            storage.Task("taken", "Table", 1, assigned_to="child", fastest_wins_claimed_by_child_id="other"),
+            storage.Task("sibling", "Bed", 1, assigned_to="other"),
+        ])
+        def progress():
+            return self.store.child_shop_progress("child", self.store.tasks)
+        self.assertEqual(progress()["tasks_left"], 2)
+        self.assertEqual(progress()["overdue_count"], 1)
+        self.assertEqual(progress()["required_left"], 1)
+        with self.assertRaisesRegex(ValueError, "shop_locked"):
+            await self.store.buy_shop_item("child", "movie")
+        self.assertEqual(self.child.points, 10)
+        self.assertFalse(self.store.purchases)
+        await self.store.set_task_status("instance", "awaiting_approval")
+        self.assertFalse(progress()["locked"])
+        self.assertEqual(progress()["tasks_left"], 1)
+        self.store.shop_require_approval = True
+        self.assertTrue(progress()["locked"])
+        self.assertEqual(progress()["required_approvals"], 1)
+        await self.store.approve_task("instance")
+        self.assertFalse(progress()["locked"])
+        await self.store.buy_shop_item("child", "movie")
+        self.assertEqual(len(self.store.purchases), 1)
 
     async def test_optional_due_time_propagates_to_recurring_tasks(self):
         self.store.tasks = []

@@ -339,6 +339,30 @@ set_ui_colors:
     points_label:
       required: false
       description: Shared reward unit name. An empty string restores the translated default.
+    shop_lock_enabled:
+      selector:
+        boolean:
+    shop_require_approval:
+      selector:
+        boolean:
+    show_task_counts:
+      selector:
+        boolean:
+    shop_exempt_categories:
+      description: List of category IDs exempt from locking the shop.
+      example: []
+    tasks_left_bg:
+      description: Shared header badge color. An empty string restores the theme default.
+    tasks_left_text:
+      description: Shared header badge color. An empty string restores the theme default.
+    overdue_count_bg:
+      description: Shared header badge color. An empty string restores the theme default.
+    overdue_count_text:
+      description: Shared header badge color. An empty string restores the theme default.
+    shop_locked_bg:
+      description: Shared header badge color. An empty string restores the theme default.
+    shop_locked_text:
+      description: Shared header badge color. An empty string restores the theme default.
     chore_columns:
       required: false
       description: Maximum columns in task lists (auto, 1, 2 or 3).

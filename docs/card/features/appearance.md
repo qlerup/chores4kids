@@ -38,6 +38,8 @@ Open **Parent card editor → Colors**. Expand **Awaiting approval**, **Taken** 
 
 [Play walkthrough](../../images/set-status-colors.gif) | [Full-size GIF](../../images/set-status-colors.gif)
 
+The **Tasks left**, **Overdue tasks** and **Shop locked** groups change the background and text colors of the corresponding child-card badges. See [shop rules and counters](rewards.md#unlock-the-shop-after-chores).
+
 ## Completion feedback
 
 Enable confetti in the parent editor and upload a completion sound if desired. The integration shares the sound across dashboards. Use **Delete sound file** to remove it. In the editor you can also adjust child task title, point and button text sizes for wall displays.

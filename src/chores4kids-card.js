@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 
-// Card distribution version: 3.2.4
+// Card distribution version: 3.3.0
 // Unified i18n (admin + child keys)
 const C4K_ADMIN_SECTIONS = {
 	children: 'section.children', categories: 'section.categories', create: 'section.new_task',
@@ -11,6 +11,13 @@ const C4K_ADMIN_SECTIONS = {
 const C4K_I18N = {
 	en: {
 		'delivery.required': 'Requires delivery', 'delivery.pending': 'Awaiting delivery', 'delivery.mark': 'Mark as delivered', 'delivery.done': 'Delivered',
+		'shop.lock_setting': 'Lock shop until chores are done',
+		'shop.approval_setting': 'Require parent approval to unlock',
+		'shop.exempt': 'Exempt categories',
+		'editor.task_counts': 'Show task counts on child cards',
+		'status.tasks_left': 'Tasks left',
+		'status.overdue_count': 'Overdue tasks',
+		'status.shop_locked': 'Shop locked',
 		'task.due_time': 'Due time (optional)',
 		'shop.visible_to': 'Visible to', 'shop.all_children': 'All children',
 		'penalty.enable': 'Deduct points if late', 'status.deadline_missed': 'Deadline missed',
@@ -160,6 +167,13 @@ const C4K_I18N = {
 	},
 	nl: {
 		'delivery.required': 'Overhandiging vereist', 'delivery.pending': 'Wacht op overhandiging', 'delivery.mark': 'Markeer als overhandigd', 'delivery.done': 'Overhandigd',
+		'shop.lock_setting': 'Winkel vergrendelen tot de taken klaar zijn',
+		'shop.approval_setting': 'Goedkeuring van een ouder vereist',
+		'shop.exempt': 'Vrijgestelde categorieën',
+		'editor.task_counts': 'Taaktellers op kinderkaarten tonen',
+		'status.tasks_left': 'Resterende taken',
+		'status.overdue_count': 'Te late taken',
+		'status.shop_locked': 'Winkel vergrendeld',
 		'task.due_time': 'Tijdstip deadline (optioneel)',
 		'shop.visible_to': 'Zichtbaar voor', 'shop.all_children': 'Alle kinderen',
 		'penalty.enable': 'Punten aftrekken bij te laat afronden', 'status.deadline_missed': 'Deadline gemist',
@@ -405,6 +419,13 @@ const C4K_I18N = {
 	},
 	tr: {
 		'delivery.required': 'Teslimat gerekiyor', 'delivery.pending': 'Teslimat bekleniyor', 'delivery.mark': 'Teslim edildi olarak işaretle', 'delivery.done': 'Teslim edildi',
+		'shop.lock_setting': 'Görevler bitene kadar mağazayı kilitle',
+		'shop.approval_setting': 'Açmak için ebeveyn onayı iste',
+		'shop.exempt': 'Muaf kategoriler',
+		'editor.task_counts': 'Çocuk kartlarında görev sayılarını göster',
+		'status.tasks_left': 'Kalan görevler',
+		'status.overdue_count': 'Geciken görevler',
+		'status.shop_locked': 'Mağaza kilitli',
 		'task.due_time': 'Son saat (isteğe bağlı)',
 		'shop.visible_to': 'Görebilenler', 'shop.all_children': 'Tüm çocuklar',
 		'penalty.enable': 'Gecikirse puan düş', 'status.deadline_missed': 'Süre doldu',
@@ -649,6 +670,13 @@ const C4K_I18N = {
 	},
 	da: {
 		'delivery.required': 'Kræver udlevering', 'delivery.pending': 'Afventer udlevering', 'delivery.mark': 'Markér som udleveret', 'delivery.done': 'Udleveret',
+		'shop.lock_setting': 'Lås butikken, indtil opgaverne er færdige',
+		'shop.approval_setting': 'Kræv forældregodkendelse for at åbne',
+		'shop.exempt': 'Undtagne kategorier',
+		'editor.task_counts': 'Vis opgavetællere på børnekort',
+		'status.tasks_left': 'Opgaver tilbage',
+		'status.overdue_count': 'Forsinkede opgaver',
+		'status.shop_locked': 'Butikken er låst',
 		'task.due_time': 'Klokkeslæt for frist (valgfrit)',
 		'shop.visible_to': 'Vises for', 'shop.all_children': 'Alle børn',
 		'penalty.enable': 'Træk point ved overskredet frist', 'status.deadline_missed': 'Frist overskredet',
@@ -788,6 +816,13 @@ const C4K_I18N = {
 		},
 			sv: {
 		'delivery.required': 'Kräver utlämning', 'delivery.pending': 'Väntar på utlämning', 'delivery.mark': 'Markera som utlämnad', 'delivery.done': 'Utlämnad',
+		'shop.lock_setting': 'Lås butiken tills uppgifterna är klara',
+		'shop.approval_setting': 'Kräv förälders godkännande',
+		'shop.exempt': 'Undantagna kategorier',
+		'editor.task_counts': 'Visa antal uppgifter på barnkort',
+		'status.tasks_left': 'Uppgifter kvar',
+		'status.overdue_count': 'Försenade uppgifter',
+		'status.shop_locked': 'Butiken är låst',
 		'task.due_time': 'Tid för deadline (valfritt)',
 		'shop.visible_to': 'Visas för', 'shop.all_children': 'Alla barn',
 		'penalty.enable': 'Dra av poäng vid missad tidsfrist', 'status.deadline_missed': 'Tidsfristen passerad',
@@ -884,6 +919,13 @@ const C4K_I18N = {
 		},
 			nb: {
 		'delivery.required': 'Krever utlevering', 'delivery.pending': 'Venter på utlevering', 'delivery.mark': 'Merk som utlevert', 'delivery.done': 'Utlevert',
+		'shop.lock_setting': 'Lås butikken til oppgavene er ferdige',
+		'shop.approval_setting': 'Krev godkjenning fra forelder',
+		'shop.exempt': 'Unntatte kategorier',
+		'editor.task_counts': 'Vis oppgavetellere på barnekort',
+		'status.tasks_left': 'Oppgaver igjen',
+		'status.overdue_count': 'Forsinkede oppgaver',
+		'status.shop_locked': 'Butikken er låst',
 		'task.due_time': 'Klokkeslett for frist (valgfritt)',
 		'shop.visible_to': 'Vises for', 'shop.all_children': 'Alle barn',
 		'penalty.enable': 'Trekk poeng ved overskredet frist', 'status.deadline_missed': 'Fristen er overskredet',
@@ -980,6 +1022,13 @@ const C4K_I18N = {
 		},
 			de: {
 		'delivery.required': 'Übergabe erforderlich', 'delivery.pending': 'Ausstehende Übergaben', 'delivery.mark': 'Als übergeben markieren', 'delivery.done': 'Übergeben',
+		'shop.lock_setting': 'Shop sperren, bis alle Aufgaben erledigt sind',
+		'shop.approval_setting': 'Freigabe durch Eltern erforderlich',
+		'shop.exempt': 'Ausgenommene Kategorien',
+		'editor.task_counts': 'Aufgabenzähler auf Kinderkarten anzeigen',
+		'status.tasks_left': 'Offene Aufgaben',
+		'status.overdue_count': 'Überfällige Aufgaben',
+		'status.shop_locked': 'Shop gesperrt',
 		'task.due_time': 'Fällige Uhrzeit (optional)',
 		'shop.visible_to': 'Sichtbar für', 'shop.all_children': 'Alle Kinder',
 		'penalty.enable': 'Bei verpasster Frist Punkte abziehen', 'status.deadline_missed': 'Frist verpasst',
@@ -1076,6 +1125,13 @@ const C4K_I18N = {
 		},
 			es: {
 		'delivery.required': 'Requiere entrega', 'delivery.pending': 'Pendiente de entrega', 'delivery.mark': 'Marcar como entregado', 'delivery.done': 'Entregado',
+		'shop.lock_setting': 'Bloquear la tienda hasta completar las tareas',
+		'shop.approval_setting': 'Requerir aprobación de los padres',
+		'shop.exempt': 'Categorías exentas',
+		'editor.task_counts': 'Mostrar contadores en las tarjetas infantiles',
+		'status.tasks_left': 'Tareas pendientes',
+		'status.overdue_count': 'Tareas atrasadas',
+		'status.shop_locked': 'Tienda bloqueada',
 		'task.due_time': 'Hora límite (opcional)',
 		'shop.visible_to': 'Visible para', 'shop.all_children': 'Todos los niños',
 		'penalty.enable': 'Restar puntos al vencer el plazo', 'status.deadline_missed': 'Plazo vencido',
@@ -1172,6 +1228,13 @@ const C4K_I18N = {
 		},
 			fr: {
 		'delivery.required': 'Remise nécessaire', 'delivery.pending': 'En attente de remise', 'delivery.mark': 'Marquer comme remis', 'delivery.done': 'Remis',
+		'shop.lock_setting': 'Verrouiller la boutique tant que des tâches restent à faire',
+		'shop.approval_setting': 'Exiger la validation des parents',
+		'shop.exempt': 'Catégories exemptées',
+		'editor.task_counts': 'Afficher les compteurs sur les cartes des enfants',
+		'status.tasks_left': 'Tâches restantes',
+		'status.overdue_count': 'Tâches en retard',
+		'status.shop_locked': 'Boutique verrouillée',
 		'task.due_time': 'Heure limite (facultative)',
 		'shop.visible_to': 'Visible pour', 'shop.all_children': 'Tous les enfants',
 		'penalty.enable': 'Retirer des points en cas de retard', 'status.deadline_missed': 'Échéance dépassée',
@@ -1268,6 +1331,13 @@ const C4K_I18N = {
 		},
 			fi: {
 		'delivery.required': 'Vaatii luovutuksen', 'delivery.pending': 'Odottaa luovutusta', 'delivery.mark': 'Merkitse luovutetuksi', 'delivery.done': 'Luovutettu',
+		'shop.lock_setting': 'Lukitse kauppa kunnes tehtävät on tehty',
+		'shop.approval_setting': 'Vaadi vanhemman hyväksyntä',
+		'shop.exempt': 'Vapautetut luokat',
+		'editor.task_counts': 'Näytä tehtävälaskurit lapsen kortissa',
+		'status.tasks_left': 'Tehtäviä jäljellä',
+		'status.overdue_count': 'Myöhässä olevat tehtävät',
+		'status.shop_locked': 'Kauppa lukittu',
 		'task.due_time': 'Määräaika kellonaikana (valinnainen)',
 		'shop.visible_to': 'Näkyy lapsille', 'shop.all_children': 'Kaikki lapset',
 		'penalty.enable': 'Vähennä pisteitä myöhästymisestä', 'status.deadline_missed': 'Määräaika ylittyi',
@@ -1364,6 +1434,13 @@ const C4K_I18N = {
 		},
 			it: {
 		'delivery.required': 'Richiede consegna', 'delivery.pending': 'In attesa di consegna', 'delivery.mark': 'Segna come consegnato', 'delivery.done': 'Consegnato',
+		'shop.lock_setting': 'Blocca il negozio fino al completamento delle attività',
+		'shop.approval_setting': 'Richiedi la conferma del genitore',
+		'shop.exempt': 'Categorie esenti',
+		'editor.task_counts': 'Mostra i contatori sulle schede dei bambini',
+		'status.tasks_left': 'Attività rimanenti',
+		'status.overdue_count': 'Attività in ritardo',
+		'status.shop_locked': 'Negozio bloccato',
 		'task.due_time': 'Ora di scadenza (facoltativa)',
 		'shop.visible_to': 'Visibile a', 'shop.all_children': 'Tutti i bambini',
 		'penalty.enable': 'Sottrai punti in caso di ritardo', 'status.deadline_missed': 'Scadenza superata',
@@ -1467,7 +1544,7 @@ function c4kTaskIcon(id, className = '') {
 	return html`<ha-icon class=${className} icon=${id}></ha-icon>`;
 }
 
-const C4K_COLOR_STATES = ['awaiting_approval', 'taken', 'approved'];
+const C4K_COLOR_STATES = ['awaiting_approval', 'taken', 'approved', 'tasks_left', 'overdue_count', 'shop_locked'];
 const C4K_LANG_ALIAS = { no: 'nb' };
 try {
 	const __EN = C4K_I18N.en || {};
@@ -1760,7 +1837,11 @@ class Chores4KidsDevCard extends LitElement {
 		}
 		@media (max-width:700px){ .shop-modal .shop-add-left{ flex:0 1 auto !important; } }
 		/* Child view */
-		.header-row{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+		.header-row .chip{display:inline-flex;align-items:center;gap:4px}
+		.header-row .tasks-left{background:var(--c4k-tasks_left_bg,var(--secondary-background-color));color:var(--c4k-tasks_left_text,var(--primary-text-color))}
+		.header-row .overdue-count{background:var(--c4k-overdue_count_bg,var(--error-color));color:var(--c4k-overdue_count_text,white)}
+		.header-row .shop-locked{background:var(--c4k-shop_locked_bg,var(--secondary-background-color));color:var(--c4k-shop_locked_text,var(--primary-text-color))}
+		.header-row{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px; }
 		.header-points{ display:inline-flex; align-items:center; gap:8px; padding:4px 10px; border-radius:999px; background: var(--c4k-kid-points-bg, color-mix(in srgb, var(--primary-color) 18%, transparent)); color: var(--c4k-kid-points-text, var(--primary-color)); font-weight:600; }
 		.tasks{ display:grid; gap:12px; }
 		.tasks.child-tasks-scroll{ max-height:min(72vh, 920px); overflow-y:auto; overflow-x:hidden; margin-right:-32px; padding-right:36px; scrollbar-gutter: stable; }
@@ -2060,6 +2141,9 @@ class Chores4KidsDevCard extends LitElement {
 	}
 
 	updated(changedProps){
+		if (this._shopOpen && this._mode === 'kid' && this._findChildSensor()?.attributes?.shop_progress?.locked) {
+			this._shopOpen = false;
+		}
 		if (this._historyOpen && this._mode === 'admin' && changedProps.has('hass')) {
 			const snapshot = this.hass?.states?.[this._idTasks];
 			if (snapshot !== this._historySnapshot) this._loadHistory();
@@ -3844,6 +3928,7 @@ class Chores4KidsDevCard extends LitElement {
 			templateCandidatesBySignature.set(sig, arr);
 		}
 
+		const progress = s.attributes.shop_progress || {};
 		const myChildId = s?.attributes?.child_id;
 
 		// Enrich tasks with description from master list if missing
@@ -3984,13 +4069,20 @@ class Chores4KidsDevCard extends LitElement {
 				<div class="card-content">
 					<div class="header-row">
 						${pointsEnabled ? html`<span class="header-points">${s.state} ${this._t('lbl.points')}</span>`:''}
-						${pointsEnabled ? html`<button class="btn-primary" @click=${()=>{ this._shopOpen = true; this.requestUpdate(); }}>${this._t('shop.title')}</button>`:''}
+						${c4kSettings(this.hass).show_task_counts ? html`
+							<span class="chip tasks-left">${this._t('status.tasks_left')} · ${progress.tasks_left ?? 0}</span>
+							${progress.overdue_count ? html`<span class="chip overdue-count">${this._t('status.overdue_count')} · ${progress.overdue_count}</span>` : ''}
+						` : ''}
+						${pointsEnabled && progress.locked ? html`<span class="chip shop-locked" role="status"><ha-icon icon="mdi:lock"></ha-icon>
+							${this._t('status.shop_locked')} · ${progress.required_left ? this._t('status.tasks_left') : this._t('lbl.awaiting')} · ${progress.required_left || progress.required_approvals}
+						</span>` : ''}
+						${pointsEnabled && !progress.locked ? html`<button class="btn-primary" @click=${()=>{ this._shopOpen = true; this.requestUpdate(); }}>${this._t('shop.title')}</button>`:''}
 					</div>
 					<div class="tasks child-tasks-scroll">
 						${dailyTasks.length ? html`<div class="section"><h3 style="margin:0 0 8px;">${this._t('section.daily_tasks')}</h3>${renderTaskGroups(dailyTasks)}</div>` : ''}
 						${weeklyTasks.length ? html`<div class="section"><h3 style="margin:0 0 8px;">${this._t('section.weekly_tasks')}</h3>${renderTaskGroups(weeklyTasks)}</div>` : (dailyTasks.length? '' : html`<i>${this._t('msg.no_tasks')}</i>`)}
 					</div>
-					${pointsEnabled ? html`<div class="overlay shop-child-overlay ${this._shopOpen?'open':''}" @click=${e=>{ if(e.target.classList.contains('overlay')) this._shopOpen=false; }}>
+					${pointsEnabled && !progress.locked ? html`<div class="overlay shop-child-overlay ${this._shopOpen?'open':''}" @click=${e=>{ if(e.target.classList.contains('overlay')) this._shopOpen=false; }}>
 						<div class="modal shop-child-modal" @click=${e=>e.stopPropagation()}>
 							<h3 style="margin:0 0 8px;">${this._t('shop.title')}</h3>
 							<div class="shop-grid">
@@ -4689,6 +4781,27 @@ class Chores4KidsDevCardEditor extends LitElement{
 		this._config = config;
 		this._emit();
 	}
+	_renderShopRules(){
+		const settings = this._getUiSensorAttrs();
+		const categories = Object.values(this.hass?.states || {}).find(s=>s.entity_id?.includes('chores4kids_tasks') && Array.isArray(s.attributes?.categories))?.attributes.categories || [];
+		const save = payload => this.hass.callService('chores4kids','set_ui_colors',payload);
+		const toggle = (key,label) => html`<label><input type="checkbox" .checked=${!!settings[key]}
+			@change=${e=>save({[key]:e.target.checked})}> ${this._t(label)}</label>`;
+		return html`<div class="form-field">
+			${toggle('show_task_counts','editor.task_counts')}
+			${this._getGlobalEnablePoints() ? html`
+				${toggle('shop_lock_enabled','shop.lock_setting')}
+				${settings.shop_lock_enabled ? html`
+					${toggle('shop_require_approval','shop.approval_setting')}
+					${categories.length ? html`<fieldset><legend>${this._t('shop.exempt')}</legend>
+						${categories.map(c=>html`<label><input type="checkbox" value=${c.id}
+							.checked=${(settings.shop_exempt_categories || []).includes(c.id)}
+							@change=${e=>save({shop_exempt_categories:Array.from(e.target.closest('fieldset').querySelectorAll('input:checked'), input=>input.value)})}> ${c.name}</label>`)}
+					</fieldset>` : ''}
+				` : ''}
+			` : ''}
+		</div>`;
+	}
 	_getGlobalConfettiEnabled(){
 		try{
 			const a = this._getUiSensorAttrs?.() || {};
@@ -5149,6 +5262,7 @@ class Chores4KidsDevCardEditor extends LitElement{
 						</label>
 						<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.enable_points_help')}</small>
 					</div>
+					${this._renderShopRules()}
 					<div class="form-field">
 						<label>${this._t('section.scoreboard')}</label>
 						<label style="display:flex;align-items:center;gap:8px;">

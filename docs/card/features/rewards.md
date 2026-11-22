@@ -4,6 +4,20 @@
 
 Select **Open shop** on the parent card. Add a title and price, then choose an icon or upload an image. Keep the item **Active** while it is available. For example, offer *Choose a board game* for eight points and *Pick the movie* for fifteen.
 
+## Unlock the shop after chores
+
+In the parent card editor, enable **Lock shop until chores are done**. Each child can open their shop as soon as they mark their last required chore complete. Enable **Require parent approval to unlock** if a parent should review it first. Select **Exempt categories** for optional activities such as drawing. These settings apply across dashboards.
+
+![Shared shop rules and category selection in the parent editor](../../images/shop-rule-settings.png)
+
+Turn on **Show task counts on child cards** to show unfinished chores and how many are overdue. The counters also work with the shop lock or the points system turned off. An exempt chore still appears in the unfinished count. The lock indicator shows how many required chores or approvals are holding up the shop. Bonus subtasks, extra opportunities to repeat a completed chore that day and tasks claimed by a sibling do not block purchases.
+
+[![A child sees the remaining chores and the reason their shop is locked](../../images/shop-locked-counts.png)](../../images/unlock-the-shop.gif)
+
+[Play walkthrough](../../images/unlock-the-shop.gif) | [Full-size GIF](../../images/unlock-the-shop.gif)
+
+Both the lock and the counters start switched off. In **Parent card editor → Colors**, expand **Tasks left**, **Overdue tasks** or **Shop locked** to choose background and text colors independently. **Clear** restores the theme default.
+
 ## Choose who sees a reward
 
 In the parent shop, open **Visible to** on a reward. Select one or more children and press **Save**. When creating a new reward, make the selection before pressing **Add item**. The default **All children** includes children added later. Selecting it again makes an existing reward available to everyone.

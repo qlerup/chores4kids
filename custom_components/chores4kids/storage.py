@@ -119,6 +119,7 @@ class Task:
     # If true, unfinished task carried to next day is marked as overdue (red).
     mark_overdue: bool = True
     multiple_per_day: bool = False
+    extra_occurrence: bool = False
     occurrence_renewed: bool = False
     due_time: str = ""
     penalty_points: int = 0
@@ -142,6 +143,10 @@ class KidsChoresStore:
         self.task_icons: Dict[str, str] = {}
         self.points_label = ""
         self.chore_columns = "auto"
+        self.shop_lock_enabled = False
+        self.shop_require_approval = False
+        self.show_task_counts = False
+        self.shop_exempt_categories: list[str] = []
         self.enable_points: bool = True
         self.confetti_enabled: bool = True
         self.notify_service: str = ""
@@ -173,6 +178,10 @@ class KidsChoresStore:
                 pass
             migrated.append(Task(**t))
         self.tasks = migrated
+        self.shop_lock_enabled = bool(data.get("shop_lock_enabled", False))
+        self.shop_require_approval = bool(data.get("shop_require_approval", False))
+        self.show_task_counts = bool(data.get("show_task_counts", False))
+        self.shop_exempt_categories = list(data.get("shop_exempt_categories") or [])
         if "activity_history" in data:
             self.activity_history = list(data["activity_history"])
         else:
@@ -261,6 +270,10 @@ class KidsChoresStore:
             "task_icons": dict(self.task_icons),
             "points_label": self.points_label,
             "chore_columns": self.chore_columns,
+            "shop_lock_enabled": self.shop_lock_enabled,
+            "shop_require_approval": self.shop_require_approval,
+            "show_task_counts": self.show_task_counts,
+            "shop_exempt_categories": self.shop_exempt_categories,
             "enable_points": bool(getattr(self, "enable_points", True)),
             "confetti_enabled": bool(getattr(self, "confetti_enabled", True)),
             "notify_service": str(getattr(self, "notify_service", "") or ""),
@@ -417,8 +430,29 @@ class KidsChoresStore:
         approved_text: Optional[str] = None,
         points_label: Optional[str] = None,
         chore_columns: Optional[str] = None,
+        shop_lock_enabled: Optional[bool] = None,
+        shop_require_approval: Optional[bool] = None,
+        show_task_counts: Optional[bool] = None,
+        shop_exempt_categories: Optional[list[str]] = None,
+        tasks_left_bg: Optional[str] = None,
+        tasks_left_text: Optional[str] = None,
+        overdue_count_bg: Optional[str] = None,
+        overdue_count_text: Optional[str] = None,
+        shop_locked_bg: Optional[str] = None,
+        shop_locked_text: Optional[str] = None,
+
     ) -> Dict[str, str]:
         """Set global UI colors. Empty string clears a value."""
+        if shop_exempt_categories is not None:
+            if not isinstance(shop_exempt_categories, list) or not all(isinstance(cid, str) for cid in shop_exempt_categories):
+                raise ValueError("shop_exempt_categories must contain category IDs")
+            self.shop_exempt_categories = list(dict.fromkeys(shop_exempt_categories))
+        if shop_lock_enabled is not None:
+            self.shop_lock_enabled = shop_lock_enabled
+        if shop_require_approval is not None:
+            self.shop_require_approval = shop_require_approval
+        if show_task_counts is not None:
+            self.show_task_counts = show_task_counts
         if chore_columns is not None and str(chore_columns) not in ("auto", "1", "2", "3"):
             raise ValueError("invalid_chore_columns")
         if chore_columns is not None:
@@ -440,6 +474,12 @@ class KidsChoresStore:
         _set("awaiting_approval_text", awaiting_approval_text)
         _set("taken_bg", taken_bg)
         _set("taken_text", taken_text)
+        _set("tasks_left_bg", tasks_left_bg)
+        _set("tasks_left_text", tasks_left_text)
+        _set("overdue_count_bg", overdue_count_bg)
+        _set("overdue_count_text", overdue_count_text)
+        _set("shop_locked_bg", shop_locked_bg)
+        _set("shop_locked_text", shop_locked_text)
         _set("approved_bg", approved_bg)
         _set("approved_text", approved_text)
         _set("start_task_bg", start_task_bg)
@@ -1110,7 +1150,7 @@ class KidsChoresStore:
         if task.occurrence_renewed:
             return
         successor = replace(
-            task, id=str(uuid4()), status=STATUS_ASSIGNED, penalty_deadline=0, penalty_settled=True,
+            task, id=str(uuid4()), extra_occurrence=True, status=STATUS_ASSIGNED, penalty_deadline=0, penalty_settled=True,
             created=datetime.now(timezone.utc).isoformat(), approved_at=None,
             completed_ts=None, carried_over=False, bonus_completed_ts=None,
             bonus_approved=False, bonus_approved_at=None, time_bonus_awarded=0,
@@ -1771,6 +1811,7 @@ class KidsChoresStore:
                 if (t.multiple_per_day and t.status in (STATUS_ASSIGNED, STATUS_IN_PROGRESS)
                         and t.repeat_template_id not in scheduled_ids and not t.fastest_wins_claimed_by_child_id):
                     t.created = datetime.now(timezone.utc).isoformat()
+                    t.extra_occurrence = False
                     t.penalty_settled = False
                     self._configure_penalty(t, None, None, True)
                     kept.append(t)
@@ -2029,9 +2070,28 @@ class KidsChoresStore:
             # Never fail deletion because of cleanup
             pass
 
+    def child_shop_progress(self, child_id, tasks):
+        left = overdue = required = approvals = 0
+        exempt = set(self.shop_exempt_categories)
+        for task in tasks:
+            if (task.assigned_to != child_id or task.extra_occurrence or
+                    task.fastest_wins_claimed_by_child_id not in (None, child_id)):
+                continue
+            blocks = not exempt.intersection(task.categories)
+            if task.status in (STATUS_ASSIGNED, STATUS_IN_PROGRESS):
+                left += 1
+                overdue += int(task.mark_overdue and task.carried_over)
+                required += int(blocks)
+            elif task.status == STATUS_AWAITING and blocks and self.shop_require_approval:
+                approvals += 1
+        return {"tasks_left": left, "overdue_count": overdue, "required_left": required,
+                "required_approvals": approvals, "locked": self.shop_lock_enabled and bool(required or approvals)}
+
     async def buy_shop_item(self, child_id: str, item_id: str):
         child = self._get_child(child_id)
         it = self._get_item(item_id)
+        if self.shop_lock_enabled and self.child_shop_progress(child_id, self.tasks)["locked"]:
+            raise ValueError("shop_locked_until_chores_done")
         if it.child_ids and child_id not in it.child_ids:
             raise ValueError("shop_item_unavailable_for_child")
         price = int(it.price)
