@@ -4,6 +4,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.const import Platform
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.entity import DeviceInfo
@@ -637,6 +638,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             icon=call.data.get("icon"),
             image=call.data.get("image"),
             active=bool(call.data.get("active", True)),
+            requires_delivery=cv.boolean(call.data.get("requires_delivery", False)),
             actions=call.data.get("actions"),
         )
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
@@ -649,6 +651,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             icon=call.data.get("icon"),
             image=call.data.get("image"),
             active=call.data.get("active"),
+            requires_delivery=cv.boolean(call.data["requires_delivery"]) if "requires_delivery" in call.data else None,
             actions=call.data.get("actions"),
         )
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
@@ -660,6 +663,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     async def svc_buy_shop_item(call: ServiceCall):
         pur = await store.buy_shop_item(call.data["child_id"], call.data["item_id"])
         await _notify_shop_purchase(pur)
+        async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
+
+    async def svc_mark_purchase_delivered(call: ServiceCall):
+        await store.mark_purchase_delivered(call.data["purchase_id"])
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
     async def svc_clear_shop_history(call: ServiceCall):
@@ -713,6 +720,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "update_shop_item", svc_update_shop_item)
     hass.services.async_register(DOMAIN, "delete_shop_item", svc_delete_shop_item)
     hass.services.async_register(DOMAIN, "buy_shop_item", svc_buy_shop_item)
+    hass.services.async_register(DOMAIN, "mark_purchase_delivered", svc_mark_purchase_delivered)
     hass.services.async_register(DOMAIN, "clear_shop_history", svc_clear_shop_history)
     # Backwards/alias
     hass.services.async_register(DOMAIN, "reset_shop_history", svc_clear_shop_history)

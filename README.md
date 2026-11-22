@@ -19,6 +19,7 @@ Give each child a Home Assistant dashboard where they can start chores, earn poi
 | Use a drawing or a custom icon on a task | [Upload an icon](https://qlerup.github.io/chores4kids/card/features/appearance.html#upload-your-own-artwork) |
 | Change approval colors on the child dashboard | [Status colors](https://qlerup.github.io/chores4kids/card/features/appearance.html#change-status-colors) |
 | Set one card to Dutch or Turkish | [Card language](https://qlerup.github.io/chores4kids/card/internationalization.html) |
+| Track rewards waiting to be handed over | [Per-item reward delivery](https://qlerup.github.io/chores4kids/card/features/rewards.html#hand-over-a-reward) |
 | Let a child spend points | [Reward shop](https://qlerup.github.io/chores4kids/card/features/rewards.html) |
 
 New to the card? Follow [Create your first family dashboard](https://qlerup.github.io/chores4kids/getting-started/quick-start.html) to add a child, assign a chore and approve it.

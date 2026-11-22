@@ -1846,9 +1846,9 @@ class KidsChoresStore:
         await self.async_save()
 
     # --- Shop API ---
-    async def add_shop_item(self, title: str, price: int, icon: Optional[str] = None, image: Optional[str] = None, active: bool = True, actions: Optional[List[Dict[str, Any]]] = None):
+    async def add_shop_item(self, title: str, price: int, icon: Optional[str] = None, image: Optional[str] = None, active: bool = True, actions: Optional[List[Dict[str, Any]]] = None, requires_delivery: bool = False):
         sid = str(uuid4())
-        it = ShopItem(id=sid, title=str(title).strip(), price=int(price), icon=(icon or "").strip(), image=(image or "").strip(), active=bool(active))
+        it = ShopItem(id=sid, title=str(title).strip(), price=int(price), icon=(icon or "").strip(), image=(image or "").strip(), active=bool(active), requires_delivery=requires_delivery)
         try:
             it.actions = self._normalize_actions(actions or [])
         except Exception:
@@ -1857,8 +1857,10 @@ class KidsChoresStore:
         await self.async_save()
         return it
 
-    async def update_shop_item(self, item_id: str, title: Optional[str] = None, price: Optional[int] = None, icon: Optional[str] = None, image: Optional[str] = None, active: Optional[bool] = None, actions: Optional[List[Dict[str, Any]]] = None):
+    async def update_shop_item(self, item_id: str, title: Optional[str] = None, price: Optional[int] = None, icon: Optional[str] = None, image: Optional[str] = None, active: Optional[bool] = None, actions: Optional[List[Dict[str, Any]]] = None, requires_delivery: Optional[bool] = None):
         it = self._get_item(item_id)
+        if requires_delivery is not None:
+            it.requires_delivery = requires_delivery
         if title is not None:
             it.title = str(title).strip()
         if price is not None:
@@ -1918,6 +1920,7 @@ class KidsChoresStore:
         pur = Purchase(
             id=str(uuid4()), child_id=child.id, item_id=it.id,
             title=it.title, price=price, icon=it.icon, image=getattr(it, 'image', ''),
+            requires_delivery=it.requires_delivery,
             ts=datetime.now(timezone.utc).isoformat(), child_name=child.name
         )
         self.purchases.append(pur)
@@ -1931,14 +1934,21 @@ class KidsChoresStore:
             pass
         return pur
 
+    async def mark_purchase_delivered(self, purchase_id: str):
+        purchase = next((p for p in self.purchases if p.id == purchase_id), None)
+        if purchase is None or not purchase.requires_delivery:
+            raise ValueError("Purchase does not exist or does not require delivery")
+        if purchase.delivered_at is None:
+            purchase.delivered_at = datetime.now(timezone.utc).isoformat()
+            await self.async_save()
+
     async def clear_shop_history(self, child_id: Optional[str] = None):
         """Clear purchase history. If child_id is provided, clear only entries for that child."""
         if child_id:
             # Validate child exists; raises if missing
             self._get_child(child_id)
-            self.purchases = [p for p in self.purchases if p.child_id != child_id]
-        else:
-            self.purchases = []
+        self.purchases = [p for p in self.purchases if (child_id and p.child_id != child_id)
+                          or (p.requires_delivery and not p.delivered_at)]
         await self.async_save()
 
     # Helpers
@@ -2157,6 +2167,7 @@ class ShopItem:
     image: str = ""
     active: bool = True
     actions: List[Dict[str, Any]] = field(default_factory=list)
+    requires_delivery: bool = False
 
 @dataclass
 class Purchase:
@@ -2171,5 +2182,7 @@ class Purchase:
 
     # Optional denormalized for convenience (filled when saving)
     child_name: str = ""
+    requires_delivery: bool = False
+    delivered_at: Optional[str] = None
 
 # End of storage

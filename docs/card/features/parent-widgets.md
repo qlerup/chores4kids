@@ -23,4 +23,4 @@ cards:
     admin_sections: [shop]
 ```
 
-Available sections are `children`, `categories`, `create`, `tasks`, `assigned`, `approvals`, `finished`, `history`, `scoreboard` and `shop`. The shop and scoreboard require points to be enabled. Omit `admin_sections` to use the full parent card with its usual shop button.
+Available sections are `children`, `categories`, `create`, `tasks`, `assigned`, `approvals`, `finished`, `history`, `scoreboard`, `shop` and `deliveries`. The shop and scoreboard require points to be enabled. Omit `admin_sections` to use the full parent card with its usual shop button.

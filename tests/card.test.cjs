@@ -122,7 +122,7 @@ test('parent section choices are local and selecting every section restores the 
   review._setAdminSection('approvals', true);
   assert.deepEqual(Array.from(review._config.admin_sections), ['assigned', 'approvals']);
   assert.deepEqual(Array.from(shop._config.admin_sections), ['shop']);
-  for (const key of ['children','categories','create','tasks','finished','history','scoreboard','shop']) {
+  for (const key of ['children','categories','create','tasks','finished','history','scoreboard','shop','deliveries']) {
     review._setAdminSection(key, true);
   }
   assert.equal(Object.hasOwn(review._config, 'admin_sections'), false);

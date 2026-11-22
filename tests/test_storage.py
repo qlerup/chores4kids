@@ -60,6 +60,28 @@ class AutomationTests(unittest.IsolatedAsyncioTestCase):
         self.store.activity_history = []
         self.store.async_save = AsyncMock()
 
+    async def test_reward_delivery_is_snapshotted_and_idempotent(self):
+        self.store.items = []
+        self.store.purchases = []
+        self.child.points = 12
+        item = await self.store.add_shop_item("Board game", 3)
+        instant = await self.store.buy_shop_item(self.child.id, item.id)
+        await self.store.update_shop_item(item.id, requires_delivery=True)
+        first = await self.store.buy_shop_item(self.child.id, item.id)
+        second = await self.store.buy_shop_item(self.child.id, item.id)
+        await self.store.update_shop_item(item.id, requires_delivery=False)
+        with self.assertRaises(ValueError):
+            await self.store.mark_purchase_delivered(instant.id)
+        await self.store.mark_purchase_delivered(first.id)
+        timestamp = first.delivered_at
+        self.assertIsNotNone(timestamp)
+        await self.store.mark_purchase_delivered(first.id)
+        self.assertEqual(first.delivered_at, timestamp)
+        self.assertIsNone(second.delivered_at)
+        self.assertEqual(self.child.points, 3)
+        await self.store.clear_shop_history()
+        self.assertEqual(self.store.purchases, [second])
+
     async def test_multiple_completions_are_independent_and_rewarded_once(self):
         self.instance.multiple_per_day = True
         for occurrence, timestamp in [(0, 1000), (1, 2000)]:

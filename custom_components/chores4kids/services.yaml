@@ -421,3 +421,13 @@ get_activity_history:
     end:
       selector:
         date:
+
+mark_purchase_delivered:
+  name: Mark purchase as delivered
+  description: Record when a reward requiring delivery was handed over.
+  fields:
+    purchase_id:
+      required: true
+      description: ID of the individual purchase in the shop sensor.
+      selector:
+        text:

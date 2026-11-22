@@ -44,6 +44,10 @@ All names below use the `chores4kids.` prefix.
 | Children and points | `add_child`, `rename_child`, `remove_child`, `add_points`, `reset_points` |
 | Tasks | `add_task`, `update_task`, `delete_task`, `assign_task`, `set_task_status`, `approve_task`, `complete_bonus_task`, `approve_bonus_task`, `set_task_repeat`, `set_task_icon` |
 | Categories | `add_category`, `rename_category`, `delete_category`, `set_category_color`, `reorder_categories` |
-| Shop | `add_shop_item`, `update_shop_item`, `delete_shop_item`, `buy_shop_item`, `clear_shop_history` (also available as `reset_shop_history`) |
+| Shop | `add_shop_item`, `update_shop_item`, `delete_shop_item`, `buy_shop_item`, `mark_purchase_delivered`, `clear_shop_history` (also available as `reset_shop_history`) |
 | Shared settings and files | `set_ui_colors`, `upload_task_icon`, `upload_shop_image`, `delete_uploaded_file`, `delete_completion_sound` |
 | Maintenance and testing | `force_rollover`, `debug_mark_overdue`, `purge_orphans` |
+
+## Record a reward delivery
+
+Pass `requires_delivery: true` to `chores4kids.add_shop_item` or `chores4kids.update_shop_item` to track future purchases of that reward. Use `chores4kids.mark_purchase_delivered` with the `purchase_id` from the shop sensor’s `purchases` list (the entry’s `id`). Repeating the action preserves the original delivery time. The shop sensor exposes `requires_delivery`, `delivered` and `delivered_at` per purchase.
