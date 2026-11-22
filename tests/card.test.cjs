@@ -7,7 +7,7 @@ class Element {requestUpdate(){}}
 const context=vm.createContext({LitElement:Element,html:(s,...v)=>({s,v}),css:(s,...v)=>({s,v}),
   window:{},customElements:{define:(n,c)=>registry.set(n,c)},console,alert(){},
   localStorage:{getItem:()=>null,setItem(){}},setTimeout,clearTimeout,Date});
-vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../chores4kids-card.js'),'utf8')
+vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../src/chores4kids-card.js'),'utf8')
   .replace(/^import .*?;\s*/,''),context);
 const Card=registry.get('chores4kids-card');
 test('shared reward names apply to all card modes without translating child names or the unit', () => {

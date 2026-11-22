@@ -1,6 +1,7 @@
 """Browser regression. Install playwright + Chromium, then run this script.
 Uses the real distributed card with synthetic HA states.
 """
+import os
 import json
 import threading
 from functools import partial
@@ -15,9 +16,17 @@ server=ThreadingHTTPServer(('127.0.0.1',0),partial(Quiet,directory=str(ROOT)))
 threading.Thread(target=server.serve_forever,daemon=True).start()
 base=f'http://127.0.0.1:{server.server_port}'
 with sync_playwright() as p:
-    browser=p.chromium.launch()
+    browser=p.chromium.launch(channel=os.environ.get("PLAYWRIGHT_CHANNEL"))
     page=browser.new_page(viewport={'width':375,'height':812},has_touch=True,is_mobile=True,ignore_https_errors=True)
     page.on('pageerror',lambda e:print('PAGE ERROR:',e))
+    external = []
+    def local_only(route):
+        if route.request.url.startswith(base + '/'):
+            route.continue_()
+        else:
+            external.append(route.request.url)
+            route.abort()
+    page.route('**/*', local_only)
     page.goto(base)
     page.evaluate("document.head.insertAdjacentHTML('beforeend','<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">')")
     page.add_script_tag(url=base+'/chores4kids-card.js',type='module')
@@ -50,5 +59,11 @@ with sync_playwright() as p:
     toggle.locator('input').check()
     assert page.locator('chores4kids-card input[placeholder="Bonus task title"]').first.is_visible()
     print('PASS: bundled card exposes working bonus controls in parent form')
+    assert page.evaluate("""() => {
+        const card = document.querySelector('chores4kids-card');
+        card._openCustomIconModal();
+        return card._availableIcons.includes('mdi:toothbrush');
+    }""")
+    assert not external, external
     browser.close()
 server.shutdown()

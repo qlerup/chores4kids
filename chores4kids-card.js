@@ -1,1594 +1,27 @@
-import { LitElement, html, css } from "https://unpkg.com/lit?module";
-
-// Card distribution version: 3.2.4
-// Unified i18n (admin + child keys)
-const C4K_ADMIN_SECTIONS = {
-	children: 'section.children', categories: 'section.categories', create: 'section.new_task',
-	tasks: 'section.tasks', assigned: 'overview.title', approvals: 'lbl.awaiting',
-	finished: 'overview.finished_title', history: 'history.title', scoreboard: 'section.scoreboard', shop: 'shop.title', deliveries: 'delivery.pending',
-};
-
-const C4K_I18N = {
-	en: {
-		'delivery.required': 'Requires delivery', 'delivery.pending': 'Awaiting delivery', 'delivery.mark': 'Mark as delivered', 'delivery.done': 'Delivered',
-		'task.due_time': 'Due time (optional)',
-		'shop.visible_to': 'Visible to', 'shop.all_children': 'All children',
-		'penalty.enable': 'Deduct points if late', 'status.deadline_missed': 'Deadline missed',
-		'editor.sections': 'Sections on this card',
-		'history.title': 'Activity history',
-		'history.from': 'From',
-		'history.through': 'Through',
-		'history.empty': 'No completions in this period.',
-		'history.error': 'Could not load activity history.',
-		'history.refresh': 'Refresh',
-		'history.loading': 'Loading…',
-		'editor.unit_name': 'Reward unit name',
-		'editor.task_columns': 'Task columns',
-		'editor.columns_auto': 'Auto',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Early bonus ({unit})',
-		'ph.time_bonus_points.custom': 'Time bonus ({unit})',
-		'btn.add_points.custom': 'Add {unit}',
-		'btn.reset_points.custom': 'Reset {unit}',
-		'points.title.custom': 'Add {unit} to {name}',
-		'err.points_required.custom': 'Enter an amount in {unit}',
-		'err.points_number.custom': 'Enter a number for {unit}',
-		'err.points_positive.custom': 'Enter zero or more {unit}',
-		'shop.title.custom': '{unit} shop',
-		'lbl.early_bonus_by.custom': '+{points} {unit} if done by {date}',
-		'editor.enable_points_help.custom': 'Show the balance, shop and actions for {unit}',
-		'editor.color_group_kid_points.custom': 'Total balance ({unit})',
-		'editor.color_group_task_points.custom': 'Task reward ({unit})',
-		'icon.library': 'Task icons', 'icon.upload_failed': 'Upload failed',
-		'ui.multiple_per_day': 'Allow multiple completions per day',
-		'editor.language_name': 'English', 'editor.language': 'Language', 'editor.language_auto': 'Auto detect',
-		// Shared/admin
-		'overview.title': 'Assigned tasks',
-		'overview.finished_title': 'Finished tasks',
-		'overview.show_all': 'Show all ({pending} pending)',
-		'overview.none_active': 'No active tasks right now.',
-		'overview.none': 'No tasks yet.',
-		'overview.finished_none': 'No finished tasks yet.',
-		'card.admin_title': 'Chores4Kids – Parents',
-		'input.new_child_name': 'New child — name',
-			'input.new_category_name': 'New category — name',
-		'btn.add_child': 'Add child',
-			'btn.add_category': 'Add category',
-		'section.children': 'Children',
-			'section.categories': 'Categories',
-		'th.name': 'Name', 'th.color': 'Color', 'th.points': 'Points', 'th.pending': 'Pending', 'th.actions': 'Actions', 'th.status':'Status', 'th.assign':'Assigned to',
-		'th.categories':'Categories', 'th.completed':'Completed',
-		'btn.rename': 'Rename', 'btn.delete': 'Delete',
-		'section.new_task': 'Create Task',
-			'ph.title': 'Title', 'ph.points': 'Points', 'ph.description': 'Description (optional)',
-			'ph.bonus_title': 'Bonus task title', 'ph.bonus_points': 'Bonus points',
-			'ph.due': 'Deadline (date)',
-			'ph.early_bonus_days': 'Early bonus days',
-			'ph.early_bonus_points': 'Early bonus points',
-			'ui.early_bonus_enabled': 'Enable early completion bonus',
-			'warn.repeat_overrides_due': 'Repeat is enabled, so the deadline is based on the selected weekdays instead of this date.',
-			'warn.schedule_overrides_due': 'A schedule is enabled, so the deadline is based on the schedule instead of this date.',
-			'schedule.weekly': 'Weekly task',
-			'schedule.monthly': 'Monthly task',
-			'ph.categories': 'Categories',
-		'select.assign_child': 'Assign child',
-			'select.categories': 'Select categories',
-		'ph.icon': 'Icon (mdi:...)',
-		'icon.choose': 'Choose icon', 'icon.clear': 'Clear icon', 'icon.none': 'None', 'icon.search': 'Search icon',
-		'btn.create_task': 'Create task', 'btn.update_task': 'Update task', 'btn.edit': 'Edit', 'editor.loaded_task': 'Editing existing task',
-		'section.unassigned': 'Unassigned tasks', 'btn.assign': 'Assign',
-		'section.tasks_per_child': 'Tasks per child',
-		'btn.start': 'Start', 'btn.back': 'Reassign', 'btn.awaiting': 'Awaiting', 'btn.approve': 'Approve', 'btn.approve_bonus': 'Approve bonus', 'btn.approve_all': 'Approve all', 'btn.approve_partial': 'Partial approve', 'lbl.approved': 'Approved',
-		'section.scoreboard': 'Scoreboard',
-		'confirm.delete_child': 'Delete {name}?', 'confirm.delete_task': 'Delete task?',
-		'alert.choose_child_first': 'Choose a child first',
-		'ui.auto_recycle': 'Auto recycle approved tasks',
-		'ui.quick_complete': 'One-tap completion',
-		'ui.skip_approval': 'Skip parent approval',
-		'ui.bonus_task': 'Enable bonus task',
-			'ui.fastest_wins': 'Fastest wins (first child claims the task)',
-		'ui.time_bonus_enabled': 'Enable before-time bonus',
-		'ph.time_bonus_before': 'Bonus if done before (HH:MM)',
-		'ph.time_bonus_points': 'Time bonus points',
-		'ui.persist_until_done': 'Carry unfinished task to next day',
-		'ui.persist_help': 'Unfinished task will automatically move to next day',
-		'ui.mark_overdue': 'Mark unfinished task as overdue',
-		'ui.toggle_off_on': 'Off/On',
-		'section.tasks': 'Tasks',
-		'form.save': 'Save', 'form.add':'Add', 'form.cancel':'Cancel', 'form.close':'Close', 'form.clear':'Clear',
-		'repeat.label': 'Repeat', 'repeat.enable': 'Repeat task', 'repeat.auto_assign': 'Auto-assign (repeat)', 'repeat.save': 'Save plan',
-		'repeat.days.mon':'Mon','repeat.days.tue':'Tue','repeat.days.wed':'Wed','repeat.days.thu':'Thu','repeat.days.fri':'Fri','repeat.days.sat':'Sat','repeat.days.sun':'Sun',
-		'assign.disabled_auto': 'Disabled: auto-assign (repeat) is active',
-		'assign.auto_to': 'Auto-assigned to {names}',
-			'btn.add_points': 'Add points', 'btn.reset_points': 'Reset points',
-			'sort.configure': 'Sorting', 'sort.title': 'Choose order', 'sort.categories_order': 'Categories order', 'sort.none': 'No category', 'sort.save': 'Save', 'sort.reset': 'Reset',
-		'points.title': 'Add points to {name}', 'points.quick':'Quick add', 'points.remove':'Quick remove', 'points.custom':'Custom amount',
-		'err.title_required':'Title is required','err.points_required':'Points are required','err.points_number':'Points must be a number','err.points_positive':'Points must be 0 or more',
-		'status.assigned':'Assigned','status.in_progress':'In progress','status.awaiting_approval':'Awaiting approval','status.approved':'Approved','status.rejected':'Rejected','status.unassigned':'Unassigned','status.taken':'Taken',
-		'status.overdue':'Overdue','overdue.reassign_prompt':'This task is also scheduled for today. Assign it again?','overdue.yes':'Yes, assign again','overdue.no':'No thanks',
-		// Shop
-		'shop.title':'Point shop','shop.open':'Open shop','shop.item':'Item','shop.price':'Price','shop.icon':'Icon','shop.image':'Image','shop.upload':'Upload image','shop.add_item':'Add item','shop.history':'Purchase history','shop.child':'Child','shop.when':'When','shop.date':'Date','shop.time':'Time','shop.advanced':'Advanced actions','shop.entity':'Entity','shop.operation':'Operation','shop.add_action':'Add action','shop.add_delay':'Add delay','shop.steps':'Steps','shop.seconds':'Seconds','shop.minutes':'Minutes','shop.hours':'Hours','shop.delay':'Delay','shop.active':'Active','shop.buy':'Buy','shop.bought':'Bought','shop.clear_history':'Clear history','confirm.clear_history':'Clear all purchase history?',
-		// Child specific
-		'card.child_title_fallback': 'Chores4Kids – {name}',
-		'msg.child_not_found': 'Child not found. Check the name in card configuration.',
-		'msg.no_tasks': 'No tasks right now.',
-			'btn.done': 'Done', 'btn.start_task': 'Start task', 'btn.complete_task': 'Complete task', 'btn.task_done': 'Task done', 'btn.complete_bonus': 'Complete bonus',
-			'lbl.awaiting':'Awaiting approval', 'lbl.bonus':'Bonus task', 'lbl.bonus_locked':'Complete main task first',
-			'lbl.taken_by':'Task taken by {name}',
-			'lbl.points': 'points',
-			'section.daily_tasks': 'Today',
-			'section.weekly_tasks': 'Weekly tasks',
-			'lbl.deadline': 'Deadline: {date}',
-			'lbl.early_bonus_by': '+{points} bonus points if done on {date} or before',
-			// Editor UI
-			'editor.mode':'Mode', 'editor.mode_admin':'Parents', 'editor.mode_kid':'Kid', 'editor.mode_overview':'Recent tasks',
-			'editor.child_label':'Child', 'editor.child_placeholder':'Child name', 'editor.child_select_prompt':'— Select child —', 'editor.child_hint':'No children found yet — type the name manually.',
-			'editor.developer_mode':'Developer Mode',
-			'editor.developer_mode_help':'Shows debug controls like manual overdue marking',
-			'editor.enable_points':'Points',
-			'editor.enable_points_help':'Show points, point shop, and point actions',
-			'editor.completion_sound':'Completion Sound',
-			'editor.completion_sound_help':'Saved as /local/chores4kids/completion.<ext> and used across dashboards',
-			'editor.delete_sound':'Delete sound file',
-			'editor.delete_sound_confirm':'Delete the uploaded completion sound file?',
-			'editor.delete_sound_failed':'Failed to delete sound file',
-			'editor.confetti':'Confetti',
-			'editor.confetti_help':'Show confetti animation on completion',
-			'editor.notify_target':'Completion notification',
-			'editor.notify_target_help':'Send a push notification when a child marks a task done.',
-			'editor.notify_target_none':'Add person',
-			'editor.notify_toggle_complete':'Notify on task completion',
-			'editor.notify_toggle_shop':'Notify on shop purchase',
-			'editor.notify_toggle_shop_image':'Show image in shop notification',
-			'section.notifications':'Notifications',
-			'editor.colors':'Colors',
-			'editor.color_field_bg':'Background',
-			'editor.color_field_text':'Text',
-			'editor.color_group_start':'Start task button',
-			'editor.color_group_complete':'Complete task button',
-			'editor.color_group_kid_points':'Kids Total Points',
-			'editor.color_group_task_points':'Task points',
-			'editor.color_start_bg':'Start task button (background)',
-			'editor.color_start_text':'Start task button (text)',
-			'editor.color_complete_bg':'Complete task button (background)',
-			'editor.color_complete_text':'Complete task button (text)',
-			'editor.color_kid_points_bg':'Kids Total Points (background)',
-			'editor.color_kid_points_text':'Kids Total Points (text)',
-			'editor.color_task_points_bg':'Task points (background)',
-			'editor.color_task_points_text':'Task points (text)',
-			'editor.color_empty_default':'Empty = default'
-	},
-	nl: {
-		'delivery.required': 'Overhandiging vereist', 'delivery.pending': 'Wacht op overhandiging', 'delivery.mark': 'Markeer als overhandigd', 'delivery.done': 'Overhandigd',
-		'task.due_time': 'Tijdstip deadline (optioneel)',
-		'shop.visible_to': 'Zichtbaar voor', 'shop.all_children': 'Alle kinderen',
-		'penalty.enable': 'Punten aftrekken bij te laat afronden', 'status.deadline_missed': 'Deadline gemist',
-		'editor.sections': 'Onderdelen op deze kaart',
-		'history.title': 'Activiteitengeschiedenis',
-		'history.from': 'Van',
-		'history.through': 'Tot en met',
-		'history.empty': 'Geen voltooide taken in deze periode.',
-		'history.error': 'Laden van de geschiedenis mislukt.',
-		'history.refresh': 'Vernieuwen',
-		'history.loading': 'Laden…',
-		'editor.unit_name': 'Naam van de beloningseenheid',
-		'editor.task_columns': 'Taakkolommen',
-		'editor.columns_auto': 'Automatisch',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Vroege bonus ({unit})',
-		'ph.time_bonus_points.custom': 'Tijdbonus ({unit})',
-		'btn.add_points.custom': '{unit} toevoegen',
-		'btn.reset_points.custom': '{unit} resetten',
-		'points.title.custom': '{unit} toevoegen aan {name}',
-		'err.points_required.custom': 'Vul een bedrag in {unit} in',
-		'err.points_number.custom': 'Voer een getal in voor {unit}',
-		'err.points_positive.custom': 'Vul minstens 0 {unit} in',
-		'shop.title.custom': 'Winkel voor {unit}',
-		'lbl.early_bonus_by.custom': '+{points} {unit} indien klaar op of voor {date}',
-		'editor.enable_points_help.custom': 'Toon saldo, winkel en acties voor {unit}',
-		'editor.color_group_kid_points.custom': 'Totaalsaldo ({unit})',
-		'editor.color_group_task_points.custom': 'Taakbeloning ({unit})',
-		'icon.library': 'Taakpictogrammen', 'icon.upload_failed': 'Uploaden mislukt',
-		'ui.multiple_per_day': 'Meerdere keren per dag uitvoeren',
-		'editor.language_name': 'Nederlands', 'editor.language': 'Taal', 'editor.language_auto': 'Automatisch detecteren',
-		'overview.title': 'Toegewezen taken',
-		'overview.finished_title': 'Voltooide taken',
-		'overview.show_all': 'Toon alles ({pending} in afwachting)',
-		'overview.none_active': 'Momenteel geen actieve taken.',
-		'overview.none': 'Nog geen taken.',
-		'overview.finished_none': 'Nog geen voltooide taken.',
-		'card.admin_title': 'Chores4Kids – Ouders',
-		'input.new_child_name': 'Nieuw kind — naam',
-		'input.new_category_name': 'Nieuwe categorie — naam',
-		'btn.add_child': 'Kind toevoegen',
-		'btn.add_category': 'Categorie toevoegen',
-		'section.children': 'Kinderen',
-		'section.categories': 'Categorieën',
-		'th.name': 'Naam',
-		'th.color': 'Kleur',
-		'th.points': 'Punten',
-		'th.pending': 'In afwachting',
-		'th.actions': 'Acties',
-		'th.status': 'Status',
-		'th.assign': 'Toegewezen aan',
-		'th.categories': 'Categorieën',
-		'th.completed': 'Voltooid',
-		'btn.rename': 'Hernoemen',
-		'btn.delete': 'Verwijderen',
-		'section.new_task': 'Taak aanmaken',
-		'ph.title': 'Titel',
-		'ph.points': 'Punten',
-		'ph.description': 'Beschrijving (optioneel)',
-		'ph.bonus_title': 'Bonustaak titel',
-		'ph.bonus_points': 'Bonuspunten',
-		'ph.due': 'Deadline (datum)',
-		'ph.early_bonus_days': 'Vroegtijdige bonusdagen',
-		'ph.early_bonus_points': 'Vroegtijdige bonuspunten',
-		'ui.early_bonus_enabled': 'Inschakelen vroegtijdige voltooiingsbonus',
-		'warn.repeat_overrides_due': 'Herhaling is ingeschakeld, dus de deadline is gebaseerd op de geselecteerde weekdagen in plaats van deze datum.',
-		'warn.schedule_overrides_due': 'Er is een schema ingeschakeld, dus de deadline is gebaseerd op het schema in plaats van deze datum.',
-		'schedule.weekly': 'Wekelijkse taak',
-		'schedule.monthly': 'Maandelijkse taak',
-		'ph.categories': 'Categorieën',
-		'select.assign_child': 'Kind toewijzen',
-		'select.categories': 'Selecteer categorieën',
-		'ph.icon': 'Icoon (mdi:...)',
-		'icon.choose': 'Kies icoon',
-		'icon.clear': 'Wis icoon',
-		'icon.none': 'Geen',
-		'icon.search': 'Zoek icoon',
-		'btn.create_task': 'Taak aanmaken',
-		'btn.update_task': 'Taak bijwerken',
-		'btn.edit': 'Bewerken',
-		'editor.loaded_task': 'Bestaande taak bewerken',
-		'section.unassigned': 'Niet-toegewezen taken',
-		'btn.assign': 'Toewijzen',
-		'section.tasks_per_child': 'Taken per kind',
-		'btn.start': 'Start',
-		'btn.back': 'Opnieuw toewijzen',
-		'btn.awaiting': 'In afwachting',
-		'btn.approve': 'Goedkeuren',
-		'btn.approve_bonus': 'Bonus goedkeuren',
-		'btn.approve_all': 'Alles goedkeuren',
-		'btn.approve_partial': 'Gedeeltelijk goedkeuren',
-		'lbl.approved': 'Goedgekeurd',
-		'section.scoreboard': 'Scorebord',
-		'confirm.delete_child': '{name} verwijderen?',
-		'confirm.delete_task': 'Taak verwijderen?',
-		'alert.choose_child_first': 'Kies eerst een kind',
-		'ui.auto_recycle': 'Goedgekeurde taken automatisch recyclen',
-		'ui.quick_complete': 'Voltooien in één tik',
-		'ui.skip_approval': 'Goedkeuring door ouders overslaan',
-		'ui.bonus_task': 'Bonustaak inschakelen',
-		'ui.fastest_wins': 'Snelste wint (eerste kind claimt de taak)',
-		'ui.time_bonus_enabled': 'Tijd-voor-tijd bonus inschakelen',
-		'ph.time_bonus_before': 'Bonus indien klaar voor (UU:MM)',
-		'ph.time_bonus_points': 'Tijdbonuspunten',
-		'ui.persist_until_done': 'Onvoltooide taak meenemen naar de volgende dag',
-		'ui.persist_help': 'Onvoltooide taak verplaatst automatisch naar de volgende dag',
-		'ui.mark_overdue': 'Markeer onvoltooide taak als te laat',
-		'ui.toggle_off_on': 'Uit/Aan',
-		'section.tasks': 'Taken',
-		'form.save': 'Opslaan',
-		'form.add': 'Toevoegen',
-		'form.cancel': 'Annuleren',
-		'form.close': 'Sluiten',
-		'form.clear': 'Wis',
-		'repeat.label': 'Herhalen',
-		'repeat.enable': 'Taak herhalen',
-		'repeat.auto_assign': 'Automatisch toewijzen (herhalen)',
-		'repeat.save': 'Plan opslaan',
-		'repeat.days.mon': 'Ma',
-		'repeat.days.tue': 'Di',
-		'repeat.days.wed': 'Wo',
-		'repeat.days.thu': 'Do',
-		'repeat.days.fri': 'Vr',
-		'repeat.days.sat': 'Za',
-		'repeat.days.sun': 'Zo',
-		'assign.disabled_auto': 'Uitgeschakeld: automatisch toewijzen (herhalen) is actief',
-		'assign.auto_to': 'Automatisch toegewezen aan {names}',
-		'btn.add_points': 'Punten toevoegen',
-		'btn.reset_points': 'Punten resetten',
-		'sort.configure': 'Sortering',
-		'sort.title': 'Kies volgorde',
-		'sort.categories_order': 'Categorieën volgorde',
-		'sort.none': 'Geen categorie',
-		'sort.save': 'Opslaan',
-		'sort.reset': 'Reset',
-		'points.title': 'Punten toevoegen aan {name}',
-		'points.quick': 'Snel toevoegen',
-		'points.remove': 'Snel verwijderen',
-		'points.custom': 'Aangepast aantal',
-		'err.title_required': 'Titel is verplicht',
-		'err.points_required': 'Punten zijn verplicht',
-		'err.points_number': 'Punten moeten een getal zijn',
-		'err.points_positive': 'Punten moeten 0 of meer zijn',
-		'status.assigned': 'Toegewezen',
-		'status.in_progress': 'In uitvoering',
-		'status.awaiting_approval': 'Wacht op goedkeuring',
-		'status.approved': 'Goedgekeurd',
-		'status.rejected': 'Afgewezen',
-		'status.unassigned': 'Niet toegewezen',
-		'status.taken': 'Genomen',
-		'status.overdue': 'Te laat',
-		'overdue.reassign_prompt': 'Deze taak is ook gepland voor vandaag. Nogmaals toewijzen?',
-		'overdue.yes': 'Ja, opnieuw toewijzen',
-		'overdue.no': 'Nee bedankt',
-		'debug.mark_overdue': '[TEST] Markeer als te laat',
-		'shop.title': 'Punteshop',
-		'shop.open': 'Open shop',
-		'shop.item': 'Artikel',
-		'shop.price': 'Prijs',
-		'shop.icon': 'Icoon',
-		'shop.image': 'Afbeelding',
-		'shop.upload': 'Upload afbeelding',
-		'shop.add_item': 'Artikel toevoegen',
-		'shop.history': 'Aankoopgeschiedenis',
-		'shop.child': 'Kind',
-		'shop.when': 'Wanneer',
-		'shop.date': 'Datum',
-		'shop.time': 'Tijd',
-		'shop.advanced': 'Geavanceerde acties',
-		'shop.entity': 'Entiteit',
-		'shop.operation': 'Bewerking',
-		'shop.add_action': 'Actie toevoegen',
-		'shop.add_delay': 'Vertraging toevoegen',
-		'shop.steps': 'Stappen',
-		'shop.seconds': 'Seconden',
-		'shop.minutes': 'Minuten',
-		'shop.hours': 'Uur',
-		'shop.delay': 'Vertraging',
-		'shop.active': 'Actief',
-		'shop.buy': 'Kopen',
-		'shop.bought': 'Gekocht',
-		'shop.clear_history': 'Geschiedenis wissen',
-		'confirm.clear_history': 'Hele aankoopgeschiedenis wissen?',
-		'card.child_title_fallback': 'Chores4Kids – {name}',
-		'msg.child_not_found': 'Kind niet gevonden. Controleer de naam in de configuratie.',
-		'msg.no_tasks': 'Momenteel geen taken.',
-		'btn.done': 'Klaar',
-		'btn.start_task': 'Start taak',
-		'btn.complete_task': 'Taak voltooid',
-		'btn.task_done': 'Taak klaar',
-		'btn.complete_bonus': 'Bonus voltooien',
-		'lbl.awaiting': 'Wacht op goedkeuring',
-		'lbl.bonus': 'Bonustaak',
-		'lbl.bonus_locked': 'Voltooi eerst de hoofdtaak',
-		'lbl.taken_by': 'Taak overgenomen door {name}',
-		'lbl.points': 'punten',
-		'section.daily_tasks': 'Vandaag',
-		'section.weekly_tasks': 'Wekelijkse taken',
-		'lbl.deadline': 'Deadline: {date}',
-		'lbl.early_bonus_by': '+{points} bonuspunten indien klaar op of voor {date}',
-		'editor.mode': 'Modus',
-		'editor.mode_admin': 'Ouders',
-		'editor.mode_kid': 'Kind',
-		'editor.mode_overview': 'Recente taken',
-		'editor.child_label': 'Kind',
-		'editor.child_placeholder': 'Naam van het kind',
-		'editor.child_select_prompt': '— Selecteer kind —',
-		'editor.child_hint': 'Nog geen kinderen gevonden — typ de naam handmatig.',
-		'editor.developer_mode': 'Ontwikkelaarsmodus',
-		'editor.developer_mode_help': 'Toont debug-bedieningselementen zoals handmatige markering voor te laat',
-		'editor.enable_points': 'Punten',
-		'editor.enable_points_help': 'Toon punten, punteshop en puntacties',
-		'editor.completion_sound': 'Voltooiingsgeluid',
-		'editor.completion_sound_help': 'Opgeslagen als /local/chores4kids/completion.<ext> en gebruikt op dashboards',
-		'editor.delete_sound': 'Geluidsbestand verwijderen',
-		'editor.delete_sound_confirm': 'Het geüploade voltooiingsgeluid verwijderen?',
-		'editor.delete_sound_failed': 'Verwijderen geluidsbestand mislukt',
-		'editor.confetti': 'Confetti',
-		'editor.confetti_help': 'Toon confetti-animatie bij voltooiing',
-		'editor.notify_target': 'Voltooiingsnotificatie',
-		'editor.notify_target_help': 'Stuur een pushmelding wanneer een kind een taak als klaar markeert.',
-		'editor.notify_target_none': 'Persoon toevoegen',
-		'editor.notify_toggle_complete': 'Melden bij taakvoltooiing',
-		'editor.notify_toggle_shop': 'Melden bij aankoop in shop',
-		'editor.notify_toggle_shop_image': 'Toon afbeelding in shopnotificatie',
-		'section.notifications': 'Notificaties',
-		'editor.colors': 'Kleuren',
-		'editor.color_field_bg': 'Achtergrond',
-		'editor.color_field_text': 'Tekst',
-		'editor.color_group_start': 'Start taak knop',
-		'editor.color_group_complete': 'Taak voltooid knop',
-		'editor.color_group_kid_points': 'Totaal punten kinderen',
-		'editor.color_group_task_points': 'Taakpunten',
-		'editor.color_start_bg': 'Start taak knop (achtergrond)',
-		'editor.color_start_text': 'Start taak knop (tekst)',
-		'editor.color_complete_bg': 'Taak voltooid knop (achtergrond)',
-		'editor.color_complete_text': 'Taak voltooid knop (tekst)',
-		'editor.color_kid_points_bg': 'Totaal punten kinderen (achtergrond)',
-		'editor.color_kid_points_text': 'Totaal punten kinderen (tekst)',
-		'editor.color_task_points_bg': 'Taakpunten (achtergrond)',
-		'editor.color_task_points_text': 'Taakpunten (tekst)',
-		'editor.color_empty_default': 'Leeg = standaard',
-	},
-	tr: {
-		'delivery.required': 'Teslimat gerekiyor', 'delivery.pending': 'Teslimat bekleniyor', 'delivery.mark': 'Teslim edildi olarak işaretle', 'delivery.done': 'Teslim edildi',
-		'task.due_time': 'Son saat (isteğe bağlı)',
-		'shop.visible_to': 'Görebilenler', 'shop.all_children': 'Tüm çocuklar',
-		'penalty.enable': 'Gecikirse puan düş', 'status.deadline_missed': 'Süre doldu',
-		'editor.sections': 'Bu karttaki bölümler',
-		'history.title': 'Etkinlik geçmişi',
-		'history.from': 'Başlangıç',
-		'history.through': 'Bitiş',
-		'history.empty': 'Bu dönemde tamamlanan görev yok.',
-		'history.error': 'Etkinlik geçmişi yüklenemedi.',
-		'history.refresh': 'Yenile',
-		'history.loading': 'Yükleniyor…',
-		'editor.unit_name': 'Ödül biriminin adı',
-		'editor.task_columns': 'Görev sütunları',
-		'editor.columns_auto': 'Otomatik',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Erken bitirme bonusu ({unit})',
-		'ph.time_bonus_points.custom': 'Zaman bonusu ({unit})',
-		'btn.add_points.custom': '{unit} ekle',
-		'btn.reset_points.custom': '{unit} sıfırla',
-		'points.title.custom': '{name} için {unit} ekle',
-		'err.points_required.custom': '{unit} miktarını girin',
-		'err.points_number.custom': '{unit} için sayı girin',
-		'err.points_positive.custom': 'En az 0 {unit} girin',
-		'shop.title.custom': '{unit} mağazası',
-		'lbl.early_bonus_by.custom': '{date} tarihine kadar bitirirsen +{points} {unit}',
-		'editor.enable_points_help.custom': '{unit} için bakiyeyi, mağazayı ve işlemleri göster',
-		'editor.color_group_kid_points.custom': 'Toplam bakiye ({unit})',
-		'editor.color_group_task_points.custom': 'Görev ödülü ({unit})',
-		'icon.library': 'Görev simgeleri', 'icon.upload_failed': 'Yükleme başarısız',
-		'ui.multiple_per_day': 'Günde birden fazla kez tamamlanabilir',
-		'editor.language_name': 'Türkçe', 'editor.language': 'Dil', 'editor.language_auto': 'Otomatik algıla',
-		'overview.title': 'Atanan görevler',
-		'overview.finished_title': 'Tamamlanan görevler',
-		'overview.show_all': 'Tümünü göster ({pending} bekliyor)',
-		'overview.none_active': 'Şu anda etkin görev yok.',
-		'overview.none': 'Henüz görev yok.',
-		'overview.finished_none': 'Henüz tamamlanan görev yok.',
-		'card.admin_title': 'Chores4Kids – Ebeveynler',
-		'input.new_child_name': 'Yeni çocuğun adı',
-		'input.new_category_name': 'Yeni kategorinin adı',
-		'btn.add_child': 'Çocuk ekle',
-		'btn.add_category': 'Kategori ekle',
-		'section.children': 'Çocuklar',
-		'section.categories': 'Kategoriler',
-		'th.name': 'Ad',
-		'th.color': 'Renk',
-		'th.points': 'Puan',
-		'th.pending': 'Bekleyen',
-		'th.actions': 'İşlemler',
-		'th.status': 'Durum',
-		'th.assign': 'Atanan kişi',
-		'th.categories': 'Kategoriler',
-		'th.completed': 'Tamamlanan',
-		'btn.rename': 'Yeniden adlandır',
-		'btn.delete': 'Sil',
-		'section.new_task': 'Görev oluştur',
-		'ph.title': 'Başlık',
-		'ph.points': 'Puan',
-		'ph.description': 'Açıklama (isteğe bağlı)',
-		'ph.bonus_title': 'Bonus görevin başlığı',
-		'ph.bonus_points': 'Bonus puan',
-		'ph.due': 'Son tarih',
-		'ph.early_bonus_days': 'Erken bitirme bonusu için gün sayısı',
-		'ph.early_bonus_points': 'Erken bitirme bonus puanı',
-		'ui.early_bonus_enabled': 'Erken bitirme bonusunu etkinleştir',
-		'warn.repeat_overrides_due': 'Tekrar etkin olduğu için son tarih seçilen günlere göre belirlenir.',
-		'warn.schedule_overrides_due': 'Zamanlama etkin olduğu için son tarih plana göre belirlenir.',
-		'schedule.weekly': 'Haftalık görev',
-		'schedule.monthly': 'Aylık görev',
-		'ph.categories': 'Kategoriler',
-		'select.assign_child': 'Çocuk seç',
-		'select.categories': 'Kategorileri seç',
-		'ph.icon': 'Simge (mdi:...)',
-		'icon.choose': 'Simge seç',
-		'icon.clear': 'Simgeyi kaldır',
-		'icon.none': 'Yok',
-		'icon.search': 'Simge ara',
-		'btn.create_task': 'Görev oluştur',
-		'btn.update_task': 'Görevi güncelle',
-		'btn.edit': 'Düzenle',
-		'editor.loaded_task': 'Mevcut görev düzenleniyor',
-		'section.unassigned': 'Atanmamış görevler',
-		'btn.assign': 'Ata',
-		'section.tasks_per_child': 'Çocuklara göre görevler',
-		'btn.start': 'Başlat',
-		'btn.back': 'Yeniden ata',
-		'btn.awaiting': 'Bekliyor',
-		'btn.approve': 'Onayla',
-		'btn.approve_bonus': 'Bonusu onayla',
-		'btn.approve_all': 'Tümünü onayla',
-		'btn.approve_partial': 'Kısmen onayla',
-		'lbl.approved': 'Onaylandı',
-		'section.scoreboard': 'Puan tablosu',
-		'confirm.delete_child': '{name} silinsin mi?',
-		'confirm.delete_task': 'Görev silinsin mi?',
-		'alert.choose_child_first': 'Önce bir çocuk seçin',
-		'ui.auto_recycle': 'Onaylanan görevleri otomatik olarak yeniden kullan',
-		'ui.quick_complete': 'Tek dokunuşla tamamla',
-		'ui.skip_approval': 'Ebeveyn onayını atla',
-		'ui.bonus_task': 'Bonus görevi etkinleştir',
-		'ui.fastest_wins': 'En hızlı olan kazanır (görevi ilk alan çocuk yapar)',
-		'ui.time_bonus_enabled': 'Belirli bir saatten önce bitirme bonusunu etkinleştir',
-		'ph.time_bonus_before': 'Bu saatten önce bitirene bonus (SS:DD)',
-		'ph.time_bonus_points': 'Saat bonusu puanı',
-		'ui.persist_until_done': 'Bitmemiş görevi ertesi güne aktar',
-		'ui.persist_help': 'Bitmemiş görev otomatik olarak ertesi güne aktarılır',
-		'ui.mark_overdue': 'Bitmemiş görevi gecikmiş olarak işaretle',
-		'ui.toggle_off_on': 'Kapalı/Açık',
-		'section.tasks': 'Görevler',
-		'form.save': 'Kaydet',
-		'form.add': 'Ekle',
-		'form.cancel': 'İptal',
-		'form.close': 'Kapat',
-		'form.clear': 'Temizle',
-		'repeat.label': 'Tekrar',
-		'repeat.enable': 'Görevi tekrarla',
-		'repeat.auto_assign': 'Otomatik ata (tekrar)',
-		'repeat.save': 'Planı kaydet',
-		'repeat.days.mon': 'Pzt',
-		'repeat.days.tue': 'Sal',
-		'repeat.days.wed': 'Çar',
-		'repeat.days.thu': 'Per',
-		'repeat.days.fri': 'Cum',
-		'repeat.days.sat': 'Cmt',
-		'repeat.days.sun': 'Paz',
-		'assign.disabled_auto': 'Otomatik atama etkin olduğu için elle atama kapalı',
-		'assign.auto_to': 'Otomatik olarak atananlar: {names}',
-		'btn.add_points': 'Puan ekle',
-		'btn.reset_points': 'Puanları sıfırla',
-		'sort.configure': 'Sıralama',
-		'sort.title': 'Sıralamayı seç',
-		'sort.categories_order': 'Kategori sırası',
-		'sort.none': 'Kategori yok',
-		'sort.save': 'Kaydet',
-		'sort.reset': 'Sıfırla',
-		'points.title': 'Puan ekle: {name}',
-		'points.quick': 'Hızlı ekle',
-		'points.remove': 'Hızlı çıkar',
-		'points.custom': 'Özel miktar',
-		'err.title_required': 'Başlık gerekli',
-		'err.points_required': 'Puan gerekli',
-		'err.points_number': 'Puan bir sayı olmalı',
-		'err.points_positive': 'Puan sıfır veya daha fazla olmalı',
-		'status.assigned': 'Atandı',
-		'status.in_progress': 'Devam ediyor',
-		'status.awaiting_approval': 'Onay bekliyor',
-		'status.approved': 'Onaylandı',
-		'status.rejected': 'Reddedildi',
-		'status.unassigned': 'Atanmadı',
-		'status.taken': 'Alındı',
-		'status.overdue': 'Gecikmiş',
-		'overdue.reassign_prompt': 'Bu görev bugün için de planlanmış. Yeniden atansın mı?',
-		'overdue.yes': 'Evet, yeniden ata',
-		'overdue.no': 'Hayır, teşekkürler',
-		'shop.title': 'Puan mağazası',
-		'shop.open': 'Mağazayı aç',
-		'shop.item': 'Ürün',
-		'shop.price': 'Fiyat',
-		'shop.icon': 'Simge',
-		'shop.image': 'Görsel',
-		'shop.upload': 'Görsel yükle',
-		'shop.add_item': 'Ürün ekle',
-		'shop.history': 'Alışveriş geçmişi',
-		'shop.child': 'Çocuk',
-		'shop.when': 'Ne zaman',
-		'shop.date': 'Tarih',
-		'shop.time': 'Saat',
-		'shop.advanced': 'Gelişmiş işlemler',
-		'shop.entity': 'Varlık',
-		'shop.operation': 'İşlem',
-		'shop.add_action': 'Eylem ekle',
-		'shop.add_delay': 'Bekleme süresi ekle',
-		'shop.steps': 'Adımlar',
-		'shop.seconds': 'Saniye',
-		'shop.minutes': 'Dakika',
-		'shop.hours': 'Saat',
-		'shop.delay': 'Bekleme süresi',
-		'shop.active': 'Etkin',
-		'shop.buy': 'Satın al',
-		'shop.bought': 'Satın alındı',
-		'shop.clear_history': 'Geçmişi temizle',
-		'confirm.clear_history': 'Tüm alışveriş geçmişi silinsin mi?',
-		'card.child_title_fallback': 'Chores4Kids – {name}',
-		'msg.child_not_found': 'Çocuk bulunamadı. Kart ayarlarındaki adı kontrol edin.',
-		'msg.no_tasks': 'Şu anda görev yok.',
-		'btn.done': 'Bitti',
-		'btn.start_task': 'Göreve başla',
-		'btn.complete_task': 'Görevi tamamla',
-		'btn.task_done': 'Görev tamamlandı',
-		'btn.complete_bonus': 'Bonus görevi tamamla',
-		'lbl.awaiting': 'Onay bekliyor',
-		'lbl.bonus': 'Bonus görev',
-		'lbl.bonus_locked': 'Önce ana görevi tamamla',
-		'lbl.taken_by': 'Görevi alan: {name}',
-		'lbl.points': 'puan',
-		'section.daily_tasks': 'Bugün',
-		'section.weekly_tasks': 'Haftalık görevler',
-		'lbl.deadline': 'Son tarih: {date}',
-		'lbl.early_bonus_by': '{date} tarihinde veya öncesinde bitirirsen +{points} bonus puan',
-		'editor.mode': 'Mod',
-		'editor.mode_admin': 'Ebeveynler',
-		'editor.mode_kid': 'Çocuk',
-		'editor.mode_overview': 'Son görevler',
-		'editor.child_label': 'Çocuk',
-		'editor.child_placeholder': 'Çocuğun adı',
-		'editor.child_select_prompt': '— Çocuk seç —',
-		'editor.child_hint': 'Henüz çocuk bulunamadı. Adı elle girin.',
-		'editor.developer_mode': 'Geliştirici modu',
-		'editor.developer_mode_help': 'Görevi elle gecikmiş olarak işaretleme gibi hata ayıklama seçeneklerini gösterir',
-		'editor.enable_points': 'Puanlar',
-		'editor.enable_points_help': 'Puanları, puan mağazasını ve puan işlemlerini göster',
-		'editor.completion_sound': 'Görev tamamlama sesi',
-		'editor.completion_sound_help': '/local/chores4kids/completion.<ext> olarak kaydedilir ve tüm panolarda kullanılır',
-		'editor.delete_sound': 'Ses dosyasını sil',
-		'editor.delete_sound_confirm': 'Yüklenen görev tamamlama sesi silinsin mi?',
-		'editor.delete_sound_failed': 'Ses dosyası silinemedi',
-		'editor.confetti': 'Konfeti',
-		'editor.confetti_help': 'Görev tamamlandığında konfeti göster',
-		'editor.notify_target': 'Görev tamamlama bildirimi',
-		'editor.notify_target_help': 'Çocuk bir görevi tamamlandı olarak işaretlediğinde anlık bildirim gönder.',
-		'editor.notify_target_none': 'Kişi ekle',
-		'editor.notify_toggle_complete': 'Görev tamamlandığında bildir',
-		'editor.notify_toggle_shop': 'Mağazadan alışveriş yapıldığında bildir',
-		'editor.notify_toggle_shop_image': 'Alışveriş bildiriminde görseli göster',
-		'section.notifications': 'Bildirimler',
-		'editor.colors': 'Renkler',
-		'editor.color_field_bg': 'Arka plan',
-		'editor.color_field_text': 'Metin',
-		'editor.color_group_start': 'Göreve başlama düğmesi',
-		'editor.color_group_complete': 'Görevi tamamlama düğmesi',
-		'editor.color_group_kid_points': 'Çocukların toplam puanı',
-		'editor.color_group_task_points': 'Görev puanı',
-		'editor.color_start_bg': 'Göreve başlama düğmesi (arka plan)',
-		'editor.color_start_text': 'Göreve başlama düğmesi (metin)',
-		'editor.color_complete_bg': 'Görevi tamamlama düğmesi (arka plan)',
-		'editor.color_complete_text': 'Görevi tamamlama düğmesi (metin)',
-		'editor.color_kid_points_bg': 'Çocukların toplam puanı (arka plan)',
-		'editor.color_kid_points_text': 'Çocukların toplam puanı (metin)',
-		'editor.color_task_points_bg': 'Görev puanı (arka plan)',
-		'editor.color_task_points_text': 'Görev puanı (metin)',
-		'editor.color_empty_default': 'Varsayılanı kullanmak için boş bırakın',
-	},
-	da: {
-		'delivery.required': 'Kræver udlevering', 'delivery.pending': 'Afventer udlevering', 'delivery.mark': 'Markér som udleveret', 'delivery.done': 'Udleveret',
-		'task.due_time': 'Klokkeslæt for frist (valgfrit)',
-		'shop.visible_to': 'Vises for', 'shop.all_children': 'Alle børn',
-		'penalty.enable': 'Træk point ved overskredet frist', 'status.deadline_missed': 'Frist overskredet',
-		'editor.sections': 'Sektioner på dette kort',
-		'history.title': 'Aktivitetshistorik',
-		'history.from': 'Fra',
-		'history.through': 'Til og med',
-		'history.empty': 'Ingen udførte opgaver i perioden.',
-		'history.error': 'Aktivitetshistorikken kunne ikke hentes.',
-		'history.refresh': 'Opdater',
-		'history.loading': 'Henter…',
-		'editor.unit_name': 'Navn på belønningsenhed',
-		'editor.task_columns': 'Opgavekolonner',
-		'editor.columns_auto': 'Automatisk',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Tidlig bonus ({unit})',
-		'ph.time_bonus_points.custom': 'Tidsbonus ({unit})',
-		'btn.add_points.custom': 'Tilføj {unit}',
-		'btn.reset_points.custom': 'Nulstil {unit}',
-		'points.title.custom': 'Tilføj {unit} til {name}',
-		'err.points_required.custom': 'Angiv et beløb i {unit}',
-		'err.points_number.custom': 'Angiv et tal for {unit}',
-		'err.points_positive.custom': 'Angiv mindst 0 {unit}',
-		'shop.title.custom': 'Butik med {unit}',
-		'lbl.early_bonus_by.custom': '+{points} {unit} ved udførelse senest {date}',
-		'editor.enable_points_help.custom': 'Vis saldo, butik og handlinger for {unit}',
-		'editor.color_group_kid_points.custom': 'Samlet saldo ({unit})',
-		'editor.color_group_task_points.custom': 'Opgavens belønning ({unit})',
-		'icon.library': 'Opgaveikoner', 'icon.upload_failed': 'Upload mislykkedes',
-		'ui.multiple_per_day': 'Kan udføres flere gange om dagen',
-		'editor.language_name': 'Dansk', 'editor.language': 'Sprog', 'editor.language_auto': 'Registrer automatisk',
-		'overview.title': 'Tildelte opgaver',
-		'overview.finished_title': 'Færdige opgaver',
-		'overview.show_all': 'Vis alle ({pending} afventer)',
-		'overview.none_active': 'Ingen aktive opgaver lige nu.',
-		'overview.none': 'Ingen opgaver endnu.',
-		'overview.finished_none': 'Ingen færdige opgaver endnu.',
-		'card.admin_title': 'Chores4Kids – Forældre',
-		'input.new_child_name': 'Nyt barn – navn',
-			'input.new_category_name': 'Ny kategori – navn',
-		'btn.add_child': 'Tilføj barn',
-			'btn.add_category': 'Tilføj kategori',
-		'section.children': 'Børn',
-			'section.categories': 'Kategorier',
-		'th.name': 'Navn', 'th.color': 'Farve', 'th.points': 'Point', 'th.pending': 'Ventende', 'th.actions': 'Handling', 'th.status':'Status', 'th.assign':'Tildelt til',
-			'th.categories':'Kategorier', 'th.completed':'Fuldført',
-		'btn.rename': 'Omdøb', 'btn.delete': 'Slet',
-		'section.new_task': 'Ny opgave',
-			'ph.title': 'Titel', 'ph.points': 'Point', 'ph.description': 'Beskrivelse (valgfri)',
-			'ph.bonus_title': 'Bonusopgave titel', 'ph.bonus_points': 'Bonus point',
-			'ph.due': 'Deadline (dato)',
-			'ph.early_bonus_days': 'Bonus dage før',
-			'ph.early_bonus_points': 'Bonus point',
-			'ui.early_bonus_enabled': 'Aktivér førtidig bonus',
-			'warn.repeat_overrides_due': 'Gentagelse er slået til, så deadline beregnes ud fra de valgte ugedage i stedet for denne dato.',
-			'warn.schedule_overrides_due': 'En plan er slået til, så deadline er baseret på planen i stedet for denne dato.',
-			'schedule.weekly': 'Ugentlig opgave',
-			'schedule.monthly': 'Månedlig opgave',
-			'ph.categories': 'Kategorier',
-		'select.assign_child': 'Tildel barn',
-			'select.categories': 'Vælg kategorier',
-		'ph.icon': 'Ikon (mdi:...)',
-		'icon.choose': 'Vælg ikon', 'icon.clear': 'Fjern ikon', 'icon.none': 'Ingen', 'icon.search': 'Søg ikon',
-		'btn.create_task': 'Opret opgave', 'btn.update_task': 'Opdatér opgave', 'btn.edit': 'Redigér', 'editor.loaded_task': 'Redigerer eksisterende opgave',
-		'section.unassigned': 'Utildelte opgaver', 'btn.assign': 'Tildel',
-		'section.tasks_per_child': 'Opgaver pr. barn',
-		'btn.start': 'Start', 'btn.back': 'Gentildel', 'btn.awaiting': 'Afventer', 'btn.approve': 'Godkend', 'btn.approve_bonus': 'Godkend bonus', 'btn.approve_all': 'Godkend alle', 'btn.approve_partial': 'Delvis godkend', 'lbl.approved': 'Godkendt',
-		'section.scoreboard': 'Scoreboard',
-		'confirm.delete_child': 'Slet {name}?', 'confirm.delete_task': 'Slet opgave?',
-		'alert.choose_child_first': 'Vælg et barn først',
-		'ui.auto_recycle': 'Genopret automatisk efter godkendelse',
-		'ui.quick_complete': 'Ét-tryk færdig',
-		'ui.skip_approval': 'Spring forældre godkendelse over',
-		'ui.bonus_task': 'Aktivér bonusopgave',
-			'ui.fastest_wins': 'Hurtigst vinder (første barn tager opgaven)',
-		'ui.persist_until_done': 'Flyt ufærdig opgave til næste dag',
-		'ui.persist_help': 'Ufærdig opgave flyttes automatisk til næste dag',
-		'ui.mark_overdue': 'Markér ufærdig opgave som forfalden',
-		'ui.toggle_off_on': 'Fra/Til',
-		'section.tasks': 'Opgaver',
-		'form.save': 'Gem', 'form.add':'Tilføj', 'form.cancel':'Annullér', 'form.close':'Luk', 'form.clear':'Ryd',
-		'repeat.label': 'Gentagelse', 'repeat.enable': 'Gentag opgave', 'repeat.auto_assign': 'Auto-tildel (gentagelse)', 'repeat.save': 'Gem plan',
-		'repeat.days.mon':'Man','repeat.days.tue':'Tir','repeat.days.wed':'Ons','repeat.days.thu':'Tor','repeat.days.fri':'Fre','repeat.days.sat':'Lør','repeat.days.sun':'Søn',
-		'assign.disabled_auto': 'Deaktiveret: auto-tildeling (gentagelse) er aktiv',
-		'assign.auto_to': 'Auto-tildelt til {names}',
-		'btn.add_points': 'Tilføj point', 'btn.reset_points': 'Nulstil point',
-			'sort.configure': 'Sortering', 'sort.title': 'Vælg rækkefølge', 'sort.categories_order': 'Rækkefølge for kategorier', 'sort.none': 'Ingen kategori', 'sort.save': 'Gem', 'sort.reset': 'Nulstil',
-		'points.title': 'Tilføj point til {name}', 'points.quick':'Hurtig tilføj', 'points.remove':'Hurtig fratræk', 'points.custom':'Valgfrit antal',
-		'err.title_required':'Titel er påkrævet','err.points_required':'Point skal udfyldes','err.points_number':'Point skal være et tal','err.points_positive':'Point skal være 0 eller mere',
-		'status.assigned':'Tildelt','status.in_progress':'I gang','status.awaiting_approval':'Afventer godkendelse','status.approved':'Godkendt','status.rejected':'Afvist','status.unassigned':'Ikke tildelt','status.taken':'Taget',
-		'status.overdue':'Forfalden','overdue.reassign_prompt':'Denne opgave er også planlagt i dag. Tildel den igen?','overdue.yes':'Ja, tildel igen','overdue.no':'Nej tak',
-		'debug.mark_overdue':'[TEST] Markér forfalden',
-		'shop.title':'Pointshop','shop.open':'Åbn shop','shop.item':'Vare','shop.price':'Pris','shop.icon':'Ikon','shop.image':'Billede','shop.upload':'Upload billede','shop.add_item':'Tilføj vare','shop.history':'Købshistorik','shop.child':'Barn','shop.when':'Tidspunkt','shop.date':'Dato','shop.time':'Tidspunkt','shop.advanced':'Avancerede handlinger','shop.entity':'Enhed','shop.operation':'Handling','shop.add_action':'Tilføj handling','shop.add_delay':'Tilføj delay','shop.steps':'Trin','shop.seconds':'Sekunder','shop.minutes':'Minutter','shop.hours':'Timer','shop.delay':'Forsinkelse','shop.active':'Aktiv','shop.buy':'Køb','shop.bought':'Købt','shop.clear_history':'Ryd historik','confirm.clear_history':'Ryd hele købshistorikken?',
-			'card.child_title_fallback': 'Chores4Kids – {name}', 'msg.child_not_found': 'Barn ikke fundet. Tjek navn i kort-konfigurationen.', 'msg.no_tasks':'Ingen opgaver lige nu.', 'btn.done':'Fuldført', 'btn.start_task':'Start opgave', 'btn.complete_task':'Opgave klaret', 'btn.task_done':'Opgave færdig', 'btn.complete_bonus':'Færdiggør bonus', 'lbl.awaiting':'Afventer godkendelse', 'lbl.bonus':'Bonusopgave', 'lbl.bonus_locked':'Afslut hovedopgaven først', 'lbl.taken_by':'Opgave taget af {name}', 'lbl.points': 'point',
-			'section.daily_tasks': 'Dagens opgaver',
-			'section.weekly_tasks': 'Ugens opgaver',
-			'lbl.deadline': 'Deadline: {date}',
-			'lbl.early_bonus_by': '+{points} bonus point hvis klaret {date} eller før'
-			,
-			// Editor UI
-			'editor.mode':'Tilstand','editor.mode_admin':'Forældre','editor.mode_kid':'Barn','editor.mode_overview':'Seneste opgaver',
-			'editor.child_label':'Barn','editor.child_placeholder':'Navn på barn','editor.child_select_prompt':'— Vælg barn —','editor.child_hint':'Ingen børn fundet endnu – skriv navnet manuelt.',
-			'editor.developer_mode':'Developer Mode',
-			'editor.developer_mode_help':'Viser debug-kontroller som manuel forfaldsmarkering',
-			'editor.enable_points':'Point',
-			'editor.enable_points_help':'Vis point, pointshop og point-handlinger',
-			'editor.completion_sound':'Completion Sound',
-			'editor.completion_sound_help':'Gemmes som /local/chores4kids/completion.<ext> og bruges på tværs af dashboards',
-			'editor.delete_sound':'Slet lydfil',
-			'editor.delete_sound_confirm':'Slet den uploadede completion-lydfil?',
-			'editor.delete_sound_failed':'Kunne ikke slette lydfilen',
-			'editor.confetti':'Konfetti',
-			'editor.confetti_help':'Vis konfetti-animation ved færdiggørelse',
-			'editor.notify_target':'Notifikation ved færdig',
-			'editor.notify_target_help':'Send en push-notifikation når et barn markerer en opgave som færdig.',
-			'editor.notify_target_none':'Tilføj person',
-			'editor.notify_toggle_complete':'Notifikation ved færdig opgave',
-			'editor.notify_toggle_shop':'Notifikation ved køb i shoppen',
-			'editor.notify_toggle_shop_image':'Vis billede i shop-notifikation',
-			'section.notifications':'Notifikationer',
-			'editor.colors':'Farver',
-			'editor.color_field_bg':'Baggrund',
-			'editor.color_field_text':'Tekst',
-			'editor.color_group_start':'Start opgave knap',
-			'editor.color_group_complete':'Opgave klaret knap',
-			'editor.color_group_kid_points':'Børnenes samlede point',
-			'editor.color_group_task_points':'Opgavepoint',
-			'editor.color_start_bg':'Start opgave (knap – baggrund)',
-			'editor.color_start_text':'Start opgave (knap – tekst)',
-			'editor.color_complete_bg':'Opgave klaret (knap – baggrund)',
-			'editor.color_complete_text':'Opgave klaret (knap – tekst)',
-			'editor.color_kid_points_bg':'Børnenes samlede point (baggrund)',
-			'editor.color_kid_points_text':'Børnenes samlede point (tekst)',
-			'editor.color_task_points_bg':'Opgavepoint (baggrund)',
-			'editor.color_task_points_text':'Opgavepoint (tekst)',
-			'editor.color_empty_default':'Tom = standard'
-		},
-			sv: {
-		'delivery.required': 'Kräver utlämning', 'delivery.pending': 'Väntar på utlämning', 'delivery.mark': 'Markera som utlämnad', 'delivery.done': 'Utlämnad',
-		'task.due_time': 'Tid för deadline (valfritt)',
-		'shop.visible_to': 'Visas för', 'shop.all_children': 'Alla barn',
-		'penalty.enable': 'Dra av poäng vid missad tidsfrist', 'status.deadline_missed': 'Tidsfristen passerad',
-		'editor.sections': 'Avsnitt på det här kortet',
-		'history.title': 'Aktivitetshistorik',
-		'history.from': 'Från',
-		'history.through': 'Till och med',
-		'history.empty': 'Inga slutförda uppgifter under perioden.',
-		'history.error': 'Kunde inte hämta historiken.',
-		'history.refresh': 'Uppdatera',
-		'history.loading': 'Hämtar…',
-		'editor.unit_name': 'Namn på belöningsenheten',
-		'editor.task_columns': 'Uppgiftskolumner',
-		'editor.columns_auto': 'Automatiskt',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Tidig bonus ({unit})',
-		'ph.time_bonus_points.custom': 'Tidsbonus ({unit})',
-		'btn.add_points.custom': 'Lägg till {unit}',
-		'btn.reset_points.custom': 'Nollställ {unit}',
-		'points.title.custom': 'Lägg till {unit} för {name}',
-		'err.points_required.custom': 'Ange ett belopp i {unit}',
-		'err.points_number.custom': 'Ange ett tal för {unit}',
-		'err.points_positive.custom': 'Ange minst 0 {unit}',
-		'shop.title.custom': 'Butik för {unit}',
-		'lbl.early_bonus_by.custom': '+{points} {unit} om klart senast {date}',
-		'editor.enable_points_help.custom': 'Visa saldo, butik och åtgärder för {unit}',
-		'editor.color_group_kid_points.custom': 'Totalt saldo ({unit})',
-		'editor.color_group_task_points.custom': 'Uppgiftsbelöning ({unit})',
-		'icon.library': 'Uppgiftsikoner', 'icon.upload_failed': 'Uppladdningen misslyckades',
-		'ui.multiple_per_day': 'Kan utföras flera gånger om dagen',
-		'editor.language_name': 'Svenska', 'editor.language': 'Språk', 'editor.language_auto': 'Identifiera automatiskt',
-			'overview.title': 'Tilldelade uppgifter', 'overview.show_all': 'Visa alla ({pending} väntar)', 'overview.none': 'Inga uppgifter ännu.',
-			'card.admin_title': 'Chores4Kids – Förälder', 'input.new_child_name': 'Nytt barn — namn', 'btn.add_child': 'Lägg till barn',
-			'input.new_category_name':'Ny kategori — namn','btn.add_category':'Lägg till kategori','section.categories':'Kategorier','th.categories':'Kategorier','ph.categories':'Kategorier','select.categories':'Välj kategorier',
-			'section.children': 'Barn', 'th.name':'Namn','th.points':'Poäng','th.pending':'Väntar','th.actions':'Åtgärder','th.status':'Status','th.assign':'Tilldelad till','th.completed':'Slutförd',
-			'btn.rename':'Byt namn','btn.delete':'Ta bort', 'section.new_task':'Ny uppgift', 'ph.title':'Titel','ph.points':'Poäng','ph.description':'Beskrivning (valfritt)',
-			'ph.bonus_title':'Bonusuppgiftens titel', 'ph.bonus_points':'Bonuspoäng',
-			'ph.due':'Deadline (datum)',
-			'ph.early_bonus_days':'Bonusdagar i förväg',
-			'ph.early_bonus_points':'Bonuspoäng',
-			'ui.early_bonus_enabled':'Aktivera tidig bonus',
-			'warn.repeat_overrides_due':'Upprepa är aktiverat, så deadlinen baseras på valda veckodagar istället för detta datum.',
-			'select.assign_child':'Tilldela barn', 'ph.icon':'Ikon (mdi:...)', 'icon.choose':'Välj ikon','icon.clear':'Rensa ikon','icon.none':'Ingen','icon.search':'Sök ikon',
-			'btn.create_task':'Skapa uppgift','btn.update_task':'Uppdatera uppgift','btn.edit':'Redigera','editor.loaded_task':'Redigerar befintlig uppgift',
-			'section.unassigned':'Otilldelade uppgifter','btn.assign':'Tilldela','section.tasks_per_child':'Uppgifter per barn',
-			'btn.start':'Starta','btn.back':'Tilldela igen','btn.awaiting':'Väntar','btn.approve':'Godkänn','btn.approve_bonus':'Godkänn bonus','btn.approve_all':'Godkänn alla','btn.approve_partial':'Delvis godkänn','lbl.approved':'Godkänd',
-			'section.scoreboard':'Poängtavla', 'confirm.delete_child':'Ta bort {name}?','confirm.delete_task':'Ta bort uppgift?', 'alert.choose_child_first':'Välj ett barn först',
-			'ui.toggle_off_on':'Av/På', 'ui.persist_until_done':'Flytta ofärdig uppgift till nästa dag', 'ui.persist_help':'Ofärdig uppgift flyttas automatiskt till nästa dag', 'ui.quick_complete':'Klar med ett tryck', 'ui.skip_approval':'Hoppa över föräldragodkännande', 'ui.bonus_task':'Aktivera bonusuppgift',
-			'section.tasks':'Uppgifter', 'form.save':'Spara','form.add':'Lägg till','form.cancel':'Avbryt','form.close':'Stäng','form.clear':'Rensa',
-			'repeat.label':'Upprepa','repeat.auto_assign':'Auto-tilldela (upprepa)','repeat.save':'Spara plan',
-			'repeat.days.mon':'Mån','repeat.days.tue':'Tis','repeat.days.wed':'Ons','repeat.days.thu':'Tor','repeat.days.fri':'Fre','repeat.days.sat':'Lör','repeat.days.sun':'Sön',
-			'assign.disabled_auto':'Inaktiverad: auto-tilldelning (upprepning) är aktiv', 'assign.auto_to':'Auto-tilldelad till {names}',
-			'btn.add_points':'Lägg till poäng','btn.reset_points':'Återställ poäng', 'points.title':'Lägg till poäng till {name}','points.quick':'Snabbtillägg','points.remove':'Snabb borttagning','points.custom':'Anpassat antal',
-			'err.title_required':'Titel krävs','err.points_required':'Poäng krävs','err.points_number':'Poäng måste vara ett tal','err.points_positive':'Poängen måste vara 0 eller mer',
-			'status.assigned':'Tilldelad','status.in_progress':'Pågår','status.awaiting_approval':'Väntar på godkännande','status.approved':'Godkänd','status.rejected':'Avvisad','status.unassigned':'Ej tilldelad','status.taken':'Tagen',
-			'shop.title':'Shop','shop.open':'Öppna shop','shop.item':'Vara','shop.price':'Pris','shop.icon':'Ikon','shop.image':'Bild','shop.upload':'Ladda upp bild','shop.add_item':'Lägg till vara','shop.history':'Köphistorik','shop.child':'Barn','shop.when':'Tidpunkt','shop.date':'Datum','shop.time':'Tid','shop.active':'Aktiv','shop.buy':'Köp','shop.bought':'Köpt','shop.clear_history':'Rensa historik','confirm.clear_history':'Rensa all köphistorik?',
-			'shop.advanced':'Avancerade åtgärder','shop.entity':'Enhet','shop.operation':'Åtgärd','shop.add_action':'Lägg till åtgärd','shop.add_delay':'Lägg till fördröjning','shop.steps':'Steg','shop.seconds':'Sekunder','shop.minutes':'Minuter','shop.hours':'Timmar','shop.delay':'Fördröjning',
-			'sort.configure':'Sortering','sort.title':'Välj ordning','sort.categories_order':'Ordning för kategorier','sort.none':'Ingen kategori','sort.save':'Spara','sort.reset':'Återställ',
-			'card.child_title_fallback':'Chores4Kids – {name}','msg.child_not_found':'Barn hittades inte. Kontrollera namnet i kortets konfiguration.','msg.no_tasks':'Inga uppgifter just nu.', 'btn.done':'Klar','btn.start_task':'Starta uppgift','btn.complete_task':'Uppgift klar','btn.task_done':'Uppgift klar','btn.complete_bonus':'Slutför bonus','lbl.awaiting':'Väntar på godkännande','lbl.bonus':'Bonusuppgift','lbl.bonus_locked':'Slutför huvuduppgiften först','lbl.taken_by':'Uppgiften är tagen av {name}','lbl.points':'poäng',
-			'section.daily_tasks':'Idag',
-			'section.weekly_tasks':'Veckouppgifter',
-			'lbl.deadline':'Deadline: {date}',
-			'lbl.early_bonus_by':'+{points} bonuspoäng om klart {date} eller tidigare',
-			// Editor UI
-			'editor.mode':'Läge','editor.mode_admin':'Förälder','editor.mode_kid':'Barn','editor.mode_overview':'Senaste uppgifter',
-			'editor.child_label':'Barn','editor.child_placeholder':'Barnets namn','editor.child_select_prompt':'— Välj barn —','editor.child_hint':'Inga barn hittades ännu – skriv namnet manuellt.',
-			'editor.developer_mode':'Utvecklarläge',
-			'editor.developer_mode_help':'Visar debug-kontroller som manuell förseningsmarkering',
-			'editor.completion_sound':'Klar-ljud',
-			'editor.completion_sound_help':'Sparas som /local/chores4kids/completion.<ext> och används på alla dashboards',
-			'editor.notify_target':'Notifikation vid slutförande',
-			'editor.notify_target_help':'Skicka en push-notis när ett barn markerar en uppgift som klar.',
-			'editor.notify_target_none':'Lägg till person',
-			'editor.notify_toggle_complete':'Notis vid slutförd uppgift',
-			'editor.notify_toggle_shop':'Notis vid köp i shoppen',
-			'editor.notify_toggle_shop_image':'Visa bild i shop-notis',
-			'section.notifications':'Notiser',
-			'editor.colors':'Färger',
-			'editor.color_field_bg':'Bakgrund',
-			'editor.color_field_text':'Text',
-			'editor.color_group_start':'Starta uppgift-knapp',
-			'editor.color_group_complete':'Uppgift klar-knapp',
-			'editor.color_group_kid_points':'Barnens totalpoäng',
-			'editor.color_group_task_points':'Uppgiftspoäng',
-			'editor.color_start_bg':'Starta uppgift-knapp (bakgrund)',
-			'editor.color_start_text':'Starta uppgift-knapp (text)',
-			'editor.color_complete_bg':'Uppgift klar-knapp (bakgrund)',
-			'editor.color_complete_text':'Uppgift klar-knapp (text)',
-			'editor.color_kid_points_bg':'Barnens totalpoäng (bakgrund)',
-			'editor.color_kid_points_text':'Barnens totalpoäng (text)',
-			'editor.color_task_points_bg':'Uppgiftspoäng (bakgrund)',
-			'editor.color_task_points_text':'Uppgiftspoäng (text)',
-			'editor.color_empty_default':'Tomt = standard'
-		},
-			nb: {
-		'delivery.required': 'Krever utlevering', 'delivery.pending': 'Venter på utlevering', 'delivery.mark': 'Merk som utlevert', 'delivery.done': 'Utlevert',
-		'task.due_time': 'Klokkeslett for frist (valgfritt)',
-		'shop.visible_to': 'Vises for', 'shop.all_children': 'Alle barn',
-		'penalty.enable': 'Trekk poeng ved overskredet frist', 'status.deadline_missed': 'Fristen er overskredet',
-		'editor.sections': 'Seksjoner på dette kortet',
-		'history.title': 'Aktivitetshistorikk',
-		'history.from': 'Fra',
-		'history.through': 'Til og med',
-		'history.empty': 'Ingen fullførte oppgaver i perioden.',
-		'history.error': 'Kunne ikke hente historikken.',
-		'history.refresh': 'Oppdater',
-		'history.loading': 'Laster…',
-		'editor.unit_name': 'Navn på belønningsenhet',
-		'editor.task_columns': 'Oppgavekolonner',
-		'editor.columns_auto': 'Automatisk',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Tidlig bonus ({unit})',
-		'ph.time_bonus_points.custom': 'Tidsbonus ({unit})',
-		'btn.add_points.custom': 'Legg til {unit}',
-		'btn.reset_points.custom': 'Nullstill {unit}',
-		'points.title.custom': 'Legg til {unit} for {name}',
-		'err.points_required.custom': 'Oppgi et beløp i {unit}',
-		'err.points_number.custom': 'Oppgi et tall for {unit}',
-		'err.points_positive.custom': 'Oppgi minst 0 {unit}',
-		'shop.title.custom': 'Butikk for {unit}',
-		'lbl.early_bonus_by.custom': '+{points} {unit} hvis ferdig innen {date}',
-		'editor.enable_points_help.custom': 'Vis saldo, butikk og handlinger for {unit}',
-		'editor.color_group_kid_points.custom': 'Samlet saldo ({unit})',
-		'editor.color_group_task_points.custom': 'Oppgavebelønning ({unit})',
-		'icon.library': 'Oppgaveikoner', 'icon.upload_failed': 'Opplastingen mislyktes',
-		'ui.multiple_per_day': 'Kan utføres flere ganger om dagen',
-		'editor.language_name': 'Norsk bokmål', 'editor.language': 'Språk', 'editor.language_auto': 'Oppdag automatisk',
-				'overview.title':'Tildelte oppgaver','overview.show_all':'Vis alle ({pending} venter)','overview.none':'Ingen oppgaver ennå.',
-			'card.admin_title':'Chores4Kids – Forelder','input.new_child_name':'Nytt barn — navn','btn.add_child':'Legg til barn',
-				'input.new_category_name':'Ny kategori — navn','btn.add_category':'Legg til kategori','section.categories':'Kategorier','th.categories':'Kategorier','ph.categories':'Kategorier','select.categories':'Velg kategorier',
-			'section.children':'Barn','th.name':'Navn','th.points':'Poeng','th.pending':'Ventende','th.actions':'Handlinger','th.status':'Status','th.assign':'Tildelt til','th.completed':'Fullført',
-			'btn.rename':'Gi nytt navn','btn.delete':'Slett','section.new_task':'Ny oppgave','ph.title':'Tittel','ph.points':'Poeng','ph.description':'Beskrivelse (valgfritt)',
-			'ph.bonus_title':'Bonusoppgave tittel', 'ph.bonus_points':'Bonuspoeng',
-			'ph.due':'Frist (dato)',
-			'ph.early_bonus_days':'Bonusdager før',
-			'ph.early_bonus_points':'Bonuspoeng',
-			'ui.early_bonus_enabled':'Aktiver tidlig bonus',
-			'warn.repeat_overrides_due':'Gjentakelse er aktiv, så fristen beregnes ut fra de valgte ukedagene i stedet for denne datoen.',
-			'select.assign_child':'Tildel barn', 'ph.icon':'Ikon (mdi:...)','icon.choose':'Velg ikon','icon.clear':'Fjern ikon','icon.none':'Ingen','icon.search':'Søk ikon',
-			'btn.create_task':'Opprett oppgave','btn.update_task':'Oppdater oppgave','btn.edit':'Rediger','editor.loaded_task':'Redigerer eksisterende oppgave',
-			'section.unassigned':'Ikke tildelte oppgaver','btn.assign':'Tildel','section.tasks_per_child':'Oppgaver per barn',
-			'btn.start':'Start','btn.back':'Tildel på nytt','btn.awaiting':'Avventer','btn.approve':'Godkjenn','btn.approve_bonus':'Godkjenn bonus','btn.approve_all':'Godkjenn alle','btn.approve_partial':'Delvis godkjenn','lbl.approved':'Godkjent',
-			'section.scoreboard':'Poengtavle','confirm.delete_child':'Slette {name}?','confirm.delete_task':'Slette oppgave?','alert.choose_child_first':'Velg et barn først',
-			'ui.toggle_off_on':'Av/På', 'ui.persist_until_done':'Flytt uferdig oppgave til neste dag', 'ui.persist_help':'Uferdig oppgave flyttes automatisk til neste dag', 'ui.quick_complete':'Ferdig med ett trykk', 'ui.skip_approval':'Hopp over foreldregodkjenning', 'ui.bonus_task':'Aktiver bonusoppgave',
-			'section.tasks':'Oppgaver','form.save':'Lagre','form.add':'Legg til','form.cancel':'Avbryt','form.close':'Lukk','form.clear':'Tøm',
-			'repeat.label':'Gjentakelse','repeat.auto_assign':'Auto-tildel (gjentakelse)','repeat.save':'Lagre plan',
-			'repeat.days.mon':'Man','repeat.days.tue':'Tir','repeat.days.wed':'Ons','repeat.days.thu':'Tor','repeat.days.fri':'Fre','repeat.days.sat':'Lør','repeat.days.sun':'Søn',
-			'assign.disabled_auto':'Deaktivert: auto-tildeling (gjentakelse) er aktiv', 'assign.auto_to':'Auto-tildelt til {names}',
-			'btn.add_points':'Legg til poeng','btn.reset_points':'Nullstill poeng', 'points.title':'Legg til poeng til {name}','points.quick':'Hurtig legg til','points.remove':'Hurtig trekk fra','points.custom':'Valgfritt antall',
-			'err.title_required':'Tittel er påkrevd','err.points_required':'Poeng må fylles ut','err.points_number':'Poeng må være et tall','err.points_positive':'Poeng må være 0 eller mer',
-			'status.assigned':'Tildelt','status.in_progress':'Pågår','status.awaiting_approval':'Avventer godkjenning','status.approved':'Godkjent','status.rejected':'Avvist','status.unassigned':'Ikke tildelt','status.taken':'Tatt',
-			'shop.title':'Butikk','shop.open':'Åpne butikk','shop.item':'Vare','shop.price':'Pris','shop.icon':'Ikon','shop.image':'Bilde','shop.upload':'Last opp bilde','shop.add_item':'Legg til vare','shop.history':'Kjøpshistorikk','shop.child':'Barn','shop.when':'Tidspunkt','shop.date':'Dato','shop.time':'Tidspunkt','shop.active':'Aktiv','shop.buy':'Kjøp','shop.bought':'Kjøpt','shop.clear_history':'Rydd historikk','confirm.clear_history':'Rydd hele kjøpshistorikken?',
-			'shop.advanced':'Avanserte handlinger','shop.entity':'Enhet','shop.operation':'Handling','shop.add_action':'Legg til handling','shop.add_delay':'Legg til forsinkelse','shop.steps':'Steg','shop.seconds':'Sekunder','shop.minutes':'Minutter','shop.hours':'Timer','shop.delay':'Forsinkelse',
-			'sort.configure':'Sortering','sort.title':'Velg rekkefølge','sort.categories_order':'Rekkefølge for kategorier','sort.none':'Ingen kategori','sort.save':'Lagre','sort.reset':'Nullstill',
-			'card.child_title_fallback':'Chores4Kids – {name}','msg.child_not_found':'Barn ikke funnet. Sjekk navnet i kortkonfigurasjonen.','msg.no_tasks':'Ingen oppgaver nå.', 'btn.done':'Ferdig','btn.start_task':'Start oppgave','btn.complete_task':'Oppgave klar','btn.task_done':'Oppgave ferdig','btn.complete_bonus':'Fullfør bonus','lbl.awaiting':'Venter på godkjenning','lbl.bonus':'Bonusoppgave','lbl.bonus_locked':'Fullfør hovedoppgaven først','lbl.taken_by':'Oppgave tatt av {name}','lbl.points':'poeng',
-			'section.daily_tasks':'I dag',
-			'section.weekly_tasks':'Ukens oppgaver',
-			'lbl.deadline':'Frist: {date}',
-			'lbl.early_bonus_by':'+{points} bonuspoeng hvis gjort {date} eller før',
-			// Editor UI
-			'editor.mode':'Modus','editor.mode_admin':'Forelder','editor.mode_kid':'Barn','editor.mode_overview':'Siste oppgaver',
-			'editor.child_label':'Barn','editor.child_placeholder':'Barnets navn','editor.child_select_prompt':'— Velg barn —','editor.child_hint':'Ingen barn funnet ennå – skriv inn navnet manuelt.',
-			'editor.developer_mode':'Utviklermodus',
-			'editor.developer_mode_help':'Viser debug-kontroller som manuell forfallsmarkering',
-			'editor.completion_sound':'Fullføringslyd',
-			'editor.completion_sound_help':'Lagres som /local/chores4kids/completion.<ext> og brukes på tvers av dashboards',
-			'editor.notify_target':'Varsling ved fullføring',
-			'editor.notify_target_help':'Send en push-varsling når et barn markerer en oppgave som ferdig.',
-			'editor.notify_target_none':'Legg til person',
-			'editor.notify_toggle_complete':'Varsling ved fullført oppgave',
-			'editor.notify_toggle_shop':'Varsling ved kjøp i butikken',
-			'editor.notify_toggle_shop_image':'Vis bilde i butikkvarsling',
-			'section.notifications':'Varsler',
-			'editor.colors':'Farger',
-			'editor.color_field_bg':'Bakgrunn',
-			'editor.color_field_text':'Tekst',
-			'editor.color_group_start':'Start oppgave-knapp',
-			'editor.color_group_complete':'Oppgave klar-knapp',
-			'editor.color_group_kid_points':'Barnas totalpoeng',
-			'editor.color_group_task_points':'Oppgavepoeng',
-			'editor.color_start_bg':'Start oppgave-knapp (bakgrunn)',
-			'editor.color_start_text':'Start oppgave-knapp (tekst)',
-			'editor.color_complete_bg':'Oppgave klar-knapp (bakgrunn)',
-			'editor.color_complete_text':'Oppgave klar-knapp (tekst)',
-			'editor.color_kid_points_bg':'Barnas totalpoeng (bakgrunn)',
-			'editor.color_kid_points_text':'Barnas totalpoeng (tekst)',
-			'editor.color_task_points_bg':'Oppgavepoeng (bakgrunn)',
-			'editor.color_task_points_text':'Oppgavepoeng (tekst)',
-			'editor.color_empty_default':'Tom = standard'
-		},
-			de: {
-		'delivery.required': 'Übergabe erforderlich', 'delivery.pending': 'Ausstehende Übergaben', 'delivery.mark': 'Als übergeben markieren', 'delivery.done': 'Übergeben',
-		'task.due_time': 'Fällige Uhrzeit (optional)',
-		'shop.visible_to': 'Sichtbar für', 'shop.all_children': 'Alle Kinder',
-		'penalty.enable': 'Bei verpasster Frist Punkte abziehen', 'status.deadline_missed': 'Frist verpasst',
-		'editor.sections': 'Abschnitte auf dieser Karte',
-		'history.title': 'Aktivitätsverlauf',
-		'history.from': 'Von',
-		'history.through': 'Bis einschließlich',
-		'history.empty': 'Keine erledigten Aufgaben in diesem Zeitraum.',
-		'history.error': 'Verlauf konnte nicht geladen werden.',
-		'history.refresh': 'Aktualisieren',
-		'history.loading': 'Lädt…',
-		'editor.unit_name': 'Name der Belohnungseinheit',
-		'editor.task_columns': 'Aufgabenspalten',
-		'editor.columns_auto': 'Automatisch',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Frühbonus ({unit})',
-		'ph.time_bonus_points.custom': 'Zeitbonus ({unit})',
-		'btn.add_points.custom': '{unit} hinzufügen',
-		'btn.reset_points.custom': '{unit} zurücksetzen',
-		'points.title.custom': '{unit} für {name} hinzufügen',
-		'err.points_required.custom': 'Betrag in {unit} eingeben',
-		'err.points_number.custom': 'Zahl für {unit} eingeben',
-		'err.points_positive.custom': 'Mindestens 0 {unit} eingeben',
-		'shop.title.custom': 'Shop für {unit}',
-		'lbl.early_bonus_by.custom': '+{points} {unit} bei Abschluss bis {date}',
-		'editor.enable_points_help.custom': 'Guthaben, Shop und Aktionen für {unit} anzeigen',
-		'editor.color_group_kid_points.custom': 'Gesamtguthaben ({unit})',
-		'editor.color_group_task_points.custom': 'Aufgabenbelohnung ({unit})',
-		'icon.library': 'Aufgabensymbole', 'icon.upload_failed': 'Hochladen fehlgeschlagen',
-		'ui.multiple_per_day': 'Mehrmals täglich erledigen',
-		'editor.language_name': 'Deutsch', 'editor.language': 'Sprache', 'editor.language_auto': 'Automatisch erkennen',
-				'overview.title':'Zugewiesene Aufgaben','overview.show_all':'Alle anzeigen ({pending} ausstehend)','overview.none':'Noch keine Aufgaben.',
-			'card.admin_title':'Chores4Kids – Eltern','input.new_child_name':'Neues Kind — Name','btn.add_child':'Kind hinzufügen',
-				'input.new_category_name':'Neue Kategorie — Name','btn.add_category':'Kategorie hinzufügen','section.categories':'Kategorien','th.categories':'Kategorien','ph.categories':'Kategorien','select.categories':'Kategorien wählen',
-			'section.children':'Kinder', 'th.name':'Name','th.points':'Punkte','th.pending':'Ausstehend','th.actions':'Aktionen','th.status':'Status','th.assign':'Zugewiesen an','th.completed':'Erledigt',
-			'btn.rename':'Umbenennen','btn.delete':'Löschen','section.new_task':'Neue Aufgabe','ph.title':'Titel','ph.points':'Punkte','ph.description':'Beschreibung (optional)',
-			'ph.bonus_title':'Titel der Bonusaufgabe', 'ph.bonus_points':'Bonuspunkte',
-			'ph.due':'Frist (Datum)',
-			'ph.early_bonus_days':'Bonus-Tage vorher',
-			'ph.early_bonus_points':'Bonuspunkte',
-			'ui.early_bonus_enabled':'Frühbonus aktivieren',
-			'warn.repeat_overrides_due':'Wiederholung ist aktiv, daher basiert die Frist auf den ausgewählten Wochentagen statt auf diesem Datum.',
-			'select.assign_child':'Kind zuweisen','ph.icon':'Symbol (mdi:...)','icon.choose':'Symbol wählen','icon.clear':'Symbol entfernen','icon.none':'Keins','icon.search':'Symbol suchen',
-			'btn.create_task':'Aufgabe erstellen','btn.update_task':'Aufgabe aktualisieren','btn.edit':'Bearbeiten','editor.loaded_task':'Vorhandene Aufgabe bearbeiten',
-			'section.unassigned':'Nicht zugewiesene Aufgaben','btn.assign':'Zuweisen','section.tasks_per_child':'Aufgaben pro Kind',
-			'btn.start':'Starten','btn.back':'Neu zuweisen','btn.awaiting':'Wartet','btn.approve':'Genehmigen','btn.approve_bonus':'Bonus genehmigen','btn.approve_all':'Alle genehmigen','btn.approve_partial':'Teilweise genehmigen','lbl.approved':'Genehmigt',
-			'section.scoreboard':'Bestenliste','confirm.delete_child':'{name} löschen?','confirm.delete_task':'Aufgabe löschen?','alert.choose_child_first':'Bitte zuerst ein Kind wählen',
-			'ui.toggle_off_on':'Aus/An', 'ui.persist_until_done':'Unfertige Aufgabe auf den nächsten Tag verschieben', 'ui.persist_help':'Unfertige Aufgabe wird automatisch auf den nächsten Tag verschoben', 'ui.quick_complete':'Mit einem Tip erledigen', 'ui.skip_approval':'Elternbestätigung überspringen', 'ui.bonus_task':'Bonusaufgabe aktivieren',
-			'section.tasks':'Aufgaben','form.save':'Speichern','form.add':'Hinzufügen','form.cancel':'Abbrechen','form.clear':'Leeren',
-			'repeat.label':'Wiederholen','repeat.auto_assign':'Automatisch zuweisen (Wiederholung)','repeat.save':'Plan speichern',
-			'repeat.days.mon':'Mo','repeat.days.tue':'Di','repeat.days.wed':'Mi','repeat.days.thu':'Do','repeat.days.fri':'Fr','repeat.days.sat':'Sa','repeat.days.sun':'So',
-			'assign.disabled_auto':'Deaktiviert: automatische Zuweisung (Wiederholung) aktiv', 'assign.auto_to':'Automatisch zugewiesen an {names}',
-			'btn.add_points':'Punkte hinzufügen','btn.reset_points':'Punkte zurücksetzen','points.title':'Punkte hinzufügen für {name}','points.quick':'Schnell hinzufügen','points.remove':'Schnell abziehen','points.custom':'Eigene Anzahl',
-			'err.title_required':'Titel ist erforderlich','err.points_required':'Punkte sind erforderlich','err.points_number':'Punkte müssen eine Zahl sein','err.points_positive':'Punkte müssen 0 oder mehr sein',
-			'status.assigned':'Zugewiesen','status.in_progress':'In Arbeit','status.awaiting_approval':'Wartet auf Genehmigung','status.approved':'Genehmigt','status.rejected':'Abgelehnt','status.unassigned':'Nicht zugewiesen','status.taken':'Vergeben',
-			'shop.title':'Shop','shop.open':'Shop öffnen','shop.item':'Artikel','shop.price':'Preis','shop.icon':'Symbol','shop.image':'Bild','shop.upload':'Bild hochladen','shop.add_item':'Artikel hinzufügen','shop.history':'Kaufhistorie','shop.child':'Kind','shop.when':'Zeitpunkt','shop.date':'Datum','shop.time':'Uhrzeit','shop.active':'Aktiv','shop.buy':'Kaufen','shop.bought':'Gekauft','shop.clear_history':'Historie löschen','confirm.clear_history':'Gesamte Kaufhistorie löschen?',
-			'shop.advanced':'Erweiterte Aktionen','shop.entity':'Entität','shop.operation':'Aktion','shop.add_action':'Aktion hinzufügen','shop.add_delay':'Verzögerung hinzufügen','shop.steps':'Schritte','shop.seconds':'Sekunden','shop.minutes':'Minuten','shop.hours':'Stunden','shop.delay':'Verzögerung',
-			'sort.configure':'Sortierung','sort.title':'Reihenfolge wählen','sort.categories_order':'Reihenfolge der Kategorien','sort.none':'Keine Kategorie','sort.save':'Speichern','sort.reset':'Zurücksetzen',
-			'card.child_title_fallback':'Chores4Kids – {name}','msg.child_not_found':'Kind nicht gefunden. Prüfe den Namen in der Kartenkonfiguration.','msg.no_tasks':'Keine Aufgaben gerade.', 'btn.done':'Fertig','btn.start_task':'Aufgabe starten','btn.complete_task':'Aufgabe erledigt','btn.task_done':'Aufgabe erledigt','btn.complete_bonus':'Bonus abschließen','lbl.awaiting':'Wartet auf Genehmigung','lbl.bonus':'Bonusaufgabe','lbl.bonus_locked':'Zuerst Hauptaufgabe abschließen','lbl.taken_by':'Aufgabe übernommen von {name}','lbl.points':'Punkte',
-			'section.daily_tasks':'Heute',
-			'section.weekly_tasks':'Wöchentliche Aufgaben',
-			'lbl.deadline':'Frist: {date}',
-			'lbl.early_bonus_by':'+{points} Bonuspunkte, wenn erledigt am {date} oder früher',
-			// Editor UI
-			'editor.mode':'Modus','editor.mode_admin':'Eltern','editor.mode_kid':'Kind','editor.mode_overview':'Aktuelle Aufgaben',
-			'editor.child_label':'Kind','editor.child_placeholder':'Name des Kindes','editor.child_select_prompt':'— Kind auswählen —','editor.child_hint':'Noch keine Kinder gefunden – Namen manuell eingeben.',
-			'editor.developer_mode':'Entwicklermodus',
-			'editor.developer_mode_help':'Zeigt Debug-Steuerungen wie manuelles Überfällig-Markieren',
-			'editor.completion_sound':'Abschluss-Sound',
-			'editor.completion_sound_help':'Wird als /local/chores4kids/completion.<ext> gespeichert und auf allen Dashboards verwendet',
-			'editor.notify_target':'Abschlussbenachrichtigung',
-			'editor.notify_target_help':'Sende eine Push-Benachrichtigung, wenn ein Kind eine Aufgabe als erledigt markiert.',
-			'editor.notify_target_none':'Person hinzufügen',
-			'editor.notify_toggle_complete':'Benachrichtigung bei Aufgabenabschluss',
-			'editor.notify_toggle_shop':'Benachrichtigung bei Shop-Kauf',
-			'editor.notify_toggle_shop_image':'Bild in Shop-Benachrichtigung anzeigen',
-			'section.notifications':'Benachrichtigungen',
-			'editor.colors':'Farben',
-			'editor.color_field_bg':'Hintergrund',
-			'editor.color_field_text':'Text',
-			'editor.color_group_start':'"Aufgabe starten"-Button',
-			'editor.color_group_complete':'"Aufgabe erledigt"-Button',
-			'editor.color_group_kid_points':'Gesamtpunkte der Kinder',
-			'editor.color_group_task_points':'Aufgabenpunkte',
-			'editor.color_start_bg':'"Aufgabe starten"-Button (Hintergrund)',
-			'editor.color_start_text':'"Aufgabe starten"-Button (Text)',
-			'editor.color_complete_bg':'"Aufgabe erledigt"-Button (Hintergrund)',
-			'editor.color_complete_text':'"Aufgabe erledigt"-Button (Text)',
-			'editor.color_kid_points_bg':'Gesamtpunkte der Kinder (Hintergrund)',
-			'editor.color_kid_points_text':'Gesamtpunkte der Kinder (Text)',
-			'editor.color_task_points_bg':'Aufgabenpunkte (Hintergrund)',
-			'editor.color_task_points_text':'Aufgabenpunkte (Text)',
-			'editor.color_empty_default':'Leer = Standard'
-		},
-			es: {
-		'delivery.required': 'Requiere entrega', 'delivery.pending': 'Pendiente de entrega', 'delivery.mark': 'Marcar como entregado', 'delivery.done': 'Entregado',
-		'task.due_time': 'Hora límite (opcional)',
-		'shop.visible_to': 'Visible para', 'shop.all_children': 'Todos los niños',
-		'penalty.enable': 'Restar puntos al vencer el plazo', 'status.deadline_missed': 'Plazo vencido',
-		'editor.sections': 'Secciones de esta tarjeta',
-		'history.title': 'Historial de actividad',
-		'history.from': 'Desde',
-		'history.through': 'Hasta',
-		'history.empty': 'No hay tareas completadas en este periodo.',
-		'history.error': 'No se pudo cargar el historial.',
-		'history.refresh': 'Actualizar',
-		'history.loading': 'Cargando…',
-		'editor.unit_name': 'Nombre de la unidad de recompensa',
-		'editor.task_columns': 'Columnas de tareas',
-		'editor.columns_auto': 'Automático',
-		'ph.bonus_points.custom': 'Bono ({unit})',
-		'ph.early_bonus_points.custom': 'Bono anticipado ({unit})',
-		'ph.time_bonus_points.custom': 'Bono por horario ({unit})',
-		'btn.add_points.custom': 'Añadir {unit}',
-		'btn.reset_points.custom': 'Restablecer {unit}',
-		'points.title.custom': 'Añadir {unit} a {name}',
-		'err.points_required.custom': 'Introduce una cantidad en {unit}',
-		'err.points_number.custom': 'Introduce un número para {unit}',
-		'err.points_positive.custom': 'Introduce al menos 0 {unit}',
-		'shop.title.custom': 'Tienda de {unit}',
-		'lbl.early_bonus_by.custom': '+{points} {unit} si se completa hasta el {date}',
-		'editor.enable_points_help.custom': 'Mostrar el saldo, la tienda y las acciones de {unit}',
-		'editor.color_group_kid_points.custom': 'Saldo total ({unit})',
-		'editor.color_group_task_points.custom': 'Recompensa por tarea ({unit})',
-		'icon.library': 'Iconos de tareas', 'icon.upload_failed': 'Error al subir',
-		'ui.multiple_per_day': 'Permitir varias veces al día',
-		'editor.language_name': 'Español', 'editor.language': 'Idioma', 'editor.language_auto': 'Detectar automáticamente',
-				'overview.title':'Tareas asignadas','overview.show_all':'Ver todas ({pending} pendientes)','overview.none':'Aún no hay tareas.',
-			'card.admin_title':'Chores4Kids – Padres','input.new_child_name':'Nuevo niño — nombre','btn.add_child':'Añadir niño',
-				'input.new_category_name':'Nueva categoría — nombre','btn.add_category':'Añadir categoría','section.categories':'Categorías','th.categories':'Categorías','ph.categories':'Categorías','select.categories':'Seleccionar categorías',
-			'section.children':'Niños','th.name':'Nombre','th.points':'Puntos','th.pending':'Pendiente','th.actions':'Acciones','th.status':'Estado','th.assign':'Asignado a','th.completed':'Completado',
-			'btn.rename':'Renombrar','btn.delete':'Eliminar','section.new_task':'Nueva tarea','ph.title':'Título','ph.points':'Puntos','ph.description':'Descripción (opcional)',
-			'ph.bonus_title':'Título de tarea de bono', 'ph.bonus_points':'Puntos de bono',
-			'ph.due':'Fecha límite (fecha)',
-			'ph.early_bonus_days':'Días de bono por anticipación',
-			'ph.early_bonus_points':'Puntos de bono',
-			'ui.early_bonus_enabled':'Activar bono por finalizar antes',
-			'warn.repeat_overrides_due':'Repetir está habilitado, así que la fecha límite se basa en los días de la semana seleccionados en lugar de esta fecha.',
-			'select.assign_child':'Asignar niño', 'ph.icon':'Icono (mdi:...)','icon.choose':'Elegir icono','icon.clear':'Quitar icono','icon.none':'Ninguno','icon.search':'Buscar icono',
-			'btn.create_task':'Crear tarea','btn.update_task':'Actualizar tarea','btn.edit':'Editar','editor.loaded_task':'Editando tarea existente',
-			'section.unassigned':'Tareas sin asignar','btn.assign':'Asignar','section.tasks_per_child':'Tareas por niño',
-			'btn.start':'Iniciar','btn.back':'Reasignar','btn.awaiting':'En espera','btn.approve':'Aprobar','btn.approve_bonus':'Aprobar bono','btn.approve_all':'Aprobar todo','btn.approve_partial':'Aprobar parcial','lbl.approved':'Aprobada',
-			'section.scoreboard':'Marcador','confirm.delete_child':'¿Eliminar a {name}?','confirm.delete_task':'¿Eliminar tarea?','alert.choose_child_first':'Elige un niño primero',
-			'ui.toggle_off_on':'Apagado/Encendido', 'ui.persist_until_done':'Pasar tarea no terminada al día siguiente', 'ui.persist_help':'La tarea no terminada se moverá automáticamente al día siguiente', 'ui.quick_complete':'Completar con un toque', 'ui.skip_approval':'Omitir aprobación de padres', 'ui.bonus_task':'Activar tarea de bono',
-			'section.tasks':'Tareas','form.save':'Guardar','form.add':'Añadir','form.cancel':'Cancelar','form.clear':'Borrar',
-			'repeat.label':'Repetir','repeat.auto_assign':'Auto-asignar (repetir)','repeat.save':'Guardar plan',
-			'repeat.days.mon':'Lun','repeat.days.tue':'Mar','repeat.days.wed':'Mié','repeat.days.thu':'Jue','repeat.days.fri':'Vie','repeat.days.sat':'Sáb','repeat.days.sun':'Dom',
-			'assign.disabled_auto':'Deshabilitado: auto-asignación (repetición) activa', 'assign.auto_to':'Autoasignada a {names}',
-			'btn.add_points':'Añadir puntos','btn.reset_points':'Reiniciar puntos','points.title':'Añadir puntos a {name}','points.quick':'Añadir rápido','points.remove':'Quitar rápido','points.custom':'Cantidad personalizada',
-			'err.title_required':'El título es obligatorio','err.points_required':'Los puntos son obligatorios','err.points_number':'Los puntos deben ser un número','err.points_positive':'Los puntos deben ser 0 o más',
-			'status.assigned':'Asignada','status.in_progress':'En curso','status.awaiting_approval':'En espera de aprobación','status.approved':'Aprobada','status.rejected':'Rechazada','status.unassigned':'Sin asignar','status.taken':'Tomada',
-			'shop.title':'Tienda','shop.open':'Abrir tienda','shop.item':'Artículo','shop.price':'Precio','shop.icon':'Icono','shop.image':'Imagen','shop.upload':'Subir imagen','shop.add_item':'Añadir artículo','shop.history':'Historial de compras','shop.child':'Niño','shop.when':'Fecha y hora','shop.date':'Fecha','shop.time':'Hora','shop.active':'Activo','shop.buy':'Comprar','shop.bought':'Comprado','shop.clear_history':'Limpiar historial','confirm.clear_history':'¿Limpiar todo el historial de compras?',
-			'shop.advanced':'Acciones avanzadas','shop.entity':'Entidad','shop.operation':'Operación','shop.add_action':'Añadir acción','shop.add_delay':'Añadir retraso','shop.steps':'Pasos','shop.seconds':'Segundos','shop.minutes':'Minutos','shop.hours':'Horas','shop.delay':'Retraso',
-			'sort.configure':'Ordenación','sort.title':'Elegir orden','sort.categories_order':'Orden de categorías','sort.none':'Sin categoría','sort.save':'Guardar','sort.reset':'Restablecer',
-			'card.child_title_fallback':'Chores4Kids – {name}','msg.child_not_found':'Niño no encontrado. Revisa el nombre en la configuración de la tarjeta.','msg.no_tasks':'No hay tareas por ahora.', 'btn.done':'Hecho','btn.start_task':'Iniciar tarea','btn.complete_task':'Tarea hecha','btn.task_done':'Tarea hecha','btn.complete_bonus':'Completar bono','lbl.awaiting':'En espera de aprobación','lbl.bonus':'Tarea de bono','lbl.bonus_locked':'Completa la tarea principal primero','lbl.taken_by':'Tarea tomada por {name}','lbl.points':'puntos',
-			'section.daily_tasks':'Hoy',
-			'section.weekly_tasks':'Tareas semanales',
-			'lbl.deadline':'Fecha límite: {date}',
-			'lbl.early_bonus_by':'+{points} puntos de bono si se completa el {date} o antes',
-			// Editor UI
-			'editor.mode':'Modo','editor.mode_admin':'Padres','editor.mode_kid':'Niño','editor.mode_overview':'Tareas recientes',
-			'editor.child_label':'Niño','editor.child_placeholder':'Nombre del niño','editor.child_select_prompt':'— Seleccionar niño —','editor.child_hint':'Aún no se encontraron niños — escribe el nombre manualmente.',
-			'editor.developer_mode':'Modo desarrollador',
-			'editor.developer_mode_help':'Muestra controles de depuración como marcar vencido manualmente',
-			'editor.completion_sound':'Sonido de finalización',
-			'editor.completion_sound_help':'Se guarda como /local/chores4kids/completion.<ext> y se usa en todos los paneles',
-			'editor.notify_target':'Notificación de finalización',
-			'editor.notify_target_help':'Enviar una notificación push cuando un niño marque una tarea como hecha.',
-			'editor.notify_target_none':'Añadir persona',
-			'editor.notify_toggle_complete':'Notificar al completar una tarea',
-			'editor.notify_toggle_shop':'Notificar compra en la tienda',
-			'editor.notify_toggle_shop_image':'Mostrar imagen en notificación de tienda',
-			'section.notifications':'Notificaciones',
-			'editor.colors':'Colores',
-			'editor.color_field_bg':'Fondo',
-			'editor.color_field_text':'Texto',
-			'editor.color_group_start':'Botón "Empezar tarea"',
-			'editor.color_group_complete':'Botón "Completar tarea"',
-			'editor.color_group_kid_points':'Puntos totales de los niños',
-			'editor.color_group_task_points':'Puntos de tarea',
-			'editor.color_start_bg':'Botón "Empezar tarea" (fondo)',
-			'editor.color_start_text':'Botón "Empezar tarea" (texto)',
-			'editor.color_complete_bg':'Botón "Completar tarea" (fondo)',
-			'editor.color_complete_text':'Botón "Completar tarea" (texto)',
-			'editor.color_kid_points_bg':'Puntos totales de los niños (fondo)',
-			'editor.color_kid_points_text':'Puntos totales de los niños (texto)',
-			'editor.color_task_points_bg':'Puntos de tarea (fondo)',
-			'editor.color_task_points_text':'Puntos de tarea (texto)',
-			'editor.color_empty_default':'Vacío = predeterminado'
-		},
-			fr: {
-		'delivery.required': 'Remise nécessaire', 'delivery.pending': 'En attente de remise', 'delivery.mark': 'Marquer comme remis', 'delivery.done': 'Remis',
-		'task.due_time': 'Heure limite (facultative)',
-		'shop.visible_to': 'Visible pour', 'shop.all_children': 'Tous les enfants',
-		'penalty.enable': 'Retirer des points en cas de retard', 'status.deadline_missed': 'Échéance dépassée',
-		'editor.sections': 'Sections de cette carte',
-		'history.title': 'Historique des activités',
-		'history.from': 'Du',
-		'history.through': 'Au',
-		'history.empty': 'Aucune tâche terminée sur cette période.',
-		'history.error': 'Impossible de charger l’historique.',
-		'history.refresh': 'Actualiser',
-		'history.loading': 'Chargement…',
-		'editor.unit_name': 'Nom de l’unité de récompense',
-		'editor.task_columns': 'Colonnes de tâches',
-		'editor.columns_auto': 'Automatique',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Bonus anticipé ({unit})',
-		'ph.time_bonus_points.custom': 'Bonus horaire ({unit})',
-		'btn.add_points.custom': 'Ajouter des {unit}',
-		'btn.reset_points.custom': 'Réinitialiser les {unit}',
-		'points.title.custom': 'Ajouter des {unit} à {name}',
-		'err.points_required.custom': 'Indiquez un montant en {unit}',
-		'err.points_number.custom': 'Indiquez un nombre de {unit}',
-		'err.points_positive.custom': 'Indiquez au moins 0 {unit}',
-		'shop.title.custom': 'Boutique en {unit}',
-		'lbl.early_bonus_by.custom': '+{points} {unit} si terminé au plus tard le {date}',
-		'editor.enable_points_help.custom': 'Afficher le solde, la boutique et les actions en {unit}',
-		'editor.color_group_kid_points.custom': 'Solde total ({unit})',
-		'editor.color_group_task_points.custom': 'Récompense par tâche ({unit})',
-		'icon.library': 'Icônes des tâches', 'icon.upload_failed': 'Échec du téléversement',
-		'ui.multiple_per_day': 'Autoriser plusieurs fois par jour',
-		'editor.language_name': 'Français', 'editor.language': 'Langue', 'editor.language_auto': 'Détection automatique',
-				'overview.title':'Tâches assignées','overview.show_all':'Tout afficher ({pending} en attente)','overview.none':'Aucune tâche pour le moment.',
-			'card.admin_title':'Chores4Kids – Parents','input.new_child_name':'Nouvel enfant — nom','btn.add_child':'Ajouter un enfant',
-				'input.new_category_name':'Nouvelle catégorie — nom','btn.add_category':'Ajouter une catégorie','section.categories':'Catégories','th.categories':'Catégories','ph.categories':'Catégories','select.categories':'Sélectionner des catégories',
-			'section.children':'Enfants','th.name':'Nom','th.points':'Points','th.pending':'En attente','th.actions':'Actions','th.status':'Statut','th.assign':'Attribué à','th.completed':'Terminé',
-			'btn.rename':'Renommer','btn.delete':'Supprimer','section.new_task':'Nouvelle tâche','ph.title':'Titre','ph.points':'Points','ph.description':'Description (facultatif)',
-			'ph.bonus_title':'Titre de la tâche bonus', 'ph.bonus_points':'Points bonus',
-			'ph.due':'Date limite (date)',
-			'ph.early_bonus_days':'Jours de bonus (avance)',
-			'ph.early_bonus_points':'Points de bonus',
-			'ui.early_bonus_enabled':'Activer le bonus d\'avance',
-			'warn.repeat_overrides_due':'La répétition est activée, donc la date limite est basée sur les jours de semaine sélectionnés plutôt que sur cette date.',
-			'select.assign_child':'Attribuer un enfant','ph.icon':'Icône (mdi:...)','icon.choose':'Choisir une icône','icon.clear':'Effacer l’icône','icon.none':'Aucune','icon.search':'Rechercher une icône',
-			'btn.create_task':'Créer la tâche','btn.update_task':'Mettre à jour la tâche','btn.edit':'Modifier','editor.loaded_task':'Modification d’une tâche existante',
-			'section.unassigned':'Tâches non attribuées','btn.assign':'Attribuer','section.tasks_per_child':'Tâches par enfant',
-			'btn.start':'Démarrer','btn.back':'Réattribuer','btn.awaiting':'En attente','btn.approve':'Approuver','btn.approve_bonus':'Approuver le bonus','btn.approve_all':'Tout approuver','btn.approve_partial':'Approuver partiellement','lbl.approved':'Approuvée',
-			'section.scoreboard':'Classement','confirm.delete_child':'Supprimer {name} ?','confirm.delete_task':'Supprimer la tâche ?','alert.choose_child_first':'Veuillez d’abord choisir un enfant',
-			'ui.toggle_off_on':'Arrêt/Marche', 'ui.persist_until_done':'Reporter la tâche inachevée au lendemain', 'ui.persist_help':'La tâche inachevée est automatiquement reportée au lendemain', 'ui.quick_complete':'Terminer en un clic', 'ui.skip_approval':'Ignorer l’approbation des parents', 'ui.bonus_task':'Activer la tâche bonus',
-			'section.tasks':'Tâches','form.save':'Enregistrer','form.add':'Ajouter','form.cancel':'Annuler','form.clear':'Effacer',
-			'repeat.label':'Répéter','repeat.auto_assign':'Auto-attribuer (répéter)','repeat.save':'Enregistrer le plan',
-			'repeat.days.mon':'Lun','repeat.days.tue':'Mar','repeat.days.wed':'Mer','repeat.days.thu':'Jeu','repeat.days.fri':'Ven','repeat.days.sat':'Sam','repeat.days.sun':'Dim',
-			'assign.disabled_auto':'Désactivé : auto-attribution (répétition) active', 'assign.auto_to':'Attribuée automatiquement à {names}',
-			'btn.add_points':'Ajouter des points','btn.reset_points':'Réinitialiser les points','points.title':'Ajouter des points à {name}','points.quick':'Ajout rapide','points.remove':'Retrait rapide','points.custom':'Montant personnalisé',
-			'err.title_required':'Le titre est requis','err.points_required':'Les points sont requis','err.points_number':'Les points doivent être un nombre','err.points_positive':'Les points doivent être 0 ou plus',
-			'status.assigned':'Attribuée','status.in_progress':'En cours','status.awaiting_approval':'En attente d’approbation','status.approved':'Approuvée','status.rejected':'Rejetée','status.unassigned':'Non attribuée','status.taken':'Prise',
-			'shop.title':'Boutique','shop.open':'Ouvrir la boutique','shop.item':'Article','shop.price':'Prix','shop.icon':'Icône','shop.image':'Image','shop.upload':'Téléverser une image','shop.add_item':'Ajouter un article','shop.history':'Historique des achats','shop.child':'Enfant','shop.when':'Date et heure','shop.date':'Date','shop.time':'Heure','shop.active':'Actif','shop.buy':'Acheter','shop.bought':'Acheté','shop.clear_history':'Effacer l`historique','confirm.clear_history':'Effacer tout l`historique des achats?',
-			'shop.advanced':'Actions avancées','shop.entity':'Entité','shop.operation':'Opération','shop.add_action':'Ajouter une action','shop.add_delay':'Ajouter un délai','shop.steps':'Étapes','shop.seconds':'Secondes','shop.minutes':'Minutes','shop.hours':'Heures','shop.delay':'Délai',
-			'sort.configure':'Tri','sort.title':'Choisir l’ordre','sort.categories_order':'Ordre des catégories','sort.none':'Aucune catégorie','sort.save':'Enregistrer','sort.reset':'Réinitialiser',
-			'card.child_title_fallback':'Chores4Kids – {name}','msg.child_not_found':'Enfant introuvable. Vérifiez le nom dans la configuration de la carte.','msg.no_tasks':'Aucune tâche pour le moment.', 'btn.done':'Terminé','btn.start_task':'Démarrer la tâche','btn.complete_task':'Tâche terminée','btn.task_done':'Tâche terminée','btn.complete_bonus':'Terminer le bonus','lbl.awaiting':'En attente d’approbation','lbl.bonus':'Tâche bonus','lbl.bonus_locked':'Terminer la tâche principale d\'abord','lbl.taken_by':'Tâche prise par {name}','lbl.points':'points',
-			'section.daily_tasks':'Aujourd’hui',
-			'section.weekly_tasks':'Tâches hebdomadaires',
-			'lbl.deadline':'Date limite : {date}',
-			'lbl.early_bonus_by':'+{points} points de bonus si terminé le {date} ou avant',
-			// Editor UI
-			'editor.mode':'Mode','editor.mode_admin':'Parents','editor.mode_kid':'Enfant','editor.mode_overview':'Tâches récentes',
-			'editor.child_label':'Enfant','editor.child_placeholder':'Nom de l’enfant','editor.child_select_prompt':'— Sélectionner un enfant —','editor.child_hint':'Aucun enfant trouvé pour l’instant — saisissez le nom manuellement.',
-			'editor.developer_mode':'Mode développeur',
-			'editor.developer_mode_help':'Affiche des contrôles de débogage comme marquer en retard manuellement',
-			'editor.completion_sound':'Son de fin',
-			'editor.completion_sound_help':'Enregistré sous /local/chores4kids/completion.<ext> et utilisé sur tous les tableaux de bord',
-			'editor.notify_target':'Notification d’achèvement',
-			'editor.notify_target_help':'Envoyer une notification push lorsqu’un enfant marque une tâche comme terminée.',
-			'editor.notify_target_none':'Ajouter une personne',
-			'editor.notify_toggle_complete':'Notifier la fin d’une tâche',
-			'editor.notify_toggle_shop':'Notifier un achat dans la boutique',
-			'editor.notify_toggle_shop_image':'Afficher l’image dans la notification d’achat',
-			'section.notifications':'Notifications',
-			'editor.colors':'Couleurs',
-			'editor.color_field_bg':'Fond',
-			'editor.color_field_text':'Texte',
-			'editor.color_group_start':'Bouton "Démarrer"',
-			'editor.color_group_complete':'Bouton "Terminer"',
-			'editor.color_group_kid_points':'Points totaux des enfants',
-			'editor.color_group_task_points':'Points de tâche',
-			'editor.color_start_bg':'Bouton "Démarrer" (fond)',
-			'editor.color_start_text':'Bouton "Démarrer" (texte)',
-			'editor.color_complete_bg':'Bouton "Terminer" (fond)',
-			'editor.color_complete_text':'Bouton "Terminer" (texte)',
-			'editor.color_kid_points_bg':'Points totaux des enfants (fond)',
-			'editor.color_kid_points_text':'Points totaux des enfants (texte)',
-			'editor.color_task_points_bg':'Points de tâche (fond)',
-			'editor.color_task_points_text':'Points de tâche (texte)',
-			'editor.color_empty_default':'Vide = par défaut'
-		},
-			fi: {
-		'delivery.required': 'Vaatii luovutuksen', 'delivery.pending': 'Odottaa luovutusta', 'delivery.mark': 'Merkitse luovutetuksi', 'delivery.done': 'Luovutettu',
-		'task.due_time': 'Määräaika kellonaikana (valinnainen)',
-		'shop.visible_to': 'Näkyy lapsille', 'shop.all_children': 'Kaikki lapset',
-		'penalty.enable': 'Vähennä pisteitä myöhästymisestä', 'status.deadline_missed': 'Määräaika ylittyi',
-		'editor.sections': 'Tämän kortin osiot',
-		'history.title': 'Tehtävähistoria',
-		'history.from': 'Alkaen',
-		'history.through': 'Asti',
-		'history.empty': 'Ei suorituksia tällä aikavälillä.',
-		'history.error': 'Historiaa ei voitu ladata.',
-		'history.refresh': 'Päivitä',
-		'history.loading': 'Ladataan…',
-		'editor.unit_name': 'Palkintoyksikön nimi',
-		'editor.task_columns': 'Tehtäväsarakkeet',
-		'editor.columns_auto': 'Automaattinen',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Aikaisen suorituksen bonus ({unit})',
-		'ph.time_bonus_points.custom': 'Aikabonus ({unit})',
-		'btn.add_points.custom': 'Lisää {unit}',
-		'btn.reset_points.custom': 'Nollaa {unit}',
-		'points.title.custom': 'Lisää käyttäjälle {name}: {unit}',
-		'err.points_required.custom': 'Anna määrä ({unit})',
-		'err.points_number.custom': 'Anna luku ({unit})',
-		'err.points_positive.custom': 'Anna vähintään 0 {unit}',
-		'shop.title.custom': 'Kauppa ({unit})',
-		'lbl.early_bonus_by.custom': '+{points} {unit}, jos valmis viimeistään {date}',
-		'editor.enable_points_help.custom': 'Näytä saldo, kauppa ja toiminnot ({unit})',
-		'editor.color_group_kid_points.custom': 'Kokonaissaldo ({unit})',
-		'editor.color_group_task_points.custom': 'Tehtäväpalkkio ({unit})',
-		'icon.library': 'Tehtäväkuvakkeet', 'icon.upload_failed': 'Lataus epäonnistui',
-		'ui.multiple_per_day': 'Salli useita suorituksia päivässä',
-		'editor.language_name': 'Suomi', 'editor.language': 'Kieli', 'editor.language_auto': 'Tunnista automaattisesti',
-				'overview.title':'Määritetyt tehtävät','overview.show_all':'Näytä kaikki ({pending} odottaa)','overview.none':'Ei vielä tehtäviä.',
-			'card.admin_title':'Chores4Kids – Vanhemmat','input.new_child_name':'Uusi lapsi — nimi','btn.add_child':'Lisää lapsi',
-				'input.new_category_name':'Uusi kategoria — nimi','btn.add_category':'Lisää kategoria','section.categories':'Kategoriat','th.categories':'Kategoriat','ph.categories':'Kategoriat','select.categories':'Valitse kategoriat',
-			'section.children':'Lapset','th.name':'Nimi','th.points':'Pisteet','th.pending':'Odottaa','th.actions':'Toiminnot','th.status':'Tila','th.assign':'Määritetty','th.completed':'Valmis',
-			'btn.rename':'Nimeä uudelleen','btn.delete':'Poista','section.new_task':'Uusi tehtävä','ph.title':'Otsikko','ph.points':'Pisteet','ph.description':'Kuvaus (valinnainen)',
-			'ph.bonus_title':'Bonus-tehtävän otsikko', 'ph.bonus_points':'Bonuspisteet',
-			'ph.due':'Määräpäivä (päivä)',
-			'ph.early_bonus_days':'Bonuspäiviä ennen',
-			'ph.early_bonus_points':'Bonuspisteet',
-			'ui.early_bonus_enabled':'Ota käyttöön aikaisen valmistumisen bonus',
-			'warn.repeat_overrides_due':'Toisto on käytössä, joten määräpäivä perustuu valittuihin viikonpäiviin tämän päivämäärän sijaan.',
-			'select.assign_child':'Määritä lapsi','ph.icon':'Kuvake (mdi:...)','icon.choose':'Valitse kuvake','icon.clear':'Poista kuvake','icon.none':'Ei mitään','icon.search':'Hae kuvaketta',
-			'btn.create_task':'Luo tehtävä','btn.update_task':'Päivitä tehtävä','btn.edit':'Muokkaa','editor.loaded_task':'Muokataan olemassa olevaa tehtävää',
-			'section.unassigned':'Määrittämättömät tehtävät','btn.assign':'Määritä','section.tasks_per_child':'Tehtävät per lapsi',
-			'btn.start':'Aloita','btn.back':'Määritä uudelleen','btn.awaiting':'Odottaa','btn.approve':'Hyväksy','btn.approve_bonus':'Hyväksy bonus','btn.approve_all':'Hyväksy kaikki','btn.approve_partial':'Osittainen hyväksyntä','lbl.approved':'Hyväksytty',
-			'section.scoreboard':'Pistetaulukko','confirm.delete_child':'Poistetaanko {name}?','confirm.delete_task':'Poistetaanko tehtävä?','alert.choose_child_first':'Valitse ensin lapsi',
-			'ui.toggle_off_on':'Pois/Päällä', 'ui.persist_until_done':'Siirrä keskeneräinen tehtävä seuraavalle päivälle', 'ui.persist_help':'Keskeneräinen tehtävä siirtyy automaattisesti seuraavalle päivälle', 'ui.quick_complete':'Valmis yhdellä painalluksella', 'ui.skip_approval':'Ohita vanhemman hyväksyntä', 'ui.bonus_task':'Ota bonus-tehtävä käyttöön',
-			'section.tasks':'Tehtävät','form.save':'Tallenna','form.add':'Lisää','form.cancel':'Peruuta','form.clear':'Tyhjennä',
-			'repeat.label':'Toisto','repeat.auto_assign':'Automaattinen määritys (toisto)','repeat.save':'Tallenna suunnitelma',
-			'repeat.days.mon':'Ma','repeat.days.tue':'Ti','repeat.days.wed':'Ke','repeat.days.thu':'To','repeat.days.fri':'Pe','repeat.days.sat':'La','repeat.days.sun':'Su',
-			'assign.disabled_auto':'Pois käytöstä: automaattinen määritys (toisto) käytössä', 'assign.auto_to':'Automaattisesti määritetty: {names}',
-			'btn.add_points':'Lisää pisteitä','btn.reset_points':'Nollaa pisteet','points.title':'Lisää pisteitä: {name}','points.quick':'Pikalisäys','points.remove':'Pikavähennys','points.custom':'Mukautettu määrä',
-			'err.title_required':'Otsikko on pakollinen','err.points_required':'Pisteet ovat pakolliset','err.points_number':'Pisteiden on oltava numero','err.points_positive':'Pisteiden on oltava 0 tai enemmän',
-			'status.assigned':'Määritetty','status.in_progress':'Käynnissä','status.awaiting_approval':'Odottaa hyväksyntää','status.approved':'Hyväksytty','status.rejected':'Hylätty','status.unassigned':'Ei määritetty','status.taken':'Varattu',
-			'shop.title':'Kauppa','shop.open':'Avaa kauppa','shop.item':'Tuote','shop.price':'Hinta','shop.icon':'Kuvake','shop.image':'Kuva','shop.upload':'Lataa kuva','shop.add_item':'Lisää tuote','shop.history':'Ostohistoria','shop.child':'Lapsi','shop.when':'Aika','shop.date':'Päiväys','shop.time':'Aika','shop.active':'Aktiivinen','shop.buy':'Osta','shop.bought':'Ostettu','shop.clear_history':'Tyhjennä historia','confirm.clear_history':'Tyhjennä koko ostohistoria?',
-			'shop.advanced':'Edistyneet toiminnot','shop.entity':'Entiteetti','shop.operation':'Toiminto','shop.add_action':'Lisää toiminto','shop.add_delay':'Lisää viive','shop.steps':'Vaiheet','shop.seconds':'Sekuntia','shop.minutes':'Minuuttia','shop.hours':'Tuntia','shop.delay':'Viive',
-			'sort.configure':'Lajittelu','sort.title':'Valitse järjestys','sort.categories_order':'Kategorioiden järjestys','sort.none':'Ei kategoriaa','sort.save':'Tallenna','sort.reset':'Palauta',
-			'card.child_title_fallback':'Chores4Kids – {name}','msg.child_not_found':'Lasta ei löytynyt. Tarkista nimi kortin asetuksista.','msg.no_tasks':'Ei tehtäviä juuri nyt.', 'btn.done':'Valmis','btn.start_task':'Aloita tehtävä','btn.complete_task':'Tehtävä valmis','btn.task_done':'Tehtävä valmis','btn.complete_bonus':'Suorita bonus','lbl.awaiting':'Odottaa hyväksyntää','lbl.bonus':'Bonustehtävä','lbl.bonus_locked':'Suorita päätehtävä ensin','lbl.taken_by':'Tehtävän otti {name}','lbl.points':'pistettä',
-			'section.daily_tasks':'Tänään',
-			'section.weekly_tasks':'Viikkotehtävät',
-			'lbl.deadline':'Määräpäivä: {date}',
-			'lbl.early_bonus_by':'+{points} bonuspistettä, jos valmis {date} tai aiemmin',
-			// Editor UI
-			'editor.mode':'Tila','editor.mode_admin':'Vanhemmat','editor.mode_kid':'Lapsi','editor.mode_overview':'Viimeisimmät tehtävät',
-			'editor.child_label':'Lapsi','editor.child_placeholder':'Lapsen nimi','editor.child_select_prompt':'— Valitse lapsi —','editor.child_hint':'Lapsia ei vielä löytynyt — kirjoita nimi manuaalisesti.',
-			'editor.developer_mode':'Kehittäjätila',
-			'editor.developer_mode_help':'Näyttää debug-ohjaimet, kuten manuaalisen myöhässä-merkinnän',
-			'editor.completion_sound':'Valmistumisääni',
-			'editor.completion_sound_help':'Tallennetaan muotoon /local/chores4kids/completion.<ext> ja käytetään kaikilla näkymillä',
-			'editor.notify_target':'Valmistumisilmoitus',
-			'editor.notify_target_help':'Lähetä push-ilmoitus, kun lapsi merkitsee tehtävän valmiiksi.',
-			'editor.notify_target_none':'Lisää henkilö',
-			'editor.notify_toggle_complete':'Ilmoitus tehtävän valmistumisesta',
-			'editor.notify_toggle_shop':'Ilmoitus ostosta kaupassa',
-			'editor.notify_toggle_shop_image':'Näytä kuva oston ilmoituksessa',
-			'section.notifications':'Ilmoitukset',
-			'editor.colors':'Värit',
-			'editor.color_field_bg':'Tausta',
-			'editor.color_field_text':'Teksti',
-			'editor.color_group_start':'Aloita tehtävä -painike',
-			'editor.color_group_complete':'Suorita tehtävä -painike',
-			'editor.color_group_kid_points':'Lasten kokonaispisteet',
-			'editor.color_group_task_points':'Tehtäväpisteet',
-			'editor.color_start_bg':'Aloita tehtävä -painike (tausta)',
-			'editor.color_start_text':'Aloita tehtävä -painike (teksti)',
-			'editor.color_complete_bg':'Suorita tehtävä -painike (tausta)',
-			'editor.color_complete_text':'Suorita tehtävä -painike (teksti)',
-			'editor.color_kid_points_bg':'Lasten kokonaispisteet (tausta)',
-			'editor.color_kid_points_text':'Lasten kokonaispisteet (teksti)',
-			'editor.color_task_points_bg':'Tehtäväpisteet (tausta)',
-			'editor.color_task_points_text':'Tehtäväpisteet (teksti)',
-			'editor.color_empty_default':'Tyhjä = oletus'
-		},
-			it: {
-		'delivery.required': 'Richiede consegna', 'delivery.pending': 'In attesa di consegna', 'delivery.mark': 'Segna come consegnato', 'delivery.done': 'Consegnato',
-		'task.due_time': 'Ora di scadenza (facoltativa)',
-		'shop.visible_to': 'Visibile a', 'shop.all_children': 'Tutti i bambini',
-		'penalty.enable': 'Sottrai punti in caso di ritardo', 'status.deadline_missed': 'Scadenza superata',
-		'editor.sections': 'Sezioni di questa scheda',
-		'history.title': 'Cronologia attività',
-		'history.from': 'Dal',
-		'history.through': 'Al',
-		'history.empty': 'Nessuna attività completata in questo periodo.',
-		'history.error': 'Impossibile caricare la cronologia.',
-		'history.refresh': 'Aggiorna',
-		'history.loading': 'Caricamento…',
-		'editor.unit_name': 'Nome dell’unità di ricompensa',
-		'editor.task_columns': 'Colonne delle attività',
-		'editor.columns_auto': 'Automatico',
-		'ph.bonus_points.custom': 'Bonus ({unit})',
-		'ph.early_bonus_points.custom': 'Bonus anticipato ({unit})',
-		'ph.time_bonus_points.custom': 'Bonus orario ({unit})',
-		'btn.add_points.custom': 'Aggiungi {unit}',
-		'btn.reset_points.custom': 'Azzera {unit}',
-		'points.title.custom': 'Aggiungi {unit} a {name}',
-		'err.points_required.custom': 'Inserisci un importo in {unit}',
-		'err.points_number.custom': 'Inserisci un numero per {unit}',
-		'err.points_positive.custom': 'Inserisci almeno 0 {unit}',
-		'shop.title.custom': 'Negozio in {unit}',
-		'lbl.early_bonus_by.custom': '+{points} {unit} se completata entro il {date}',
-		'editor.enable_points_help.custom': 'Mostra saldo, negozio e azioni in {unit}',
-		'editor.color_group_kid_points.custom': 'Saldo totale ({unit})',
-		'editor.color_group_task_points.custom': 'Ricompensa attività ({unit})',
-		'icon.library': 'Icone delle attività', 'icon.upload_failed': 'Caricamento non riuscito',
-		'ui.multiple_per_day': 'Consenti più completamenti al giorno',
-		'editor.language_name': 'Italiano', 'editor.language': 'Lingua', 'editor.language_auto': 'Rilevamento automatico',
-				'overview.title':'Attività assegnate','overview.show_all':'Mostra tutto ({pending} in attesa)','overview.none':'Nessuna attività.',
-			'card.admin_title':'Chores4Kids – Genitori','input.new_child_name':'Nuovo bambino — nome','btn.add_child':'Aggiungi bambino',
-				'input.new_category_name':'Nuova categoria — nome','btn.add_category':'Aggiungi categoria','section.categories':'Categorie','th.categories':'Categorie','ph.categories':'Categorie','select.categories':'Seleziona categorie',
-			'section.children':'Bambini','th.name':'Nome','th.points':'Punti','th.pending':'In sospeso','th.actions':'Azioni','th.status':'Stato','th.assign':'Assegnato a','th.completed':'Completato',
-			'btn.rename':'Rinomina','btn.delete':'Elimina','section.new_task':'Nuova attività','ph.title':'Titolo','ph.points':'Punti','ph.description':'Descrizione (opzionale)',
-			'ph.bonus_title':'Titolo attività bonus', 'ph.bonus_points':'Punti bonus',
-			'ph.due':'Scadenza (data)',
-			'ph.early_bonus_days':'Giorni di bonus (anticipo)',
-			'ph.early_bonus_points':'Punti bonus',
-			'ui.early_bonus_enabled':'Attiva bonus per completamento anticipato',
-			'warn.repeat_overrides_due':'La ripetizione è attiva, quindi la scadenza si basa sui giorni della settimana selezionati invece di questa data.',
-			'select.assign_child':'Assegna bambino','ph.icon':'Icona (mdi:...)','icon.choose':'Scegli icona','icon.clear':'Rimuovi icona','icon.none':'Nessuna','icon.search':'Cerca icona',
-			'btn.create_task':'Crea attività','btn.update_task':'Aggiorna attività','btn.edit':'Modifica','editor.loaded_task':'Modifica attività esistente',
-			'section.unassigned':'Attività non assegnate','btn.assign':'Assegna','section.tasks_per_child':'Attività per bambino',
-			'btn.start':'Avvia','btn.back':'Riassegna','btn.awaiting':'In attesa','btn.approve':'Approva','btn.approve_bonus':'Approva bonus','btn.approve_all':'Approva tutto','btn.approve_partial':'Approva parzialmente','lbl.approved':'Approvato',
-			'section.scoreboard':'Classifica','confirm.delete_child':'Eliminare {name}?','confirm.delete_task':'Eliminare attività?','alert.choose_child_first':'Scegli prima un bambino',
-			'ui.toggle_off_on':'Spento/Acceso', 'ui.persist_until_done':'Sposta l’attività non completata al giorno successivo', 'ui.persist_help':'L’attività non completata verrà spostata automaticamente al giorno successivo', 'ui.quick_complete':'Completa con un tocco', 'ui.skip_approval':'Salta approvazione genitori', 'ui.bonus_task':'Attiva attività bonus',
-			'section.tasks':'Attività','form.save':'Salva','form.add':'Aggiungi','form.cancel':'Annulla','form.clear':'Cancella',
-			'repeat.label':'Ripeti','repeat.auto_assign':'Assegnazione automatica (ripeti)','repeat.save':'Salva piano',
-			'repeat.days.mon':'Lun','repeat.days.tue':'Mar','repeat.days.wed':'Mer','repeat.days.thu':'Gio','repeat.days.fri':'Ven','repeat.days.sat':'Sab','repeat.days.sun':'Dom',
-			'assign.disabled_auto':'Disabilitato: assegnazione automatica (ripetizione) attiva', 'assign.auto_to':'Assegnata automaticamente a {names}',
-			'btn.add_points':'Aggiungi punti','btn.reset_points':'Azzera punti','points.title':'Aggiungi punti a {name}','points.quick':'Aggiunta rapida','points.remove':'Rimozione rapida','points.custom':'Quantità personalizzata',
-			'err.title_required':'Titolo obbligatorio','err.points_required':'Punti obbligatori','err.points_number':'I punti devono essere un numero','err.points_positive':'I punti devono essere 0 o più',
-			'status.assigned':'Assegnata','status.in_progress':'In corso','status.awaiting_approval':'In attesa di approvazione','status.approved':'Approvata','status.rejected':'Rifiutata','status.unassigned':'Non assegnata','status.taken':'Presa',
-			'shop.title':'Negozio','shop.open':'Apri negozio','shop.item':'Articolo','shop.price':'Prezzo','shop.icon':'Icona','shop.image':'Immagine','shop.upload':'Carica immagine','shop.add_item':'Aggiungi articolo','shop.history':'Storico acquisti','shop.child':'Bambino','shop.when':'Data e ora','shop.date':'Data','shop.time':'Ora','shop.active':'Attivo','shop.buy':'Compra','shop.bought':'Comprato','shop.clear_history':'Cancella storico','confirm.clear_history':'Cancellare tutto lo storico acquisti?',
-			'shop.advanced':'Azioni avanzate','shop.entity':'Entità','shop.operation':'Operazione','shop.add_action':'Aggiungi azione','shop.add_delay':'Aggiungi ritardo','shop.steps':'Passi','shop.seconds':'Secondi','shop.minutes':'Minuti','shop.hours':'Ore','shop.delay':'Ritardo',
-			'sort.configure':'Ordinamento','sort.title':'Scegli ordine','sort.categories_order':'Ordine categorie','sort.none':'Nessuna categoria','sort.save':'Salva','sort.reset':'Reimposta',
-			'card.child_title_fallback':'Chores4Kids – {name}','msg.child_not_found':'Bambino non trovato. Controlla il nome nella configurazione della scheda.','msg.no_tasks':'Nessuna attività al momento.', 'btn.done':'Fatto','btn.start_task':'Avvia attività','btn.complete_task':'Attività completata','btn.task_done':'Attività completata','btn.complete_bonus':'Completa bonus','lbl.awaiting':'In attesa di approvazione','lbl.bonus':'Attività bonus','lbl.bonus_locked':'Completa prima l\'attività principale','lbl.taken_by':'Attività presa da {name}','lbl.points':'punti',
-			'section.daily_tasks':'Oggi',
-			'section.weekly_tasks':'Attività settimanali',
-			'lbl.deadline':'Scadenza: {date}',
-			'lbl.early_bonus_by':'+{points} punti bonus se completata il {date} o prima',
-			// Editor UI
-			'editor.mode':'Modalità','editor.mode_admin':'Genitori','editor.mode_kid':'Bambino','editor.mode_overview':'Attività recenti',
-			'editor.child_label':'Bambino','editor.child_placeholder':'Nome del bambino','editor.child_select_prompt':'— Seleziona bambino —','editor.child_hint':'Ancora nessun bambino trovato — inserisci il nome manualmente.',
-			'editor.developer_mode':'Modalità sviluppatore',
-			'editor.developer_mode_help':'Mostra controlli di debug come segnare scaduto manualmente',
-			'editor.completion_sound':'Suono di completamento',
-			'editor.completion_sound_help':'Salvato come /local/chores4kids/completion.<ext> e usato su tutte le dashboard',
-			'editor.notify_target':'Notifica di completamento',
-			'editor.notify_target_help':'Invia una notifica push quando un bambino segna un’attività come completata.',
-			'editor.notify_target_none':'Aggiungi persona',
-			'editor.notify_toggle_complete':'Notifica completamento attività',
-			'editor.notify_toggle_shop':'Notifica acquisto nel negozio',
-			'editor.notify_toggle_shop_image':'Mostra immagine nella notifica di acquisto',
-			'section.notifications':'Notifiche',
-			'editor.colors':'Colori',
-			'editor.color_field_bg':'Sfondo',
-			'editor.color_field_text':'Testo',
-			'editor.color_group_start':'Pulsante "Avvia"',
-			'editor.color_group_complete':'Pulsante "Completa"',
-			'editor.color_group_kid_points':'Punti totali dei bambini',
-			'editor.color_group_task_points':'Punti attività',
-			'editor.color_start_bg':'Pulsante "Avvia" (sfondo)',
-			'editor.color_start_text':'Pulsante "Avvia" (testo)',
-			'editor.color_complete_bg':'Pulsante "Completa" (sfondo)',
-			'editor.color_complete_text':'Pulsante "Completa" (testo)',
-			'editor.color_kid_points_bg':'Punti totali dei bambini (sfondo)',
-			'editor.color_kid_points_text':'Punti totali dei bambini (testo)',
-			'editor.color_task_points_bg':'Punti attività (sfondo)',
-			'editor.color_task_points_text':'Punti attività (testo)',
-			'editor.color_empty_default':'Vuoto = predefinito'
-		}
-};
-function c4kTaskIcon(id, className = '') {
-	if (!id) return '';
-	if (/^\/local\/chores4kids\/icons\/[a-f0-9]{64}\.png$/.test(id)) {
-		return html`<img class=${className} src=${id} width="24" height="24" alt="" style="vertical-align:middle;object-fit:contain">`;
-	}
-	return html`<ha-icon class=${className} icon=${id}></ha-icon>`;
-}
-
-const C4K_COLOR_STATES = ['awaiting_approval', 'taken', 'approved'];
-const C4K_LANG_ALIAS = { no: 'nb' };
-try {
-	const __EN = C4K_I18N.en || {};
-	for (const __lang of Object.keys(C4K_I18N)){
-		if (__lang==='en') continue; const __m = C4K_I18N[__lang] ||= {};
-		for (const __k of Object.keys(__EN)){ if (!(__k in __m)) __m[__k] = __EN[__k]; }
-	}
-} catch {}
-function c4kGetLangFromHass(hass){ const raw = hass?.locale?.language || hass?.language || navigator.language || 'en'; return String(raw).toLowerCase(); }
-function c4kCardLocale(language, hass){
-	const manual = String(language || '').toLowerCase();
-	return Object.hasOwn(C4K_I18N, manual) ? manual : c4kGetLangFromHass(hass);
-}
-const c4kSettingsCache = new WeakMap();
-function c4kSettings(hass) {
-	const states = hass?.states;
-	if (!states) return {};
-	if (!c4kSettingsCache.has(states)) {
-		const sensor = states['sensor.chores4kids_ui'] || Object.values(states).find(s =>
-			s.entity_id?.startsWith('sensor.') && ('chore_columns' in (s.attributes || {}) || 'start_task_bg' in (s.attributes || {})));
-		c4kSettingsCache.set(states, sensor?.attributes || {});
-	}
-	return c4kSettingsCache.get(states);
-}
-
-function c4kLocalize(key, langOrHass, vars, unit){
-	const raw = typeof langOrHass==='string'? langOrHass : c4kGetLangFromHass(langOrHass);
-	const lang = String(raw).toLowerCase();
-	const parts = lang.split('-');
-	const candidates = [lang, parts[0], C4K_LANG_ALIAS[lang], C4K_LANG_ALIAS[parts[0]], 'en'].filter(Boolean);
-	if (unit) {
-		if (['lbl.points','th.points','ph.points','editor.enable_points'].includes(key)) return unit;
-		if (C4K_I18N.en[key + '.custom']) {
-			key += '.custom';
-			vars = {...vars, unit};
-		}
-	}
-	let txt = null; for (const c of candidates){ const d=C4K_I18N[c]; if (d && d[key]) { txt=d[key]; break; } }
-	if (!txt) txt = C4K_I18N.en[key] || key;
-	if (vars && typeof vars==='object') txt = String(txt).replace(/\{(\w+)\}/g,(_,k)=> vars[k]!==undefined?String(vars[k]):'{'+k+'}');
-	return txt;
-}
-
-// Curated icon set (full list from original admin card)
-const C4K_ICON_SET = [
-	{ id:'mdi:broom', label:'Sweep' },
-	{ id:'mdi:bucket', label:'Mop' },
-	{ id:'mdi:vacuum', label:'Vacuum' },
-	{ id:'mdi:robot-vacuum', label:'Robot vacuum' },
-	{ id:'mdi:spray-bottle', label:'Wipe surfaces' },
-	{ id:'mdi:window-closed-variant', label:'Windows' },
-	{ id:'mdi:bucket-outline', label:'Bucket' },
-	{ id:'mdi:washing-machine', label:'Laundry wash' },
-	{ id:'mdi:tumble-dryer', label:'Laundry dry' },
-	{ id:'mdi:iron', label:'Iron clothes' },
-	{ id:'mdi:hanger', label:'Put away clothes' },
-	{ id:'mdi:wardrobe-outline', label:'Closet' },
-	{ id:'mdi:bed', label:'Make bed' },
-	{ id:'mdi:bed-single', label:'Tidy room' },
-	{ id:'mdi:trash-can-outline', label:'Take out trash' },
-	{ id:'mdi:recycle', label:'Recycling' },
-	{ id:'mdi:watering-can', label:'Water plants' },
-	{ id:'mdi:flower', label:'Garden' },
-	{ id:'mdi:leaf', label:'Leaves' },
-	{ id:'mdi:car-wash', label:'Wash car' },
-	{ id:'mdi:silverware-clean', label:'Dishes' },
-	{ id:'mdi:dishwasher', label:'Load dishwasher' },
-	{ id:'mdi:dishwasher-off', label:'Unload dishwasher' },
-	{ id:'mdi:table-furniture', label:'Set table' },
-	{ id:'mdi:table-chair', label:'Clear table' },
-	{ id:'mdi:pot-steam', label:'Cook' },
-	{ id:'mdi:stove', label:'Kitchen' },
-	{ id:'mdi:toothbrush-paste', label:'Brush teeth' },
-	{ id:'mdi:shower', label:'Shower' },
-	{ id:'mdi:toilet', label:'Bathroom' },
-	{ id:'mdi:book', label:'Homework' },
-	{ id:'mdi:school', label:'Study' },
-	{ id:'mdi:dog-side', label:'Walk dog' },
-	{ id:'mdi:cat', label:'Feed cat' },
-	{ id:'mdi:paw', label:'Pet care' },
-	{ id:'mdi:fish', label:'Feed fish' },
-	{ id:'mdi:sofa', label:'Living room' },
-	{ id:'mdi:bookshelf', label:'Books' },
-];
-
-class Chores4KidsDevCard extends LitElement {
-	static get properties(){
-		return {
-			hass: {},
-			config: {},
-			// Shared state
-			_mode: { state: true },
-			_childName: { state: true },
-			// Per-task in-flight locks (prevents double taps sending multiple requests)
-			_taskBusy: { state: true },
-			// UI collapse state
-			_collapsed: { state: true },
-			// Admin state
-			_name: { state: true }, _taskTitle: { state: true }, _taskPoints: { state: true }, _taskDesc: { state: true }, _taskIcon: { state: true }, _iconModalOpen: { state: true },
-			_taskCategories: { state: true }, _openCategoriesMenu: { state: true }, _newCategoryName: { state: true }, _newCategoryColor: { state: true },
-			_taskBonusEnabled: { state: true }, _taskBonusTitle: { state: true }, _taskBonusPoints: { state: true },
-			_repeatEnabled: { state: true }, _weeklyEnabled: { state: true }, _monthlyEnabled: { state: true }, _repeatAssign: { state: true }, _persistUntilDone: { state: true }, _markOverdue: { state: true }, _taskDueTime: {state:true}, _penaltyEnabled: {state:true}, _penaltyAmount: {state:true}, _penaltyTime: {state:true}, _multiplePerDay: { state: true }, _quickComplete: { state: true }, _skipApproval: { state: true }, _fastestWins: { state: true }, _editingTask: { state: true }, _tasksModalOpen: { state: true },
-			_customIconModalOpen: { state: true }, _customIconSearch: { state: true }, _customIconPreview: { state: true }, _customIconLabel: { state: true },
-			_shopModalOpen: { state: true }, _shopTitle: { state: true }, _shopRequiresDelivery: { state: true }, _shopAudienceDrafts: {state:true}, _shopPrice: { state: true }, _shopImage: { state: true }, _editItem: { state: true }, _advItem: { state: true },
-			// UI for nicer multi-assign dropdown
-			_openAssignMenuFor: { state: true }, _assignMenuStyle: { state: true },
-			_openRepeatMenu: { state: true },
-			// Re-assign modal
-			_reassignTask: { state: true },
-			// Child state
-			_shopOpen: { state: true },
-			// Sorting/categories order
-			_sortModalOpen: { state: true }, _catOrderDraft: { state: true },
-			// Task description view
-			_viewingTaskDesc: { state: true },
-			_taskTimeBonusEnabled: { state: true },
-			_taskTimeBonusBefore: { state: true },
-			_taskTimeBonusPoints: { state: true }
-		};
-	}
-	static get styles(){ return css`
+// Generated from src/chores4kids-card.js with npm run build.
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */var Z=globalThis,Y=Z.ShadowRoot&&(Z.ShadyCSS===void 0||Z.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,ot=Symbol(),Tt=new WeakMap,F=class{constructor(t,e,i){if(this._$cssResult$=!0,i!==ot)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t,this.t=e}get styleSheet(){let t=this.o,e=this.t;if(Y&&t===void 0){let i=e!==void 0&&e.length===1;i&&(t=Tt.get(e)),t===void 0&&((this.o=t=new CSSStyleSheet).replaceSync(this.cssText),i&&Tt.set(e,t))}return t}toString(){return this.cssText}},Ct=h=>new F(typeof h=="string"?h:h+"",void 0,ot),Q=(h,...t)=>{let e=h.length===1?h[0]:t.reduce((i,s,a)=>i+(r=>{if(r._$cssResult$===!0)return r.cssText;if(typeof r=="number")return r;throw Error("Value passed to 'css' function must be a 'css' function result: "+r+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+h[a+1],h[0]);return new F(e,h,ot)},Et=(h,t)=>{if(Y)h.adoptedStyleSheets=t.map(e=>e instanceof CSSStyleSheet?e:e.styleSheet);else for(let e of t){let i=document.createElement("style"),s=Z.litNonce;s!==void 0&&i.setAttribute("nonce",s),i.textContent=e.cssText,h.appendChild(i)}},nt=Y?h=>h:h=>h instanceof CSSStyleSheet?(t=>{let e="";for(let i of t.cssRules)e+=i.cssText;return Ct(e)})(h):h;/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */var{is:ae,defineProperty:oe,getOwnPropertyDescriptor:ne,getOwnPropertyNames:re,getOwnPropertySymbols:le,getPrototypeOf:de}=Object,X=globalThis,Bt=X.trustedTypes,ce=Bt?Bt.emptyScript:"",pe=X.reactiveElementPolyfillSupport,G=(h,t)=>h,rt={toAttribute(h,t){switch(t){case Boolean:h=h?ce:null;break;case Object:case Array:h=h==null?h:JSON.stringify(h)}return h},fromAttribute(h,t){let e=h;switch(t){case Boolean:e=h!==null;break;case Number:e=h===null?null:Number(h);break;case Object:case Array:try{e=JSON.parse(h)}catch{e=null}}return e}},It=(h,t)=>!ae(h,t),Dt={attribute:!0,type:String,converter:rt,reflect:!1,useDefault:!1,hasChanged:It};Symbol.metadata??=Symbol("metadata"),X.litPropertyMetadata??=new WeakMap;var T=class extends HTMLElement{static addInitializer(t){this._$Ei(),(this.l??=[]).push(t)}static get observedAttributes(){return this.finalize(),this._$Eh&&[...this._$Eh.keys()]}static createProperty(t,e=Dt){if(e.state&&(e.attribute=!1),this._$Ei(),this.prototype.hasOwnProperty(t)&&((e=Object.create(e)).wrapped=!0),this.elementProperties.set(t,e),!e.noAccessor){let i=Symbol(),s=this.getPropertyDescriptor(t,i,e);s!==void 0&&oe(this.prototype,t,s)}}static getPropertyDescriptor(t,e,i){let{get:s,set:a}=ne(this.prototype,t)??{get(){return this[e]},set(r){this[e]=r}};return{get:s,set(r){let p=s?.call(this);a?.call(this,r),this.requestUpdate(t,p,i)},configurable:!0,enumerable:!0}}static getPropertyOptions(t){return this.elementProperties.get(t)??Dt}static _$Ei(){if(this.hasOwnProperty(G("elementProperties")))return;let t=de(this);t.finalize(),t.l!==void 0&&(this.l=[...t.l]),this.elementProperties=new Map(t.elementProperties)}static finalize(){if(this.hasOwnProperty(G("finalized")))return;if(this.finalized=!0,this._$Ei(),this.hasOwnProperty(G("properties"))){let e=this.properties,i=[...re(e),...le(e)];for(let s of i)this.createProperty(s,e[s])}let t=this[Symbol.metadata];if(t!==null){let e=litPropertyMetadata.get(t);if(e!==void 0)for(let[i,s]of e)this.elementProperties.set(i,s)}this._$Eh=new Map;for(let[e,i]of this.elementProperties){let s=this._$Eu(e,i);s!==void 0&&this._$Eh.set(s,e)}this.elementStyles=this.finalizeStyles(this.styles)}static finalizeStyles(t){let e=[];if(Array.isArray(t)){let i=new Set(t.flat(1/0).reverse());for(let s of i)e.unshift(nt(s))}else t!==void 0&&e.push(nt(t));return e}static _$Eu(t,e){let i=e.attribute;return i===!1?void 0:typeof i=="string"?i:typeof t=="string"?t.toLowerCase():void 0}constructor(){super(),this._$Ep=void 0,this.isUpdatePending=!1,this.hasUpdated=!1,this._$Em=null,this._$Ev()}_$Ev(){this._$ES=new Promise(t=>this.enableUpdating=t),this._$AL=new Map,this._$E_(),this.requestUpdate(),this.constructor.l?.forEach(t=>t(this))}addController(t){(this._$EO??=new Set).add(t),this.renderRoot!==void 0&&this.isConnected&&t.hostConnected?.()}removeController(t){this._$EO?.delete(t)}_$E_(){let t=new Map,e=this.constructor.elementProperties;for(let i of e.keys())this.hasOwnProperty(i)&&(t.set(i,this[i]),delete this[i]);t.size>0&&(this._$Ep=t)}createRenderRoot(){let t=this.shadowRoot??this.attachShadow(this.constructor.shadowRootOptions);return Et(t,this.constructor.elementStyles),t}connectedCallback(){this.renderRoot??=this.createRenderRoot(),this.enableUpdating(!0),this._$EO?.forEach(t=>t.hostConnected?.())}enableUpdating(t){}disconnectedCallback(){this._$EO?.forEach(t=>t.hostDisconnected?.())}attributeChangedCallback(t,e,i){this._$AK(t,i)}_$ET(t,e){let i=this.constructor.elementProperties.get(t),s=this.constructor._$Eu(t,i);if(s!==void 0&&i.reflect===!0){let a=(i.converter?.toAttribute!==void 0?i.converter:rt).toAttribute(e,i.type);this._$Em=t,a==null?this.removeAttribute(s):this.setAttribute(s,a),this._$Em=null}}_$AK(t,e){let i=this.constructor,s=i._$Eh.get(t);if(s!==void 0&&this._$Em!==s){let a=i.getPropertyOptions(s),r=typeof a.converter=="function"?{fromAttribute:a.converter}:a.converter?.fromAttribute!==void 0?a.converter:rt;this._$Em=s;let p=r.fromAttribute(e,a.type);this[s]=p??this._$Ej?.get(s)??p,this._$Em=null}}requestUpdate(t,e,i,s=!1,a){if(t!==void 0){let r=this.constructor;if(s===!1&&(a=this[t]),i??=r.getPropertyOptions(t),!((i.hasChanged??It)(a,e)||i.useDefault&&i.reflect&&a===this._$Ej?.get(t)&&!this.hasAttribute(r._$Eu(t,i))))return;this.C(t,e,i)}this.isUpdatePending===!1&&(this._$ES=this._$EP())}C(t,e,{useDefault:i,reflect:s,wrapped:a},r){i&&!(this._$Ej??=new Map).has(t)&&(this._$Ej.set(t,r??e??this[t]),a!==!0||r!==void 0)||(this._$AL.has(t)||(this.hasUpdated||i||(e=void 0),this._$AL.set(t,e)),s===!0&&this._$Em!==t&&(this._$Eq??=new Set).add(t))}async _$EP(){this.isUpdatePending=!0;try{await this._$ES}catch(e){Promise.reject(e)}let t=this.scheduleUpdate();return t!=null&&await t,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){if(!this.isUpdatePending)return;if(!this.hasUpdated){if(this.renderRoot??=this.createRenderRoot(),this._$Ep){for(let[s,a]of this._$Ep)this[s]=a;this._$Ep=void 0}let i=this.constructor.elementProperties;if(i.size>0)for(let[s,a]of i){let{wrapped:r}=a,p=this[s];r!==!0||this._$AL.has(s)||p===void 0||this.C(s,void 0,a,p)}}let t=!1,e=this._$AL;try{t=this.shouldUpdate(e),t?(this.willUpdate(e),this._$EO?.forEach(i=>i.hostUpdate?.()),this.update(e)):this._$EM()}catch(i){throw t=!1,this._$EM(),i}t&&this._$AE(e)}willUpdate(t){}_$AE(t){this._$EO?.forEach(e=>e.hostUpdated?.()),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(t)),this.updated(t)}_$EM(){this._$AL=new Map,this.isUpdatePending=!1}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$ES}shouldUpdate(t){return!0}update(t){this._$Eq&&=this._$Eq.forEach(e=>this._$ET(e,this[e])),this._$EM()}updated(t){}firstUpdated(t){}};T.elementStyles=[],T.shadowRootOptions={mode:"open"},T[G("elementProperties")]=new Map,T[G("finalized")]=new Map,pe?.({ReactiveElement:T}),(X.reactiveElementVersions??=[]).push("2.1.2");/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */var _t=globalThis,Pt=h=>h,tt=_t.trustedTypes,Nt=tt?tt.createPolicy("lit-html",{createHTML:h=>h}):void 0,jt="$lit$",P=`lit$${Math.random().toFixed(9).slice(2)}$`,Rt="?"+P,he=`<${Rt}>`,U=document,K=()=>U.createComment(""),H=h=>h===null||typeof h!="object"&&typeof h!="function",gt=Array.isArray,ue=h=>gt(h)||typeof h?.[Symbol.iterator]=="function",lt=`[ 	
+\f\r]`,V=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,Ot=/-->/g,zt=/>/g,z=RegExp(`>|${lt}(?:([^\\s"'>=/]+)(${lt}*=${lt}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`,"g"),Mt=/'/g,Ut=/"/g,Lt=/^(?:script|style|textarea|title)$/i,mt=h=>(t,...e)=>({_$litType$:h,strings:t,values:e}),n=mt(1),$e=mt(2),xe=mt(3),q=Symbol.for("lit-noChange"),k=Symbol.for("lit-nothing"),qt=new WeakMap,M=U.createTreeWalker(U,129);function Ft(h,t){if(!gt(h)||!h.hasOwnProperty("raw"))throw Error("invalid template strings array");return Nt!==void 0?Nt.createHTML(t):t}var _e=(h,t)=>{let e=h.length-1,i=[],s,a=t===2?"<svg>":t===3?"<math>":"",r=V;for(let p=0;p<e;p++){let o=h[p],c,u,l=-1,d=0;for(;d<o.length&&(r.lastIndex=d,u=r.exec(o),u!==null);)d=r.lastIndex,r===V?u[1]==="!--"?r=Ot:u[1]!==void 0?r=zt:u[2]!==void 0?(Lt.test(u[2])&&(s=RegExp("</"+u[2],"g")),r=z):u[3]!==void 0&&(r=z):r===z?u[0]===">"?(r=s??V,l=-1):u[1]===void 0?l=-2:(l=r.lastIndex-u[2].length,c=u[1],r=u[3]===void 0?z:u[3]==='"'?Ut:Mt):r===Ut||r===Mt?r=z:r===Ot||r===zt?r=V:(r=z,s=void 0);let m=r===z&&h[p+1].startsWith("/>")?" ":"";a+=r===V?o+he:l>=0?(i.push(c),o.slice(0,l)+jt+o.slice(l)+P+m):o+P+(l===-2?p:m)}return[Ft(h,a+(h[e]||"<?>")+(t===2?"</svg>":t===3?"</math>":"")),i]},W=class h{constructor({strings:t,_$litType$:e},i){let s;this.parts=[];let a=0,r=0,p=t.length-1,o=this.parts,[c,u]=_e(t,e);if(this.el=h.createElement(c,i),M.currentNode=this.el.content,e===2||e===3){let l=this.el.content.firstChild;l.replaceWith(...l.childNodes)}for(;(s=M.nextNode())!==null&&o.length<p;){if(s.nodeType===1){if(s.hasAttributes())for(let l of s.getAttributeNames())if(l.endsWith(jt)){let d=u[r++],m=s.getAttribute(l).split(P),g=/([.?@])?(.*)/.exec(d);o.push({type:1,index:a,name:g[2],strings:m,ctor:g[1]==="."?ct:g[1]==="?"?pt:g[1]==="@"?ht:L}),s.removeAttribute(l)}else l.startsWith(P)&&(o.push({type:6,index:a}),s.removeAttribute(l));if(Lt.test(s.tagName)){let l=s.textContent.split(P),d=l.length-1;if(d>0){s.textContent=tt?tt.emptyScript:"";for(let m=0;m<d;m++)s.append(l[m],K()),M.nextNode(),o.push({type:2,index:++a});s.append(l[d],K())}}}else if(s.nodeType===8)if(s.data===Rt)o.push({type:2,index:a});else{let l=-1;for(;(l=s.data.indexOf(P,l+1))!==-1;)o.push({type:7,index:a}),l+=P.length-1}a++}}static createElement(t,e){let i=U.createElement("template");return i.innerHTML=t,i}};function R(h,t,e=h,i){if(t===q)return t;let s=i!==void 0?e._$Co?.[i]:e._$Cl,a=H(t)?void 0:t._$litDirective$;return s?.constructor!==a&&(s?._$AO?.(!1),a===void 0?s=void 0:(s=new a(h),s._$AT(h,e,i)),i!==void 0?(e._$Co??=[])[i]=s:e._$Cl=s),s!==void 0&&(t=R(h,s._$AS(h,t.values),s,i)),t}var dt=class{constructor(t,e){this._$AV=[],this._$AN=void 0,this._$AD=t,this._$AM=e}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(t){let{el:{content:e},parts:i}=this._$AD,s=(t?.creationScope??U).importNode(e,!0);M.currentNode=s;let a=M.nextNode(),r=0,p=0,o=i[0];for(;o!==void 0;){if(r===o.index){let c;o.type===2?c=new J(a,a.nextSibling,this,t):o.type===1?c=new o.ctor(a,o.name,o.strings,this,t):o.type===6&&(c=new ut(a,this,t)),this._$AV.push(c),o=i[++p]}r!==o?.index&&(a=M.nextNode(),r++)}return M.currentNode=U,s}p(t){let e=0;for(let i of this._$AV)i!==void 0&&(i.strings!==void 0?(i._$AI(t,i,e),e+=i.strings.length-2):i._$AI(t[e])),e++}},J=class h{get _$AU(){return this._$AM?._$AU??this._$Cv}constructor(t,e,i,s){this.type=2,this._$AH=k,this._$AN=void 0,this._$AA=t,this._$AB=e,this._$AM=i,this.options=s,this._$Cv=s?.isConnected??!0}get parentNode(){let t=this._$AA.parentNode,e=this._$AM;return e!==void 0&&t?.nodeType===11&&(t=e.parentNode),t}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(t,e=this){t=R(this,t,e),H(t)?t===k||t==null||t===""?(this._$AH!==k&&this._$AR(),this._$AH=k):t!==this._$AH&&t!==q&&this._(t):t._$litType$!==void 0?this.$(t):t.nodeType!==void 0?this.T(t):ue(t)?this.k(t):this._(t)}O(t){return this._$AA.parentNode.insertBefore(t,this._$AB)}T(t){this._$AH!==t&&(this._$AR(),this._$AH=this.O(t))}_(t){this._$AH!==k&&H(this._$AH)?this._$AA.nextSibling.data=t:this.T(U.createTextNode(t)),this._$AH=t}$(t){let{values:e,_$litType$:i}=t,s=typeof i=="number"?this._$AC(t):(i.el===void 0&&(i.el=W.createElement(Ft(i.h,i.h[0]),this.options)),i);if(this._$AH?._$AD===s)this._$AH.p(e);else{let a=new dt(s,this),r=a.u(this.options);a.p(e),this.T(r),this._$AH=a}}_$AC(t){let e=qt.get(t.strings);return e===void 0&&qt.set(t.strings,e=new W(t)),e}k(t){gt(this._$AH)||(this._$AH=[],this._$AR());let e=this._$AH,i,s=0;for(let a of t)s===e.length?e.push(i=new h(this.O(K()),this.O(K()),this,this.options)):i=e[s],i._$AI(a),s++;s<e.length&&(this._$AR(i&&i._$AB.nextSibling,s),e.length=s)}_$AR(t=this._$AA.nextSibling,e){for(this._$AP?.(!1,!0,e);t!==this._$AB;){let i=Pt(t).nextSibling;Pt(t).remove(),t=i}}setConnected(t){this._$AM===void 0&&(this._$Cv=t,this._$AP?.(t))}},L=class{get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}constructor(t,e,i,s,a){this.type=1,this._$AH=k,this._$AN=void 0,this.element=t,this.name=e,this._$AM=s,this.options=a,i.length>2||i[0]!==""||i[1]!==""?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=k}_$AI(t,e=this,i,s){let a=this.strings,r=!1;if(a===void 0)t=R(this,t,e,0),r=!H(t)||t!==this._$AH&&t!==q,r&&(this._$AH=t);else{let p=t,o,c;for(t=a[0],o=0;o<a.length-1;o++)c=R(this,p[i+o],e,o),c===q&&(c=this._$AH[o]),r||=!H(c)||c!==this._$AH[o],c===k?t=k:t!==k&&(t+=(c??"")+a[o+1]),this._$AH[o]=c}r&&!s&&this.j(t)}j(t){t===k?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,t??"")}},ct=class extends L{constructor(){super(...arguments),this.type=3}j(t){this.element[this.name]=t===k?void 0:t}},pt=class extends L{constructor(){super(...arguments),this.type=4}j(t){this.element.toggleAttribute(this.name,!!t&&t!==k)}},ht=class extends L{constructor(t,e,i,s,a){super(t,e,i,s,a),this.type=5}_$AI(t,e=this){if((t=R(this,t,e,0)??k)===q)return;let i=this._$AH,s=t===k&&i!==k||t.capture!==i.capture||t.once!==i.once||t.passive!==i.passive,a=t!==k&&(i===k||s);s&&this.element.removeEventListener(this.name,this,i),a&&this.element.addEventListener(this.name,this,t),this._$AH=t}handleEvent(t){typeof this._$AH=="function"?this._$AH.call(this.options?.host??this.element,t):this._$AH.handleEvent(t)}},ut=class{constructor(t,e,i){this.element=t,this.type=6,this._$AN=void 0,this._$AM=e,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(t){R(this,t)}};var ge=_t.litHtmlPolyfillSupport;ge?.(W,J),(_t.litHtmlVersions??=[]).push("3.3.3");var Gt=(h,t,e)=>{let i=e?.renderBefore??t,s=i._$litPart$;if(s===void 0){let a=e?.renderBefore??null;i._$litPart$=s=new J(t.insertBefore(K(),a),a,void 0,e??{})}return s._$AI(h),s};/**
+ * @license
+ * Copyright 2017 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */var bt=globalThis,C=class extends T{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){let t=super.createRenderRoot();return this.renderOptions.renderBefore??=t.firstChild,t}update(t){let e=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Do=Gt(e,this.renderRoot,this.renderOptions)}connectedCallback(){super.connectedCallback(),this._$Do?.setConnected(!0)}disconnectedCallback(){super.disconnectedCallback(),this._$Do?.setConnected(!1)}render(){return q}};C._$litElement$=!0,C.finalized=!0,bt.litElementHydrateSupport?.({LitElement:C});var me=bt.litElementPolyfillSupport;me?.({LitElement:C});(bt.litElementVersions??=[]).push("4.2.2");/**
+ * @license
+ * Copyright 2022 Google LLC
+ * SPDX-License-Identifier: BSD-3-Clause
+ */var Vt={children:"section.children",categories:"section.categories",create:"section.new_task",tasks:"section.tasks",assigned:"overview.title",approvals:"lbl.awaiting",finished:"overview.finished_title",history:"history.title",scoreboard:"section.scoreboard",shop:"shop.title",deliveries:"delivery.pending"},B={en:{"delivery.required":"Requires delivery","delivery.pending":"Awaiting delivery","delivery.mark":"Mark as delivered","delivery.done":"Delivered","task.due_time":"Due time (optional)","shop.visible_to":"Visible to","shop.all_children":"All children","penalty.enable":"Deduct points if late","status.deadline_missed":"Deadline missed","editor.sections":"Sections on this card","history.title":"Activity history","history.from":"From","history.through":"Through","history.empty":"No completions in this period.","history.error":"Could not load activity history.","history.refresh":"Refresh","history.loading":"Loading\u2026","editor.unit_name":"Reward unit name","editor.task_columns":"Task columns","editor.columns_auto":"Auto","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Early bonus ({unit})","ph.time_bonus_points.custom":"Time bonus ({unit})","btn.add_points.custom":"Add {unit}","btn.reset_points.custom":"Reset {unit}","points.title.custom":"Add {unit} to {name}","err.points_required.custom":"Enter an amount in {unit}","err.points_number.custom":"Enter a number for {unit}","err.points_positive.custom":"Enter zero or more {unit}","shop.title.custom":"{unit} shop","lbl.early_bonus_by.custom":"+{points} {unit} if done by {date}","editor.enable_points_help.custom":"Show the balance, shop and actions for {unit}","editor.color_group_kid_points.custom":"Total balance ({unit})","editor.color_group_task_points.custom":"Task reward ({unit})","icon.library":"Task icons","icon.upload_failed":"Upload failed","ui.multiple_per_day":"Allow multiple completions per day","editor.language_name":"English","editor.language":"Language","editor.language_auto":"Auto detect","overview.title":"Assigned tasks","overview.finished_title":"Finished tasks","overview.show_all":"Show all ({pending} pending)","overview.none_active":"No active tasks right now.","overview.none":"No tasks yet.","overview.finished_none":"No finished tasks yet.","card.admin_title":"Chores4Kids \u2013 Parents","input.new_child_name":"New child \u2014 name","input.new_category_name":"New category \u2014 name","btn.add_child":"Add child","btn.add_category":"Add category","section.children":"Children","section.categories":"Categories","th.name":"Name","th.color":"Color","th.points":"Points","th.pending":"Pending","th.actions":"Actions","th.status":"Status","th.assign":"Assigned to","th.categories":"Categories","th.completed":"Completed","btn.rename":"Rename","btn.delete":"Delete","section.new_task":"Create Task","ph.title":"Title","ph.points":"Points","ph.description":"Description (optional)","ph.bonus_title":"Bonus task title","ph.bonus_points":"Bonus points","ph.due":"Deadline (date)","ph.early_bonus_days":"Early bonus days","ph.early_bonus_points":"Early bonus points","ui.early_bonus_enabled":"Enable early completion bonus","warn.repeat_overrides_due":"Repeat is enabled, so the deadline is based on the selected weekdays instead of this date.","warn.schedule_overrides_due":"A schedule is enabled, so the deadline is based on the schedule instead of this date.","schedule.weekly":"Weekly task","schedule.monthly":"Monthly task","ph.categories":"Categories","select.assign_child":"Assign child","select.categories":"Select categories","ph.icon":"Icon (mdi:...)","icon.choose":"Choose icon","icon.clear":"Clear icon","icon.none":"None","icon.search":"Search icon","btn.create_task":"Create task","btn.update_task":"Update task","btn.edit":"Edit","editor.loaded_task":"Editing existing task","section.unassigned":"Unassigned tasks","btn.assign":"Assign","section.tasks_per_child":"Tasks per child","btn.start":"Start","btn.back":"Reassign","btn.awaiting":"Awaiting","btn.approve":"Approve","btn.approve_bonus":"Approve bonus","btn.approve_all":"Approve all","btn.approve_partial":"Partial approve","lbl.approved":"Approved","section.scoreboard":"Scoreboard","confirm.delete_child":"Delete {name}?","confirm.delete_task":"Delete task?","alert.choose_child_first":"Choose a child first","ui.auto_recycle":"Auto recycle approved tasks","ui.quick_complete":"One-tap completion","ui.skip_approval":"Skip parent approval","ui.bonus_task":"Enable bonus task","ui.fastest_wins":"Fastest wins (first child claims the task)","ui.time_bonus_enabled":"Enable before-time bonus","ph.time_bonus_before":"Bonus if done before (HH:MM)","ph.time_bonus_points":"Time bonus points","ui.persist_until_done":"Carry unfinished task to next day","ui.persist_help":"Unfinished task will automatically move to next day","ui.mark_overdue":"Mark unfinished task as overdue","ui.toggle_off_on":"Off/On","section.tasks":"Tasks","form.save":"Save","form.add":"Add","form.cancel":"Cancel","form.close":"Close","form.clear":"Clear","repeat.label":"Repeat","repeat.enable":"Repeat task","repeat.auto_assign":"Auto-assign (repeat)","repeat.save":"Save plan","repeat.days.mon":"Mon","repeat.days.tue":"Tue","repeat.days.wed":"Wed","repeat.days.thu":"Thu","repeat.days.fri":"Fri","repeat.days.sat":"Sat","repeat.days.sun":"Sun","assign.disabled_auto":"Disabled: auto-assign (repeat) is active","assign.auto_to":"Auto-assigned to {names}","btn.add_points":"Add points","btn.reset_points":"Reset points","sort.configure":"Sorting","sort.title":"Choose order","sort.categories_order":"Categories order","sort.none":"No category","sort.save":"Save","sort.reset":"Reset","points.title":"Add points to {name}","points.quick":"Quick add","points.remove":"Quick remove","points.custom":"Custom amount","err.title_required":"Title is required","err.points_required":"Points are required","err.points_number":"Points must be a number","err.points_positive":"Points must be 0 or more","status.assigned":"Assigned","status.in_progress":"In progress","status.awaiting_approval":"Awaiting approval","status.approved":"Approved","status.rejected":"Rejected","status.unassigned":"Unassigned","status.taken":"Taken","status.overdue":"Overdue","overdue.reassign_prompt":"This task is also scheduled for today. Assign it again?","overdue.yes":"Yes, assign again","overdue.no":"No thanks","shop.title":"Point shop","shop.open":"Open shop","shop.item":"Item","shop.price":"Price","shop.icon":"Icon","shop.image":"Image","shop.upload":"Upload image","shop.add_item":"Add item","shop.history":"Purchase history","shop.child":"Child","shop.when":"When","shop.date":"Date","shop.time":"Time","shop.advanced":"Advanced actions","shop.entity":"Entity","shop.operation":"Operation","shop.add_action":"Add action","shop.add_delay":"Add delay","shop.steps":"Steps","shop.seconds":"Seconds","shop.minutes":"Minutes","shop.hours":"Hours","shop.delay":"Delay","shop.active":"Active","shop.buy":"Buy","shop.bought":"Bought","shop.clear_history":"Clear history","confirm.clear_history":"Clear all purchase history?","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Child not found. Check the name in card configuration.","msg.no_tasks":"No tasks right now.","btn.done":"Done","btn.start_task":"Start task","btn.complete_task":"Complete task","btn.task_done":"Task done","btn.complete_bonus":"Complete bonus","lbl.awaiting":"Awaiting approval","lbl.bonus":"Bonus task","lbl.bonus_locked":"Complete main task first","lbl.taken_by":"Task taken by {name}","lbl.points":"points","section.daily_tasks":"Today","section.weekly_tasks":"Weekly tasks","lbl.deadline":"Deadline: {date}","lbl.early_bonus_by":"+{points} bonus points if done on {date} or before","editor.mode":"Mode","editor.mode_admin":"Parents","editor.mode_kid":"Kid","editor.mode_overview":"Recent tasks","editor.child_label":"Child","editor.child_placeholder":"Child name","editor.child_select_prompt":"\u2014 Select child \u2014","editor.child_hint":"No children found yet \u2014 type the name manually.","editor.developer_mode":"Developer Mode","editor.developer_mode_help":"Shows debug controls like manual overdue marking","editor.enable_points":"Points","editor.enable_points_help":"Show points, point shop, and point actions","editor.completion_sound":"Completion Sound","editor.completion_sound_help":"Saved as /local/chores4kids/completion.<ext> and used across dashboards","editor.delete_sound":"Delete sound file","editor.delete_sound_confirm":"Delete the uploaded completion sound file?","editor.delete_sound_failed":"Failed to delete sound file","editor.confetti":"Confetti","editor.confetti_help":"Show confetti animation on completion","editor.notify_target":"Completion notification","editor.notify_target_help":"Send a push notification when a child marks a task done.","editor.notify_target_none":"Add person","editor.notify_toggle_complete":"Notify on task completion","editor.notify_toggle_shop":"Notify on shop purchase","editor.notify_toggle_shop_image":"Show image in shop notification","section.notifications":"Notifications","editor.colors":"Colors","editor.color_field_bg":"Background","editor.color_field_text":"Text","editor.color_group_start":"Start task button","editor.color_group_complete":"Complete task button","editor.color_group_kid_points":"Kids Total Points","editor.color_group_task_points":"Task points","editor.color_start_bg":"Start task button (background)","editor.color_start_text":"Start task button (text)","editor.color_complete_bg":"Complete task button (background)","editor.color_complete_text":"Complete task button (text)","editor.color_kid_points_bg":"Kids Total Points (background)","editor.color_kid_points_text":"Kids Total Points (text)","editor.color_task_points_bg":"Task points (background)","editor.color_task_points_text":"Task points (text)","editor.color_empty_default":"Empty = default"},nl:{"delivery.required":"Overhandiging vereist","delivery.pending":"Wacht op overhandiging","delivery.mark":"Markeer als overhandigd","delivery.done":"Overhandigd","task.due_time":"Tijdstip deadline (optioneel)","shop.visible_to":"Zichtbaar voor","shop.all_children":"Alle kinderen","penalty.enable":"Punten aftrekken bij te laat afronden","status.deadline_missed":"Deadline gemist","editor.sections":"Onderdelen op deze kaart","history.title":"Activiteitengeschiedenis","history.from":"Van","history.through":"Tot en met","history.empty":"Geen voltooide taken in deze periode.","history.error":"Laden van de geschiedenis mislukt.","history.refresh":"Vernieuwen","history.loading":"Laden\u2026","editor.unit_name":"Naam van de beloningseenheid","editor.task_columns":"Taakkolommen","editor.columns_auto":"Automatisch","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Vroege bonus ({unit})","ph.time_bonus_points.custom":"Tijdbonus ({unit})","btn.add_points.custom":"{unit} toevoegen","btn.reset_points.custom":"{unit} resetten","points.title.custom":"{unit} toevoegen aan {name}","err.points_required.custom":"Vul een bedrag in {unit} in","err.points_number.custom":"Voer een getal in voor {unit}","err.points_positive.custom":"Vul minstens 0 {unit} in","shop.title.custom":"Winkel voor {unit}","lbl.early_bonus_by.custom":"+{points} {unit} indien klaar op of voor {date}","editor.enable_points_help.custom":"Toon saldo, winkel en acties voor {unit}","editor.color_group_kid_points.custom":"Totaalsaldo ({unit})","editor.color_group_task_points.custom":"Taakbeloning ({unit})","icon.library":"Taakpictogrammen","icon.upload_failed":"Uploaden mislukt","ui.multiple_per_day":"Meerdere keren per dag uitvoeren","editor.language_name":"Nederlands","editor.language":"Taal","editor.language_auto":"Automatisch detecteren","overview.title":"Toegewezen taken","overview.finished_title":"Voltooide taken","overview.show_all":"Toon alles ({pending} in afwachting)","overview.none_active":"Momenteel geen actieve taken.","overview.none":"Nog geen taken.","overview.finished_none":"Nog geen voltooide taken.","card.admin_title":"Chores4Kids \u2013 Ouders","input.new_child_name":"Nieuw kind \u2014 naam","input.new_category_name":"Nieuwe categorie \u2014 naam","btn.add_child":"Kind toevoegen","btn.add_category":"Categorie toevoegen","section.children":"Kinderen","section.categories":"Categorie\xEBn","th.name":"Naam","th.color":"Kleur","th.points":"Punten","th.pending":"In afwachting","th.actions":"Acties","th.status":"Status","th.assign":"Toegewezen aan","th.categories":"Categorie\xEBn","th.completed":"Voltooid","btn.rename":"Hernoemen","btn.delete":"Verwijderen","section.new_task":"Taak aanmaken","ph.title":"Titel","ph.points":"Punten","ph.description":"Beschrijving (optioneel)","ph.bonus_title":"Bonustaak titel","ph.bonus_points":"Bonuspunten","ph.due":"Deadline (datum)","ph.early_bonus_days":"Vroegtijdige bonusdagen","ph.early_bonus_points":"Vroegtijdige bonuspunten","ui.early_bonus_enabled":"Inschakelen vroegtijdige voltooiingsbonus","warn.repeat_overrides_due":"Herhaling is ingeschakeld, dus de deadline is gebaseerd op de geselecteerde weekdagen in plaats van deze datum.","warn.schedule_overrides_due":"Er is een schema ingeschakeld, dus de deadline is gebaseerd op het schema in plaats van deze datum.","schedule.weekly":"Wekelijkse taak","schedule.monthly":"Maandelijkse taak","ph.categories":"Categorie\xEBn","select.assign_child":"Kind toewijzen","select.categories":"Selecteer categorie\xEBn","ph.icon":"Icoon (mdi:...)","icon.choose":"Kies icoon","icon.clear":"Wis icoon","icon.none":"Geen","icon.search":"Zoek icoon","btn.create_task":"Taak aanmaken","btn.update_task":"Taak bijwerken","btn.edit":"Bewerken","editor.loaded_task":"Bestaande taak bewerken","section.unassigned":"Niet-toegewezen taken","btn.assign":"Toewijzen","section.tasks_per_child":"Taken per kind","btn.start":"Start","btn.back":"Opnieuw toewijzen","btn.awaiting":"In afwachting","btn.approve":"Goedkeuren","btn.approve_bonus":"Bonus goedkeuren","btn.approve_all":"Alles goedkeuren","btn.approve_partial":"Gedeeltelijk goedkeuren","lbl.approved":"Goedgekeurd","section.scoreboard":"Scorebord","confirm.delete_child":"{name} verwijderen?","confirm.delete_task":"Taak verwijderen?","alert.choose_child_first":"Kies eerst een kind","ui.auto_recycle":"Goedgekeurde taken automatisch recyclen","ui.quick_complete":"Voltooien in \xE9\xE9n tik","ui.skip_approval":"Goedkeuring door ouders overslaan","ui.bonus_task":"Bonustaak inschakelen","ui.fastest_wins":"Snelste wint (eerste kind claimt de taak)","ui.time_bonus_enabled":"Tijd-voor-tijd bonus inschakelen","ph.time_bonus_before":"Bonus indien klaar voor (UU:MM)","ph.time_bonus_points":"Tijdbonuspunten","ui.persist_until_done":"Onvoltooide taak meenemen naar de volgende dag","ui.persist_help":"Onvoltooide taak verplaatst automatisch naar de volgende dag","ui.mark_overdue":"Markeer onvoltooide taak als te laat","ui.toggle_off_on":"Uit/Aan","section.tasks":"Taken","form.save":"Opslaan","form.add":"Toevoegen","form.cancel":"Annuleren","form.close":"Sluiten","form.clear":"Wis","repeat.label":"Herhalen","repeat.enable":"Taak herhalen","repeat.auto_assign":"Automatisch toewijzen (herhalen)","repeat.save":"Plan opslaan","repeat.days.mon":"Ma","repeat.days.tue":"Di","repeat.days.wed":"Wo","repeat.days.thu":"Do","repeat.days.fri":"Vr","repeat.days.sat":"Za","repeat.days.sun":"Zo","assign.disabled_auto":"Uitgeschakeld: automatisch toewijzen (herhalen) is actief","assign.auto_to":"Automatisch toegewezen aan {names}","btn.add_points":"Punten toevoegen","btn.reset_points":"Punten resetten","sort.configure":"Sortering","sort.title":"Kies volgorde","sort.categories_order":"Categorie\xEBn volgorde","sort.none":"Geen categorie","sort.save":"Opslaan","sort.reset":"Reset","points.title":"Punten toevoegen aan {name}","points.quick":"Snel toevoegen","points.remove":"Snel verwijderen","points.custom":"Aangepast aantal","err.title_required":"Titel is verplicht","err.points_required":"Punten zijn verplicht","err.points_number":"Punten moeten een getal zijn","err.points_positive":"Punten moeten 0 of meer zijn","status.assigned":"Toegewezen","status.in_progress":"In uitvoering","status.awaiting_approval":"Wacht op goedkeuring","status.approved":"Goedgekeurd","status.rejected":"Afgewezen","status.unassigned":"Niet toegewezen","status.taken":"Genomen","status.overdue":"Te laat","overdue.reassign_prompt":"Deze taak is ook gepland voor vandaag. Nogmaals toewijzen?","overdue.yes":"Ja, opnieuw toewijzen","overdue.no":"Nee bedankt","debug.mark_overdue":"[TEST] Markeer als te laat","shop.title":"Punteshop","shop.open":"Open shop","shop.item":"Artikel","shop.price":"Prijs","shop.icon":"Icoon","shop.image":"Afbeelding","shop.upload":"Upload afbeelding","shop.add_item":"Artikel toevoegen","shop.history":"Aankoopgeschiedenis","shop.child":"Kind","shop.when":"Wanneer","shop.date":"Datum","shop.time":"Tijd","shop.advanced":"Geavanceerde acties","shop.entity":"Entiteit","shop.operation":"Bewerking","shop.add_action":"Actie toevoegen","shop.add_delay":"Vertraging toevoegen","shop.steps":"Stappen","shop.seconds":"Seconden","shop.minutes":"Minuten","shop.hours":"Uur","shop.delay":"Vertraging","shop.active":"Actief","shop.buy":"Kopen","shop.bought":"Gekocht","shop.clear_history":"Geschiedenis wissen","confirm.clear_history":"Hele aankoopgeschiedenis wissen?","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Kind niet gevonden. Controleer de naam in de configuratie.","msg.no_tasks":"Momenteel geen taken.","btn.done":"Klaar","btn.start_task":"Start taak","btn.complete_task":"Taak voltooid","btn.task_done":"Taak klaar","btn.complete_bonus":"Bonus voltooien","lbl.awaiting":"Wacht op goedkeuring","lbl.bonus":"Bonustaak","lbl.bonus_locked":"Voltooi eerst de hoofdtaak","lbl.taken_by":"Taak overgenomen door {name}","lbl.points":"punten","section.daily_tasks":"Vandaag","section.weekly_tasks":"Wekelijkse taken","lbl.deadline":"Deadline: {date}","lbl.early_bonus_by":"+{points} bonuspunten indien klaar op of voor {date}","editor.mode":"Modus","editor.mode_admin":"Ouders","editor.mode_kid":"Kind","editor.mode_overview":"Recente taken","editor.child_label":"Kind","editor.child_placeholder":"Naam van het kind","editor.child_select_prompt":"\u2014 Selecteer kind \u2014","editor.child_hint":"Nog geen kinderen gevonden \u2014 typ de naam handmatig.","editor.developer_mode":"Ontwikkelaarsmodus","editor.developer_mode_help":"Toont debug-bedieningselementen zoals handmatige markering voor te laat","editor.enable_points":"Punten","editor.enable_points_help":"Toon punten, punteshop en puntacties","editor.completion_sound":"Voltooiingsgeluid","editor.completion_sound_help":"Opgeslagen als /local/chores4kids/completion.<ext> en gebruikt op dashboards","editor.delete_sound":"Geluidsbestand verwijderen","editor.delete_sound_confirm":"Het ge\xFCploade voltooiingsgeluid verwijderen?","editor.delete_sound_failed":"Verwijderen geluidsbestand mislukt","editor.confetti":"Confetti","editor.confetti_help":"Toon confetti-animatie bij voltooiing","editor.notify_target":"Voltooiingsnotificatie","editor.notify_target_help":"Stuur een pushmelding wanneer een kind een taak als klaar markeert.","editor.notify_target_none":"Persoon toevoegen","editor.notify_toggle_complete":"Melden bij taakvoltooiing","editor.notify_toggle_shop":"Melden bij aankoop in shop","editor.notify_toggle_shop_image":"Toon afbeelding in shopnotificatie","section.notifications":"Notificaties","editor.colors":"Kleuren","editor.color_field_bg":"Achtergrond","editor.color_field_text":"Tekst","editor.color_group_start":"Start taak knop","editor.color_group_complete":"Taak voltooid knop","editor.color_group_kid_points":"Totaal punten kinderen","editor.color_group_task_points":"Taakpunten","editor.color_start_bg":"Start taak knop (achtergrond)","editor.color_start_text":"Start taak knop (tekst)","editor.color_complete_bg":"Taak voltooid knop (achtergrond)","editor.color_complete_text":"Taak voltooid knop (tekst)","editor.color_kid_points_bg":"Totaal punten kinderen (achtergrond)","editor.color_kid_points_text":"Totaal punten kinderen (tekst)","editor.color_task_points_bg":"Taakpunten (achtergrond)","editor.color_task_points_text":"Taakpunten (tekst)","editor.color_empty_default":"Leeg = standaard"},tr:{"delivery.required":"Teslimat gerekiyor","delivery.pending":"Teslimat bekleniyor","delivery.mark":"Teslim edildi olarak i\u015Faretle","delivery.done":"Teslim edildi","task.due_time":"Son saat (iste\u011Fe ba\u011Fl\u0131)","shop.visible_to":"G\xF6rebilenler","shop.all_children":"T\xFCm \xE7ocuklar","penalty.enable":"Gecikirse puan d\xFC\u015F","status.deadline_missed":"S\xFCre doldu","editor.sections":"Bu karttaki b\xF6l\xFCmler","history.title":"Etkinlik ge\xE7mi\u015Fi","history.from":"Ba\u015Flang\u0131\xE7","history.through":"Biti\u015F","history.empty":"Bu d\xF6nemde tamamlanan g\xF6rev yok.","history.error":"Etkinlik ge\xE7mi\u015Fi y\xFCklenemedi.","history.refresh":"Yenile","history.loading":"Y\xFCkleniyor\u2026","editor.unit_name":"\xD6d\xFCl biriminin ad\u0131","editor.task_columns":"G\xF6rev s\xFCtunlar\u0131","editor.columns_auto":"Otomatik","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Erken bitirme bonusu ({unit})","ph.time_bonus_points.custom":"Zaman bonusu ({unit})","btn.add_points.custom":"{unit} ekle","btn.reset_points.custom":"{unit} s\u0131f\u0131rla","points.title.custom":"{name} i\xE7in {unit} ekle","err.points_required.custom":"{unit} miktar\u0131n\u0131 girin","err.points_number.custom":"{unit} i\xE7in say\u0131 girin","err.points_positive.custom":"En az 0 {unit} girin","shop.title.custom":"{unit} ma\u011Fazas\u0131","lbl.early_bonus_by.custom":"{date} tarihine kadar bitirirsen +{points} {unit}","editor.enable_points_help.custom":"{unit} i\xE7in bakiyeyi, ma\u011Fazay\u0131 ve i\u015Flemleri g\xF6ster","editor.color_group_kid_points.custom":"Toplam bakiye ({unit})","editor.color_group_task_points.custom":"G\xF6rev \xF6d\xFCl\xFC ({unit})","icon.library":"G\xF6rev simgeleri","icon.upload_failed":"Y\xFCkleme ba\u015Far\u0131s\u0131z","ui.multiple_per_day":"G\xFCnde birden fazla kez tamamlanabilir","editor.language_name":"T\xFCrk\xE7e","editor.language":"Dil","editor.language_auto":"Otomatik alg\u0131la","overview.title":"Atanan g\xF6revler","overview.finished_title":"Tamamlanan g\xF6revler","overview.show_all":"T\xFCm\xFCn\xFC g\xF6ster ({pending} bekliyor)","overview.none_active":"\u015Eu anda etkin g\xF6rev yok.","overview.none":"Hen\xFCz g\xF6rev yok.","overview.finished_none":"Hen\xFCz tamamlanan g\xF6rev yok.","card.admin_title":"Chores4Kids \u2013 Ebeveynler","input.new_child_name":"Yeni \xE7ocu\u011Fun ad\u0131","input.new_category_name":"Yeni kategorinin ad\u0131","btn.add_child":"\xC7ocuk ekle","btn.add_category":"Kategori ekle","section.children":"\xC7ocuklar","section.categories":"Kategoriler","th.name":"Ad","th.color":"Renk","th.points":"Puan","th.pending":"Bekleyen","th.actions":"\u0130\u015Flemler","th.status":"Durum","th.assign":"Atanan ki\u015Fi","th.categories":"Kategoriler","th.completed":"Tamamlanan","btn.rename":"Yeniden adland\u0131r","btn.delete":"Sil","section.new_task":"G\xF6rev olu\u015Ftur","ph.title":"Ba\u015Fl\u0131k","ph.points":"Puan","ph.description":"A\xE7\u0131klama (iste\u011Fe ba\u011Fl\u0131)","ph.bonus_title":"Bonus g\xF6revin ba\u015Fl\u0131\u011F\u0131","ph.bonus_points":"Bonus puan","ph.due":"Son tarih","ph.early_bonus_days":"Erken bitirme bonusu i\xE7in g\xFCn say\u0131s\u0131","ph.early_bonus_points":"Erken bitirme bonus puan\u0131","ui.early_bonus_enabled":"Erken bitirme bonusunu etkinle\u015Ftir","warn.repeat_overrides_due":"Tekrar etkin oldu\u011Fu i\xE7in son tarih se\xE7ilen g\xFCnlere g\xF6re belirlenir.","warn.schedule_overrides_due":"Zamanlama etkin oldu\u011Fu i\xE7in son tarih plana g\xF6re belirlenir.","schedule.weekly":"Haftal\u0131k g\xF6rev","schedule.monthly":"Ayl\u0131k g\xF6rev","ph.categories":"Kategoriler","select.assign_child":"\xC7ocuk se\xE7","select.categories":"Kategorileri se\xE7","ph.icon":"Simge (mdi:...)","icon.choose":"Simge se\xE7","icon.clear":"Simgeyi kald\u0131r","icon.none":"Yok","icon.search":"Simge ara","btn.create_task":"G\xF6rev olu\u015Ftur","btn.update_task":"G\xF6revi g\xFCncelle","btn.edit":"D\xFCzenle","editor.loaded_task":"Mevcut g\xF6rev d\xFCzenleniyor","section.unassigned":"Atanmam\u0131\u015F g\xF6revler","btn.assign":"Ata","section.tasks_per_child":"\xC7ocuklara g\xF6re g\xF6revler","btn.start":"Ba\u015Flat","btn.back":"Yeniden ata","btn.awaiting":"Bekliyor","btn.approve":"Onayla","btn.approve_bonus":"Bonusu onayla","btn.approve_all":"T\xFCm\xFCn\xFC onayla","btn.approve_partial":"K\u0131smen onayla","lbl.approved":"Onayland\u0131","section.scoreboard":"Puan tablosu","confirm.delete_child":"{name} silinsin mi?","confirm.delete_task":"G\xF6rev silinsin mi?","alert.choose_child_first":"\xD6nce bir \xE7ocuk se\xE7in","ui.auto_recycle":"Onaylanan g\xF6revleri otomatik olarak yeniden kullan","ui.quick_complete":"Tek dokunu\u015Fla tamamla","ui.skip_approval":"Ebeveyn onay\u0131n\u0131 atla","ui.bonus_task":"Bonus g\xF6revi etkinle\u015Ftir","ui.fastest_wins":"En h\u0131zl\u0131 olan kazan\u0131r (g\xF6revi ilk alan \xE7ocuk yapar)","ui.time_bonus_enabled":"Belirli bir saatten \xF6nce bitirme bonusunu etkinle\u015Ftir","ph.time_bonus_before":"Bu saatten \xF6nce bitirene bonus (SS:DD)","ph.time_bonus_points":"Saat bonusu puan\u0131","ui.persist_until_done":"Bitmemi\u015F g\xF6revi ertesi g\xFCne aktar","ui.persist_help":"Bitmemi\u015F g\xF6rev otomatik olarak ertesi g\xFCne aktar\u0131l\u0131r","ui.mark_overdue":"Bitmemi\u015F g\xF6revi gecikmi\u015F olarak i\u015Faretle","ui.toggle_off_on":"Kapal\u0131/A\xE7\u0131k","section.tasks":"G\xF6revler","form.save":"Kaydet","form.add":"Ekle","form.cancel":"\u0130ptal","form.close":"Kapat","form.clear":"Temizle","repeat.label":"Tekrar","repeat.enable":"G\xF6revi tekrarla","repeat.auto_assign":"Otomatik ata (tekrar)","repeat.save":"Plan\u0131 kaydet","repeat.days.mon":"Pzt","repeat.days.tue":"Sal","repeat.days.wed":"\xC7ar","repeat.days.thu":"Per","repeat.days.fri":"Cum","repeat.days.sat":"Cmt","repeat.days.sun":"Paz","assign.disabled_auto":"Otomatik atama etkin oldu\u011Fu i\xE7in elle atama kapal\u0131","assign.auto_to":"Otomatik olarak atananlar: {names}","btn.add_points":"Puan ekle","btn.reset_points":"Puanlar\u0131 s\u0131f\u0131rla","sort.configure":"S\u0131ralama","sort.title":"S\u0131ralamay\u0131 se\xE7","sort.categories_order":"Kategori s\u0131ras\u0131","sort.none":"Kategori yok","sort.save":"Kaydet","sort.reset":"S\u0131f\u0131rla","points.title":"Puan ekle: {name}","points.quick":"H\u0131zl\u0131 ekle","points.remove":"H\u0131zl\u0131 \xE7\u0131kar","points.custom":"\xD6zel miktar","err.title_required":"Ba\u015Fl\u0131k gerekli","err.points_required":"Puan gerekli","err.points_number":"Puan bir say\u0131 olmal\u0131","err.points_positive":"Puan s\u0131f\u0131r veya daha fazla olmal\u0131","status.assigned":"Atand\u0131","status.in_progress":"Devam ediyor","status.awaiting_approval":"Onay bekliyor","status.approved":"Onayland\u0131","status.rejected":"Reddedildi","status.unassigned":"Atanmad\u0131","status.taken":"Al\u0131nd\u0131","status.overdue":"Gecikmi\u015F","overdue.reassign_prompt":"Bu g\xF6rev bug\xFCn i\xE7in de planlanm\u0131\u015F. Yeniden atans\u0131n m\u0131?","overdue.yes":"Evet, yeniden ata","overdue.no":"Hay\u0131r, te\u015Fekk\xFCrler","shop.title":"Puan ma\u011Fazas\u0131","shop.open":"Ma\u011Fazay\u0131 a\xE7","shop.item":"\xDCr\xFCn","shop.price":"Fiyat","shop.icon":"Simge","shop.image":"G\xF6rsel","shop.upload":"G\xF6rsel y\xFCkle","shop.add_item":"\xDCr\xFCn ekle","shop.history":"Al\u0131\u015Fveri\u015F ge\xE7mi\u015Fi","shop.child":"\xC7ocuk","shop.when":"Ne zaman","shop.date":"Tarih","shop.time":"Saat","shop.advanced":"Geli\u015Fmi\u015F i\u015Flemler","shop.entity":"Varl\u0131k","shop.operation":"\u0130\u015Flem","shop.add_action":"Eylem ekle","shop.add_delay":"Bekleme s\xFCresi ekle","shop.steps":"Ad\u0131mlar","shop.seconds":"Saniye","shop.minutes":"Dakika","shop.hours":"Saat","shop.delay":"Bekleme s\xFCresi","shop.active":"Etkin","shop.buy":"Sat\u0131n al","shop.bought":"Sat\u0131n al\u0131nd\u0131","shop.clear_history":"Ge\xE7mi\u015Fi temizle","confirm.clear_history":"T\xFCm al\u0131\u015Fveri\u015F ge\xE7mi\u015Fi silinsin mi?","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"\xC7ocuk bulunamad\u0131. Kart ayarlar\u0131ndaki ad\u0131 kontrol edin.","msg.no_tasks":"\u015Eu anda g\xF6rev yok.","btn.done":"Bitti","btn.start_task":"G\xF6reve ba\u015Fla","btn.complete_task":"G\xF6revi tamamla","btn.task_done":"G\xF6rev tamamland\u0131","btn.complete_bonus":"Bonus g\xF6revi tamamla","lbl.awaiting":"Onay bekliyor","lbl.bonus":"Bonus g\xF6rev","lbl.bonus_locked":"\xD6nce ana g\xF6revi tamamla","lbl.taken_by":"G\xF6revi alan: {name}","lbl.points":"puan","section.daily_tasks":"Bug\xFCn","section.weekly_tasks":"Haftal\u0131k g\xF6revler","lbl.deadline":"Son tarih: {date}","lbl.early_bonus_by":"{date} tarihinde veya \xF6ncesinde bitirirsen +{points} bonus puan","editor.mode":"Mod","editor.mode_admin":"Ebeveynler","editor.mode_kid":"\xC7ocuk","editor.mode_overview":"Son g\xF6revler","editor.child_label":"\xC7ocuk","editor.child_placeholder":"\xC7ocu\u011Fun ad\u0131","editor.child_select_prompt":"\u2014 \xC7ocuk se\xE7 \u2014","editor.child_hint":"Hen\xFCz \xE7ocuk bulunamad\u0131. Ad\u0131 elle girin.","editor.developer_mode":"Geli\u015Ftirici modu","editor.developer_mode_help":"G\xF6revi elle gecikmi\u015F olarak i\u015Faretleme gibi hata ay\u0131klama se\xE7eneklerini g\xF6sterir","editor.enable_points":"Puanlar","editor.enable_points_help":"Puanlar\u0131, puan ma\u011Fazas\u0131n\u0131 ve puan i\u015Flemlerini g\xF6ster","editor.completion_sound":"G\xF6rev tamamlama sesi","editor.completion_sound_help":"/local/chores4kids/completion.<ext> olarak kaydedilir ve t\xFCm panolarda kullan\u0131l\u0131r","editor.delete_sound":"Ses dosyas\u0131n\u0131 sil","editor.delete_sound_confirm":"Y\xFCklenen g\xF6rev tamamlama sesi silinsin mi?","editor.delete_sound_failed":"Ses dosyas\u0131 silinemedi","editor.confetti":"Konfeti","editor.confetti_help":"G\xF6rev tamamland\u0131\u011F\u0131nda konfeti g\xF6ster","editor.notify_target":"G\xF6rev tamamlama bildirimi","editor.notify_target_help":"\xC7ocuk bir g\xF6revi tamamland\u0131 olarak i\u015Faretledi\u011Finde anl\u0131k bildirim g\xF6nder.","editor.notify_target_none":"Ki\u015Fi ekle","editor.notify_toggle_complete":"G\xF6rev tamamland\u0131\u011F\u0131nda bildir","editor.notify_toggle_shop":"Ma\u011Fazadan al\u0131\u015Fveri\u015F yap\u0131ld\u0131\u011F\u0131nda bildir","editor.notify_toggle_shop_image":"Al\u0131\u015Fveri\u015F bildiriminde g\xF6rseli g\xF6ster","section.notifications":"Bildirimler","editor.colors":"Renkler","editor.color_field_bg":"Arka plan","editor.color_field_text":"Metin","editor.color_group_start":"G\xF6reve ba\u015Flama d\xFC\u011Fmesi","editor.color_group_complete":"G\xF6revi tamamlama d\xFC\u011Fmesi","editor.color_group_kid_points":"\xC7ocuklar\u0131n toplam puan\u0131","editor.color_group_task_points":"G\xF6rev puan\u0131","editor.color_start_bg":"G\xF6reve ba\u015Flama d\xFC\u011Fmesi (arka plan)","editor.color_start_text":"G\xF6reve ba\u015Flama d\xFC\u011Fmesi (metin)","editor.color_complete_bg":"G\xF6revi tamamlama d\xFC\u011Fmesi (arka plan)","editor.color_complete_text":"G\xF6revi tamamlama d\xFC\u011Fmesi (metin)","editor.color_kid_points_bg":"\xC7ocuklar\u0131n toplam puan\u0131 (arka plan)","editor.color_kid_points_text":"\xC7ocuklar\u0131n toplam puan\u0131 (metin)","editor.color_task_points_bg":"G\xF6rev puan\u0131 (arka plan)","editor.color_task_points_text":"G\xF6rev puan\u0131 (metin)","editor.color_empty_default":"Varsay\u0131lan\u0131 kullanmak i\xE7in bo\u015F b\u0131rak\u0131n"},da:{"delivery.required":"Kr\xE6ver udlevering","delivery.pending":"Afventer udlevering","delivery.mark":"Mark\xE9r som udleveret","delivery.done":"Udleveret","task.due_time":"Klokkesl\xE6t for frist (valgfrit)","shop.visible_to":"Vises for","shop.all_children":"Alle b\xF8rn","penalty.enable":"Tr\xE6k point ved overskredet frist","status.deadline_missed":"Frist overskredet","editor.sections":"Sektioner p\xE5 dette kort","history.title":"Aktivitetshistorik","history.from":"Fra","history.through":"Til og med","history.empty":"Ingen udf\xF8rte opgaver i perioden.","history.error":"Aktivitetshistorikken kunne ikke hentes.","history.refresh":"Opdater","history.loading":"Henter\u2026","editor.unit_name":"Navn p\xE5 bel\xF8nningsenhed","editor.task_columns":"Opgavekolonner","editor.columns_auto":"Automatisk","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Tidlig bonus ({unit})","ph.time_bonus_points.custom":"Tidsbonus ({unit})","btn.add_points.custom":"Tilf\xF8j {unit}","btn.reset_points.custom":"Nulstil {unit}","points.title.custom":"Tilf\xF8j {unit} til {name}","err.points_required.custom":"Angiv et bel\xF8b i {unit}","err.points_number.custom":"Angiv et tal for {unit}","err.points_positive.custom":"Angiv mindst 0 {unit}","shop.title.custom":"Butik med {unit}","lbl.early_bonus_by.custom":"+{points} {unit} ved udf\xF8relse senest {date}","editor.enable_points_help.custom":"Vis saldo, butik og handlinger for {unit}","editor.color_group_kid_points.custom":"Samlet saldo ({unit})","editor.color_group_task_points.custom":"Opgavens bel\xF8nning ({unit})","icon.library":"Opgaveikoner","icon.upload_failed":"Upload mislykkedes","ui.multiple_per_day":"Kan udf\xF8res flere gange om dagen","editor.language_name":"Dansk","editor.language":"Sprog","editor.language_auto":"Registrer automatisk","overview.title":"Tildelte opgaver","overview.finished_title":"F\xE6rdige opgaver","overview.show_all":"Vis alle ({pending} afventer)","overview.none_active":"Ingen aktive opgaver lige nu.","overview.none":"Ingen opgaver endnu.","overview.finished_none":"Ingen f\xE6rdige opgaver endnu.","card.admin_title":"Chores4Kids \u2013 For\xE6ldre","input.new_child_name":"Nyt barn \u2013 navn","input.new_category_name":"Ny kategori \u2013 navn","btn.add_child":"Tilf\xF8j barn","btn.add_category":"Tilf\xF8j kategori","section.children":"B\xF8rn","section.categories":"Kategorier","th.name":"Navn","th.color":"Farve","th.points":"Point","th.pending":"Ventende","th.actions":"Handling","th.status":"Status","th.assign":"Tildelt til","th.categories":"Kategorier","th.completed":"Fuldf\xF8rt","btn.rename":"Omd\xF8b","btn.delete":"Slet","section.new_task":"Ny opgave","ph.title":"Titel","ph.points":"Point","ph.description":"Beskrivelse (valgfri)","ph.bonus_title":"Bonusopgave titel","ph.bonus_points":"Bonus point","ph.due":"Deadline (dato)","ph.early_bonus_days":"Bonus dage f\xF8r","ph.early_bonus_points":"Bonus point","ui.early_bonus_enabled":"Aktiv\xE9r f\xF8rtidig bonus","warn.repeat_overrides_due":"Gentagelse er sl\xE5et til, s\xE5 deadline beregnes ud fra de valgte ugedage i stedet for denne dato.","warn.schedule_overrides_due":"En plan er sl\xE5et til, s\xE5 deadline er baseret p\xE5 planen i stedet for denne dato.","schedule.weekly":"Ugentlig opgave","schedule.monthly":"M\xE5nedlig opgave","ph.categories":"Kategorier","select.assign_child":"Tildel barn","select.categories":"V\xE6lg kategorier","ph.icon":"Ikon (mdi:...)","icon.choose":"V\xE6lg ikon","icon.clear":"Fjern ikon","icon.none":"Ingen","icon.search":"S\xF8g ikon","btn.create_task":"Opret opgave","btn.update_task":"Opdat\xE9r opgave","btn.edit":"Redig\xE9r","editor.loaded_task":"Redigerer eksisterende opgave","section.unassigned":"Utildelte opgaver","btn.assign":"Tildel","section.tasks_per_child":"Opgaver pr. barn","btn.start":"Start","btn.back":"Gentildel","btn.awaiting":"Afventer","btn.approve":"Godkend","btn.approve_bonus":"Godkend bonus","btn.approve_all":"Godkend alle","btn.approve_partial":"Delvis godkend","lbl.approved":"Godkendt","section.scoreboard":"Scoreboard","confirm.delete_child":"Slet {name}?","confirm.delete_task":"Slet opgave?","alert.choose_child_first":"V\xE6lg et barn f\xF8rst","ui.auto_recycle":"Genopret automatisk efter godkendelse","ui.quick_complete":"\xC9t-tryk f\xE6rdig","ui.skip_approval":"Spring for\xE6ldre godkendelse over","ui.bonus_task":"Aktiv\xE9r bonusopgave","ui.fastest_wins":"Hurtigst vinder (f\xF8rste barn tager opgaven)","ui.persist_until_done":"Flyt uf\xE6rdig opgave til n\xE6ste dag","ui.persist_help":"Uf\xE6rdig opgave flyttes automatisk til n\xE6ste dag","ui.mark_overdue":"Mark\xE9r uf\xE6rdig opgave som forfalden","ui.toggle_off_on":"Fra/Til","section.tasks":"Opgaver","form.save":"Gem","form.add":"Tilf\xF8j","form.cancel":"Annull\xE9r","form.close":"Luk","form.clear":"Ryd","repeat.label":"Gentagelse","repeat.enable":"Gentag opgave","repeat.auto_assign":"Auto-tildel (gentagelse)","repeat.save":"Gem plan","repeat.days.mon":"Man","repeat.days.tue":"Tir","repeat.days.wed":"Ons","repeat.days.thu":"Tor","repeat.days.fri":"Fre","repeat.days.sat":"L\xF8r","repeat.days.sun":"S\xF8n","assign.disabled_auto":"Deaktiveret: auto-tildeling (gentagelse) er aktiv","assign.auto_to":"Auto-tildelt til {names}","btn.add_points":"Tilf\xF8j point","btn.reset_points":"Nulstil point","sort.configure":"Sortering","sort.title":"V\xE6lg r\xE6kkef\xF8lge","sort.categories_order":"R\xE6kkef\xF8lge for kategorier","sort.none":"Ingen kategori","sort.save":"Gem","sort.reset":"Nulstil","points.title":"Tilf\xF8j point til {name}","points.quick":"Hurtig tilf\xF8j","points.remove":"Hurtig fratr\xE6k","points.custom":"Valgfrit antal","err.title_required":"Titel er p\xE5kr\xE6vet","err.points_required":"Point skal udfyldes","err.points_number":"Point skal v\xE6re et tal","err.points_positive":"Point skal v\xE6re 0 eller mere","status.assigned":"Tildelt","status.in_progress":"I gang","status.awaiting_approval":"Afventer godkendelse","status.approved":"Godkendt","status.rejected":"Afvist","status.unassigned":"Ikke tildelt","status.taken":"Taget","status.overdue":"Forfalden","overdue.reassign_prompt":"Denne opgave er ogs\xE5 planlagt i dag. Tildel den igen?","overdue.yes":"Ja, tildel igen","overdue.no":"Nej tak","debug.mark_overdue":"[TEST] Mark\xE9r forfalden","shop.title":"Pointshop","shop.open":"\xC5bn shop","shop.item":"Vare","shop.price":"Pris","shop.icon":"Ikon","shop.image":"Billede","shop.upload":"Upload billede","shop.add_item":"Tilf\xF8j vare","shop.history":"K\xF8bshistorik","shop.child":"Barn","shop.when":"Tidspunkt","shop.date":"Dato","shop.time":"Tidspunkt","shop.advanced":"Avancerede handlinger","shop.entity":"Enhed","shop.operation":"Handling","shop.add_action":"Tilf\xF8j handling","shop.add_delay":"Tilf\xF8j delay","shop.steps":"Trin","shop.seconds":"Sekunder","shop.minutes":"Minutter","shop.hours":"Timer","shop.delay":"Forsinkelse","shop.active":"Aktiv","shop.buy":"K\xF8b","shop.bought":"K\xF8bt","shop.clear_history":"Ryd historik","confirm.clear_history":"Ryd hele k\xF8bshistorikken?","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Barn ikke fundet. Tjek navn i kort-konfigurationen.","msg.no_tasks":"Ingen opgaver lige nu.","btn.done":"Fuldf\xF8rt","btn.start_task":"Start opgave","btn.complete_task":"Opgave klaret","btn.task_done":"Opgave f\xE6rdig","btn.complete_bonus":"F\xE6rdigg\xF8r bonus","lbl.awaiting":"Afventer godkendelse","lbl.bonus":"Bonusopgave","lbl.bonus_locked":"Afslut hovedopgaven f\xF8rst","lbl.taken_by":"Opgave taget af {name}","lbl.points":"point","section.daily_tasks":"Dagens opgaver","section.weekly_tasks":"Ugens opgaver","lbl.deadline":"Deadline: {date}","lbl.early_bonus_by":"+{points} bonus point hvis klaret {date} eller f\xF8r","editor.mode":"Tilstand","editor.mode_admin":"For\xE6ldre","editor.mode_kid":"Barn","editor.mode_overview":"Seneste opgaver","editor.child_label":"Barn","editor.child_placeholder":"Navn p\xE5 barn","editor.child_select_prompt":"\u2014 V\xE6lg barn \u2014","editor.child_hint":"Ingen b\xF8rn fundet endnu \u2013 skriv navnet manuelt.","editor.developer_mode":"Developer Mode","editor.developer_mode_help":"Viser debug-kontroller som manuel forfaldsmarkering","editor.enable_points":"Point","editor.enable_points_help":"Vis point, pointshop og point-handlinger","editor.completion_sound":"Completion Sound","editor.completion_sound_help":"Gemmes som /local/chores4kids/completion.<ext> og bruges p\xE5 tv\xE6rs af dashboards","editor.delete_sound":"Slet lydfil","editor.delete_sound_confirm":"Slet den uploadede completion-lydfil?","editor.delete_sound_failed":"Kunne ikke slette lydfilen","editor.confetti":"Konfetti","editor.confetti_help":"Vis konfetti-animation ved f\xE6rdigg\xF8relse","editor.notify_target":"Notifikation ved f\xE6rdig","editor.notify_target_help":"Send en push-notifikation n\xE5r et barn markerer en opgave som f\xE6rdig.","editor.notify_target_none":"Tilf\xF8j person","editor.notify_toggle_complete":"Notifikation ved f\xE6rdig opgave","editor.notify_toggle_shop":"Notifikation ved k\xF8b i shoppen","editor.notify_toggle_shop_image":"Vis billede i shop-notifikation","section.notifications":"Notifikationer","editor.colors":"Farver","editor.color_field_bg":"Baggrund","editor.color_field_text":"Tekst","editor.color_group_start":"Start opgave knap","editor.color_group_complete":"Opgave klaret knap","editor.color_group_kid_points":"B\xF8rnenes samlede point","editor.color_group_task_points":"Opgavepoint","editor.color_start_bg":"Start opgave (knap \u2013 baggrund)","editor.color_start_text":"Start opgave (knap \u2013 tekst)","editor.color_complete_bg":"Opgave klaret (knap \u2013 baggrund)","editor.color_complete_text":"Opgave klaret (knap \u2013 tekst)","editor.color_kid_points_bg":"B\xF8rnenes samlede point (baggrund)","editor.color_kid_points_text":"B\xF8rnenes samlede point (tekst)","editor.color_task_points_bg":"Opgavepoint (baggrund)","editor.color_task_points_text":"Opgavepoint (tekst)","editor.color_empty_default":"Tom = standard"},sv:{"delivery.required":"Kr\xE4ver utl\xE4mning","delivery.pending":"V\xE4ntar p\xE5 utl\xE4mning","delivery.mark":"Markera som utl\xE4mnad","delivery.done":"Utl\xE4mnad","task.due_time":"Tid f\xF6r deadline (valfritt)","shop.visible_to":"Visas f\xF6r","shop.all_children":"Alla barn","penalty.enable":"Dra av po\xE4ng vid missad tidsfrist","status.deadline_missed":"Tidsfristen passerad","editor.sections":"Avsnitt p\xE5 det h\xE4r kortet","history.title":"Aktivitetshistorik","history.from":"Fr\xE5n","history.through":"Till och med","history.empty":"Inga slutf\xF6rda uppgifter under perioden.","history.error":"Kunde inte h\xE4mta historiken.","history.refresh":"Uppdatera","history.loading":"H\xE4mtar\u2026","editor.unit_name":"Namn p\xE5 bel\xF6ningsenheten","editor.task_columns":"Uppgiftskolumner","editor.columns_auto":"Automatiskt","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Tidig bonus ({unit})","ph.time_bonus_points.custom":"Tidsbonus ({unit})","btn.add_points.custom":"L\xE4gg till {unit}","btn.reset_points.custom":"Nollst\xE4ll {unit}","points.title.custom":"L\xE4gg till {unit} f\xF6r {name}","err.points_required.custom":"Ange ett belopp i {unit}","err.points_number.custom":"Ange ett tal f\xF6r {unit}","err.points_positive.custom":"Ange minst 0 {unit}","shop.title.custom":"Butik f\xF6r {unit}","lbl.early_bonus_by.custom":"+{points} {unit} om klart senast {date}","editor.enable_points_help.custom":"Visa saldo, butik och \xE5tg\xE4rder f\xF6r {unit}","editor.color_group_kid_points.custom":"Totalt saldo ({unit})","editor.color_group_task_points.custom":"Uppgiftsbel\xF6ning ({unit})","icon.library":"Uppgiftsikoner","icon.upload_failed":"Uppladdningen misslyckades","ui.multiple_per_day":"Kan utf\xF6ras flera g\xE5nger om dagen","editor.language_name":"Svenska","editor.language":"Spr\xE5k","editor.language_auto":"Identifiera automatiskt","overview.title":"Tilldelade uppgifter","overview.show_all":"Visa alla ({pending} v\xE4ntar)","overview.none":"Inga uppgifter \xE4nnu.","card.admin_title":"Chores4Kids \u2013 F\xF6r\xE4lder","input.new_child_name":"Nytt barn \u2014 namn","btn.add_child":"L\xE4gg till barn","input.new_category_name":"Ny kategori \u2014 namn","btn.add_category":"L\xE4gg till kategori","section.categories":"Kategorier","th.categories":"Kategorier","ph.categories":"Kategorier","select.categories":"V\xE4lj kategorier","section.children":"Barn","th.name":"Namn","th.points":"Po\xE4ng","th.pending":"V\xE4ntar","th.actions":"\xC5tg\xE4rder","th.status":"Status","th.assign":"Tilldelad till","th.completed":"Slutf\xF6rd","btn.rename":"Byt namn","btn.delete":"Ta bort","section.new_task":"Ny uppgift","ph.title":"Titel","ph.points":"Po\xE4ng","ph.description":"Beskrivning (valfritt)","ph.bonus_title":"Bonusuppgiftens titel","ph.bonus_points":"Bonuspo\xE4ng","ph.due":"Deadline (datum)","ph.early_bonus_days":"Bonusdagar i f\xF6rv\xE4g","ph.early_bonus_points":"Bonuspo\xE4ng","ui.early_bonus_enabled":"Aktivera tidig bonus","warn.repeat_overrides_due":"Upprepa \xE4r aktiverat, s\xE5 deadlinen baseras p\xE5 valda veckodagar ist\xE4llet f\xF6r detta datum.","select.assign_child":"Tilldela barn","ph.icon":"Ikon (mdi:...)","icon.choose":"V\xE4lj ikon","icon.clear":"Rensa ikon","icon.none":"Ingen","icon.search":"S\xF6k ikon","btn.create_task":"Skapa uppgift","btn.update_task":"Uppdatera uppgift","btn.edit":"Redigera","editor.loaded_task":"Redigerar befintlig uppgift","section.unassigned":"Otilldelade uppgifter","btn.assign":"Tilldela","section.tasks_per_child":"Uppgifter per barn","btn.start":"Starta","btn.back":"Tilldela igen","btn.awaiting":"V\xE4ntar","btn.approve":"Godk\xE4nn","btn.approve_bonus":"Godk\xE4nn bonus","btn.approve_all":"Godk\xE4nn alla","btn.approve_partial":"Delvis godk\xE4nn","lbl.approved":"Godk\xE4nd","section.scoreboard":"Po\xE4ngtavla","confirm.delete_child":"Ta bort {name}?","confirm.delete_task":"Ta bort uppgift?","alert.choose_child_first":"V\xE4lj ett barn f\xF6rst","ui.toggle_off_on":"Av/P\xE5","ui.persist_until_done":"Flytta of\xE4rdig uppgift till n\xE4sta dag","ui.persist_help":"Of\xE4rdig uppgift flyttas automatiskt till n\xE4sta dag","ui.quick_complete":"Klar med ett tryck","ui.skip_approval":"Hoppa \xF6ver f\xF6r\xE4ldragodk\xE4nnande","ui.bonus_task":"Aktivera bonusuppgift","section.tasks":"Uppgifter","form.save":"Spara","form.add":"L\xE4gg till","form.cancel":"Avbryt","form.close":"St\xE4ng","form.clear":"Rensa","repeat.label":"Upprepa","repeat.auto_assign":"Auto-tilldela (upprepa)","repeat.save":"Spara plan","repeat.days.mon":"M\xE5n","repeat.days.tue":"Tis","repeat.days.wed":"Ons","repeat.days.thu":"Tor","repeat.days.fri":"Fre","repeat.days.sat":"L\xF6r","repeat.days.sun":"S\xF6n","assign.disabled_auto":"Inaktiverad: auto-tilldelning (upprepning) \xE4r aktiv","assign.auto_to":"Auto-tilldelad till {names}","btn.add_points":"L\xE4gg till po\xE4ng","btn.reset_points":"\xC5terst\xE4ll po\xE4ng","points.title":"L\xE4gg till po\xE4ng till {name}","points.quick":"Snabbtill\xE4gg","points.remove":"Snabb borttagning","points.custom":"Anpassat antal","err.title_required":"Titel kr\xE4vs","err.points_required":"Po\xE4ng kr\xE4vs","err.points_number":"Po\xE4ng m\xE5ste vara ett tal","err.points_positive":"Po\xE4ngen m\xE5ste vara 0 eller mer","status.assigned":"Tilldelad","status.in_progress":"P\xE5g\xE5r","status.awaiting_approval":"V\xE4ntar p\xE5 godk\xE4nnande","status.approved":"Godk\xE4nd","status.rejected":"Avvisad","status.unassigned":"Ej tilldelad","status.taken":"Tagen","shop.title":"Shop","shop.open":"\xD6ppna shop","shop.item":"Vara","shop.price":"Pris","shop.icon":"Ikon","shop.image":"Bild","shop.upload":"Ladda upp bild","shop.add_item":"L\xE4gg till vara","shop.history":"K\xF6phistorik","shop.child":"Barn","shop.when":"Tidpunkt","shop.date":"Datum","shop.time":"Tid","shop.active":"Aktiv","shop.buy":"K\xF6p","shop.bought":"K\xF6pt","shop.clear_history":"Rensa historik","confirm.clear_history":"Rensa all k\xF6phistorik?","shop.advanced":"Avancerade \xE5tg\xE4rder","shop.entity":"Enhet","shop.operation":"\xC5tg\xE4rd","shop.add_action":"L\xE4gg till \xE5tg\xE4rd","shop.add_delay":"L\xE4gg till f\xF6rdr\xF6jning","shop.steps":"Steg","shop.seconds":"Sekunder","shop.minutes":"Minuter","shop.hours":"Timmar","shop.delay":"F\xF6rdr\xF6jning","sort.configure":"Sortering","sort.title":"V\xE4lj ordning","sort.categories_order":"Ordning f\xF6r kategorier","sort.none":"Ingen kategori","sort.save":"Spara","sort.reset":"\xC5terst\xE4ll","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Barn hittades inte. Kontrollera namnet i kortets konfiguration.","msg.no_tasks":"Inga uppgifter just nu.","btn.done":"Klar","btn.start_task":"Starta uppgift","btn.complete_task":"Uppgift klar","btn.task_done":"Uppgift klar","btn.complete_bonus":"Slutf\xF6r bonus","lbl.awaiting":"V\xE4ntar p\xE5 godk\xE4nnande","lbl.bonus":"Bonusuppgift","lbl.bonus_locked":"Slutf\xF6r huvuduppgiften f\xF6rst","lbl.taken_by":"Uppgiften \xE4r tagen av {name}","lbl.points":"po\xE4ng","section.daily_tasks":"Idag","section.weekly_tasks":"Veckouppgifter","lbl.deadline":"Deadline: {date}","lbl.early_bonus_by":"+{points} bonuspo\xE4ng om klart {date} eller tidigare","editor.mode":"L\xE4ge","editor.mode_admin":"F\xF6r\xE4lder","editor.mode_kid":"Barn","editor.mode_overview":"Senaste uppgifter","editor.child_label":"Barn","editor.child_placeholder":"Barnets namn","editor.child_select_prompt":"\u2014 V\xE4lj barn \u2014","editor.child_hint":"Inga barn hittades \xE4nnu \u2013 skriv namnet manuellt.","editor.developer_mode":"Utvecklarl\xE4ge","editor.developer_mode_help":"Visar debug-kontroller som manuell f\xF6rseningsmarkering","editor.completion_sound":"Klar-ljud","editor.completion_sound_help":"Sparas som /local/chores4kids/completion.<ext> och anv\xE4nds p\xE5 alla dashboards","editor.notify_target":"Notifikation vid slutf\xF6rande","editor.notify_target_help":"Skicka en push-notis n\xE4r ett barn markerar en uppgift som klar.","editor.notify_target_none":"L\xE4gg till person","editor.notify_toggle_complete":"Notis vid slutf\xF6rd uppgift","editor.notify_toggle_shop":"Notis vid k\xF6p i shoppen","editor.notify_toggle_shop_image":"Visa bild i shop-notis","section.notifications":"Notiser","editor.colors":"F\xE4rger","editor.color_field_bg":"Bakgrund","editor.color_field_text":"Text","editor.color_group_start":"Starta uppgift-knapp","editor.color_group_complete":"Uppgift klar-knapp","editor.color_group_kid_points":"Barnens totalpo\xE4ng","editor.color_group_task_points":"Uppgiftspo\xE4ng","editor.color_start_bg":"Starta uppgift-knapp (bakgrund)","editor.color_start_text":"Starta uppgift-knapp (text)","editor.color_complete_bg":"Uppgift klar-knapp (bakgrund)","editor.color_complete_text":"Uppgift klar-knapp (text)","editor.color_kid_points_bg":"Barnens totalpo\xE4ng (bakgrund)","editor.color_kid_points_text":"Barnens totalpo\xE4ng (text)","editor.color_task_points_bg":"Uppgiftspo\xE4ng (bakgrund)","editor.color_task_points_text":"Uppgiftspo\xE4ng (text)","editor.color_empty_default":"Tomt = standard"},nb:{"delivery.required":"Krever utlevering","delivery.pending":"Venter p\xE5 utlevering","delivery.mark":"Merk som utlevert","delivery.done":"Utlevert","task.due_time":"Klokkeslett for frist (valgfritt)","shop.visible_to":"Vises for","shop.all_children":"Alle barn","penalty.enable":"Trekk poeng ved overskredet frist","status.deadline_missed":"Fristen er overskredet","editor.sections":"Seksjoner p\xE5 dette kortet","history.title":"Aktivitetshistorikk","history.from":"Fra","history.through":"Til og med","history.empty":"Ingen fullf\xF8rte oppgaver i perioden.","history.error":"Kunne ikke hente historikken.","history.refresh":"Oppdater","history.loading":"Laster\u2026","editor.unit_name":"Navn p\xE5 bel\xF8nningsenhet","editor.task_columns":"Oppgavekolonner","editor.columns_auto":"Automatisk","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Tidlig bonus ({unit})","ph.time_bonus_points.custom":"Tidsbonus ({unit})","btn.add_points.custom":"Legg til {unit}","btn.reset_points.custom":"Nullstill {unit}","points.title.custom":"Legg til {unit} for {name}","err.points_required.custom":"Oppgi et bel\xF8p i {unit}","err.points_number.custom":"Oppgi et tall for {unit}","err.points_positive.custom":"Oppgi minst 0 {unit}","shop.title.custom":"Butikk for {unit}","lbl.early_bonus_by.custom":"+{points} {unit} hvis ferdig innen {date}","editor.enable_points_help.custom":"Vis saldo, butikk og handlinger for {unit}","editor.color_group_kid_points.custom":"Samlet saldo ({unit})","editor.color_group_task_points.custom":"Oppgavebel\xF8nning ({unit})","icon.library":"Oppgaveikoner","icon.upload_failed":"Opplastingen mislyktes","ui.multiple_per_day":"Kan utf\xF8res flere ganger om dagen","editor.language_name":"Norsk bokm\xE5l","editor.language":"Spr\xE5k","editor.language_auto":"Oppdag automatisk","overview.title":"Tildelte oppgaver","overview.show_all":"Vis alle ({pending} venter)","overview.none":"Ingen oppgaver enn\xE5.","card.admin_title":"Chores4Kids \u2013 Forelder","input.new_child_name":"Nytt barn \u2014 navn","btn.add_child":"Legg til barn","input.new_category_name":"Ny kategori \u2014 navn","btn.add_category":"Legg til kategori","section.categories":"Kategorier","th.categories":"Kategorier","ph.categories":"Kategorier","select.categories":"Velg kategorier","section.children":"Barn","th.name":"Navn","th.points":"Poeng","th.pending":"Ventende","th.actions":"Handlinger","th.status":"Status","th.assign":"Tildelt til","th.completed":"Fullf\xF8rt","btn.rename":"Gi nytt navn","btn.delete":"Slett","section.new_task":"Ny oppgave","ph.title":"Tittel","ph.points":"Poeng","ph.description":"Beskrivelse (valgfritt)","ph.bonus_title":"Bonusoppgave tittel","ph.bonus_points":"Bonuspoeng","ph.due":"Frist (dato)","ph.early_bonus_days":"Bonusdager f\xF8r","ph.early_bonus_points":"Bonuspoeng","ui.early_bonus_enabled":"Aktiver tidlig bonus","warn.repeat_overrides_due":"Gjentakelse er aktiv, s\xE5 fristen beregnes ut fra de valgte ukedagene i stedet for denne datoen.","select.assign_child":"Tildel barn","ph.icon":"Ikon (mdi:...)","icon.choose":"Velg ikon","icon.clear":"Fjern ikon","icon.none":"Ingen","icon.search":"S\xF8k ikon","btn.create_task":"Opprett oppgave","btn.update_task":"Oppdater oppgave","btn.edit":"Rediger","editor.loaded_task":"Redigerer eksisterende oppgave","section.unassigned":"Ikke tildelte oppgaver","btn.assign":"Tildel","section.tasks_per_child":"Oppgaver per barn","btn.start":"Start","btn.back":"Tildel p\xE5 nytt","btn.awaiting":"Avventer","btn.approve":"Godkjenn","btn.approve_bonus":"Godkjenn bonus","btn.approve_all":"Godkjenn alle","btn.approve_partial":"Delvis godkjenn","lbl.approved":"Godkjent","section.scoreboard":"Poengtavle","confirm.delete_child":"Slette {name}?","confirm.delete_task":"Slette oppgave?","alert.choose_child_first":"Velg et barn f\xF8rst","ui.toggle_off_on":"Av/P\xE5","ui.persist_until_done":"Flytt uferdig oppgave til neste dag","ui.persist_help":"Uferdig oppgave flyttes automatisk til neste dag","ui.quick_complete":"Ferdig med ett trykk","ui.skip_approval":"Hopp over foreldregodkjenning","ui.bonus_task":"Aktiver bonusoppgave","section.tasks":"Oppgaver","form.save":"Lagre","form.add":"Legg til","form.cancel":"Avbryt","form.close":"Lukk","form.clear":"T\xF8m","repeat.label":"Gjentakelse","repeat.auto_assign":"Auto-tildel (gjentakelse)","repeat.save":"Lagre plan","repeat.days.mon":"Man","repeat.days.tue":"Tir","repeat.days.wed":"Ons","repeat.days.thu":"Tor","repeat.days.fri":"Fre","repeat.days.sat":"L\xF8r","repeat.days.sun":"S\xF8n","assign.disabled_auto":"Deaktivert: auto-tildeling (gjentakelse) er aktiv","assign.auto_to":"Auto-tildelt til {names}","btn.add_points":"Legg til poeng","btn.reset_points":"Nullstill poeng","points.title":"Legg til poeng til {name}","points.quick":"Hurtig legg til","points.remove":"Hurtig trekk fra","points.custom":"Valgfritt antall","err.title_required":"Tittel er p\xE5krevd","err.points_required":"Poeng m\xE5 fylles ut","err.points_number":"Poeng m\xE5 v\xE6re et tall","err.points_positive":"Poeng m\xE5 v\xE6re 0 eller mer","status.assigned":"Tildelt","status.in_progress":"P\xE5g\xE5r","status.awaiting_approval":"Avventer godkjenning","status.approved":"Godkjent","status.rejected":"Avvist","status.unassigned":"Ikke tildelt","status.taken":"Tatt","shop.title":"Butikk","shop.open":"\xC5pne butikk","shop.item":"Vare","shop.price":"Pris","shop.icon":"Ikon","shop.image":"Bilde","shop.upload":"Last opp bilde","shop.add_item":"Legg til vare","shop.history":"Kj\xF8pshistorikk","shop.child":"Barn","shop.when":"Tidspunkt","shop.date":"Dato","shop.time":"Tidspunkt","shop.active":"Aktiv","shop.buy":"Kj\xF8p","shop.bought":"Kj\xF8pt","shop.clear_history":"Rydd historikk","confirm.clear_history":"Rydd hele kj\xF8pshistorikken?","shop.advanced":"Avanserte handlinger","shop.entity":"Enhet","shop.operation":"Handling","shop.add_action":"Legg til handling","shop.add_delay":"Legg til forsinkelse","shop.steps":"Steg","shop.seconds":"Sekunder","shop.minutes":"Minutter","shop.hours":"Timer","shop.delay":"Forsinkelse","sort.configure":"Sortering","sort.title":"Velg rekkef\xF8lge","sort.categories_order":"Rekkef\xF8lge for kategorier","sort.none":"Ingen kategori","sort.save":"Lagre","sort.reset":"Nullstill","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Barn ikke funnet. Sjekk navnet i kortkonfigurasjonen.","msg.no_tasks":"Ingen oppgaver n\xE5.","btn.done":"Ferdig","btn.start_task":"Start oppgave","btn.complete_task":"Oppgave klar","btn.task_done":"Oppgave ferdig","btn.complete_bonus":"Fullf\xF8r bonus","lbl.awaiting":"Venter p\xE5 godkjenning","lbl.bonus":"Bonusoppgave","lbl.bonus_locked":"Fullf\xF8r hovedoppgaven f\xF8rst","lbl.taken_by":"Oppgave tatt av {name}","lbl.points":"poeng","section.daily_tasks":"I dag","section.weekly_tasks":"Ukens oppgaver","lbl.deadline":"Frist: {date}","lbl.early_bonus_by":"+{points} bonuspoeng hvis gjort {date} eller f\xF8r","editor.mode":"Modus","editor.mode_admin":"Forelder","editor.mode_kid":"Barn","editor.mode_overview":"Siste oppgaver","editor.child_label":"Barn","editor.child_placeholder":"Barnets navn","editor.child_select_prompt":"\u2014 Velg barn \u2014","editor.child_hint":"Ingen barn funnet enn\xE5 \u2013 skriv inn navnet manuelt.","editor.developer_mode":"Utviklermodus","editor.developer_mode_help":"Viser debug-kontroller som manuell forfallsmarkering","editor.completion_sound":"Fullf\xF8ringslyd","editor.completion_sound_help":"Lagres som /local/chores4kids/completion.<ext> og brukes p\xE5 tvers av dashboards","editor.notify_target":"Varsling ved fullf\xF8ring","editor.notify_target_help":"Send en push-varsling n\xE5r et barn markerer en oppgave som ferdig.","editor.notify_target_none":"Legg til person","editor.notify_toggle_complete":"Varsling ved fullf\xF8rt oppgave","editor.notify_toggle_shop":"Varsling ved kj\xF8p i butikken","editor.notify_toggle_shop_image":"Vis bilde i butikkvarsling","section.notifications":"Varsler","editor.colors":"Farger","editor.color_field_bg":"Bakgrunn","editor.color_field_text":"Tekst","editor.color_group_start":"Start oppgave-knapp","editor.color_group_complete":"Oppgave klar-knapp","editor.color_group_kid_points":"Barnas totalpoeng","editor.color_group_task_points":"Oppgavepoeng","editor.color_start_bg":"Start oppgave-knapp (bakgrunn)","editor.color_start_text":"Start oppgave-knapp (tekst)","editor.color_complete_bg":"Oppgave klar-knapp (bakgrunn)","editor.color_complete_text":"Oppgave klar-knapp (tekst)","editor.color_kid_points_bg":"Barnas totalpoeng (bakgrunn)","editor.color_kid_points_text":"Barnas totalpoeng (tekst)","editor.color_task_points_bg":"Oppgavepoeng (bakgrunn)","editor.color_task_points_text":"Oppgavepoeng (tekst)","editor.color_empty_default":"Tom = standard"},de:{"delivery.required":"\xDCbergabe erforderlich","delivery.pending":"Ausstehende \xDCbergaben","delivery.mark":"Als \xFCbergeben markieren","delivery.done":"\xDCbergeben","task.due_time":"F\xE4llige Uhrzeit (optional)","shop.visible_to":"Sichtbar f\xFCr","shop.all_children":"Alle Kinder","penalty.enable":"Bei verpasster Frist Punkte abziehen","status.deadline_missed":"Frist verpasst","editor.sections":"Abschnitte auf dieser Karte","history.title":"Aktivit\xE4tsverlauf","history.from":"Von","history.through":"Bis einschlie\xDFlich","history.empty":"Keine erledigten Aufgaben in diesem Zeitraum.","history.error":"Verlauf konnte nicht geladen werden.","history.refresh":"Aktualisieren","history.loading":"L\xE4dt\u2026","editor.unit_name":"Name der Belohnungseinheit","editor.task_columns":"Aufgabenspalten","editor.columns_auto":"Automatisch","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Fr\xFChbonus ({unit})","ph.time_bonus_points.custom":"Zeitbonus ({unit})","btn.add_points.custom":"{unit} hinzuf\xFCgen","btn.reset_points.custom":"{unit} zur\xFCcksetzen","points.title.custom":"{unit} f\xFCr {name} hinzuf\xFCgen","err.points_required.custom":"Betrag in {unit} eingeben","err.points_number.custom":"Zahl f\xFCr {unit} eingeben","err.points_positive.custom":"Mindestens 0 {unit} eingeben","shop.title.custom":"Shop f\xFCr {unit}","lbl.early_bonus_by.custom":"+{points} {unit} bei Abschluss bis {date}","editor.enable_points_help.custom":"Guthaben, Shop und Aktionen f\xFCr {unit} anzeigen","editor.color_group_kid_points.custom":"Gesamtguthaben ({unit})","editor.color_group_task_points.custom":"Aufgabenbelohnung ({unit})","icon.library":"Aufgabensymbole","icon.upload_failed":"Hochladen fehlgeschlagen","ui.multiple_per_day":"Mehrmals t\xE4glich erledigen","editor.language_name":"Deutsch","editor.language":"Sprache","editor.language_auto":"Automatisch erkennen","overview.title":"Zugewiesene Aufgaben","overview.show_all":"Alle anzeigen ({pending} ausstehend)","overview.none":"Noch keine Aufgaben.","card.admin_title":"Chores4Kids \u2013 Eltern","input.new_child_name":"Neues Kind \u2014 Name","btn.add_child":"Kind hinzuf\xFCgen","input.new_category_name":"Neue Kategorie \u2014 Name","btn.add_category":"Kategorie hinzuf\xFCgen","section.categories":"Kategorien","th.categories":"Kategorien","ph.categories":"Kategorien","select.categories":"Kategorien w\xE4hlen","section.children":"Kinder","th.name":"Name","th.points":"Punkte","th.pending":"Ausstehend","th.actions":"Aktionen","th.status":"Status","th.assign":"Zugewiesen an","th.completed":"Erledigt","btn.rename":"Umbenennen","btn.delete":"L\xF6schen","section.new_task":"Neue Aufgabe","ph.title":"Titel","ph.points":"Punkte","ph.description":"Beschreibung (optional)","ph.bonus_title":"Titel der Bonusaufgabe","ph.bonus_points":"Bonuspunkte","ph.due":"Frist (Datum)","ph.early_bonus_days":"Bonus-Tage vorher","ph.early_bonus_points":"Bonuspunkte","ui.early_bonus_enabled":"Fr\xFChbonus aktivieren","warn.repeat_overrides_due":"Wiederholung ist aktiv, daher basiert die Frist auf den ausgew\xE4hlten Wochentagen statt auf diesem Datum.","select.assign_child":"Kind zuweisen","ph.icon":"Symbol (mdi:...)","icon.choose":"Symbol w\xE4hlen","icon.clear":"Symbol entfernen","icon.none":"Keins","icon.search":"Symbol suchen","btn.create_task":"Aufgabe erstellen","btn.update_task":"Aufgabe aktualisieren","btn.edit":"Bearbeiten","editor.loaded_task":"Vorhandene Aufgabe bearbeiten","section.unassigned":"Nicht zugewiesene Aufgaben","btn.assign":"Zuweisen","section.tasks_per_child":"Aufgaben pro Kind","btn.start":"Starten","btn.back":"Neu zuweisen","btn.awaiting":"Wartet","btn.approve":"Genehmigen","btn.approve_bonus":"Bonus genehmigen","btn.approve_all":"Alle genehmigen","btn.approve_partial":"Teilweise genehmigen","lbl.approved":"Genehmigt","section.scoreboard":"Bestenliste","confirm.delete_child":"{name} l\xF6schen?","confirm.delete_task":"Aufgabe l\xF6schen?","alert.choose_child_first":"Bitte zuerst ein Kind w\xE4hlen","ui.toggle_off_on":"Aus/An","ui.persist_until_done":"Unfertige Aufgabe auf den n\xE4chsten Tag verschieben","ui.persist_help":"Unfertige Aufgabe wird automatisch auf den n\xE4chsten Tag verschoben","ui.quick_complete":"Mit einem Tip erledigen","ui.skip_approval":"Elternbest\xE4tigung \xFCberspringen","ui.bonus_task":"Bonusaufgabe aktivieren","section.tasks":"Aufgaben","form.save":"Speichern","form.add":"Hinzuf\xFCgen","form.cancel":"Abbrechen","form.clear":"Leeren","repeat.label":"Wiederholen","repeat.auto_assign":"Automatisch zuweisen (Wiederholung)","repeat.save":"Plan speichern","repeat.days.mon":"Mo","repeat.days.tue":"Di","repeat.days.wed":"Mi","repeat.days.thu":"Do","repeat.days.fri":"Fr","repeat.days.sat":"Sa","repeat.days.sun":"So","assign.disabled_auto":"Deaktiviert: automatische Zuweisung (Wiederholung) aktiv","assign.auto_to":"Automatisch zugewiesen an {names}","btn.add_points":"Punkte hinzuf\xFCgen","btn.reset_points":"Punkte zur\xFCcksetzen","points.title":"Punkte hinzuf\xFCgen f\xFCr {name}","points.quick":"Schnell hinzuf\xFCgen","points.remove":"Schnell abziehen","points.custom":"Eigene Anzahl","err.title_required":"Titel ist erforderlich","err.points_required":"Punkte sind erforderlich","err.points_number":"Punkte m\xFCssen eine Zahl sein","err.points_positive":"Punkte m\xFCssen 0 oder mehr sein","status.assigned":"Zugewiesen","status.in_progress":"In Arbeit","status.awaiting_approval":"Wartet auf Genehmigung","status.approved":"Genehmigt","status.rejected":"Abgelehnt","status.unassigned":"Nicht zugewiesen","status.taken":"Vergeben","shop.title":"Shop","shop.open":"Shop \xF6ffnen","shop.item":"Artikel","shop.price":"Preis","shop.icon":"Symbol","shop.image":"Bild","shop.upload":"Bild hochladen","shop.add_item":"Artikel hinzuf\xFCgen","shop.history":"Kaufhistorie","shop.child":"Kind","shop.when":"Zeitpunkt","shop.date":"Datum","shop.time":"Uhrzeit","shop.active":"Aktiv","shop.buy":"Kaufen","shop.bought":"Gekauft","shop.clear_history":"Historie l\xF6schen","confirm.clear_history":"Gesamte Kaufhistorie l\xF6schen?","shop.advanced":"Erweiterte Aktionen","shop.entity":"Entit\xE4t","shop.operation":"Aktion","shop.add_action":"Aktion hinzuf\xFCgen","shop.add_delay":"Verz\xF6gerung hinzuf\xFCgen","shop.steps":"Schritte","shop.seconds":"Sekunden","shop.minutes":"Minuten","shop.hours":"Stunden","shop.delay":"Verz\xF6gerung","sort.configure":"Sortierung","sort.title":"Reihenfolge w\xE4hlen","sort.categories_order":"Reihenfolge der Kategorien","sort.none":"Keine Kategorie","sort.save":"Speichern","sort.reset":"Zur\xFCcksetzen","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Kind nicht gefunden. Pr\xFCfe den Namen in der Kartenkonfiguration.","msg.no_tasks":"Keine Aufgaben gerade.","btn.done":"Fertig","btn.start_task":"Aufgabe starten","btn.complete_task":"Aufgabe erledigt","btn.task_done":"Aufgabe erledigt","btn.complete_bonus":"Bonus abschlie\xDFen","lbl.awaiting":"Wartet auf Genehmigung","lbl.bonus":"Bonusaufgabe","lbl.bonus_locked":"Zuerst Hauptaufgabe abschlie\xDFen","lbl.taken_by":"Aufgabe \xFCbernommen von {name}","lbl.points":"Punkte","section.daily_tasks":"Heute","section.weekly_tasks":"W\xF6chentliche Aufgaben","lbl.deadline":"Frist: {date}","lbl.early_bonus_by":"+{points} Bonuspunkte, wenn erledigt am {date} oder fr\xFCher","editor.mode":"Modus","editor.mode_admin":"Eltern","editor.mode_kid":"Kind","editor.mode_overview":"Aktuelle Aufgaben","editor.child_label":"Kind","editor.child_placeholder":"Name des Kindes","editor.child_select_prompt":"\u2014 Kind ausw\xE4hlen \u2014","editor.child_hint":"Noch keine Kinder gefunden \u2013 Namen manuell eingeben.","editor.developer_mode":"Entwicklermodus","editor.developer_mode_help":"Zeigt Debug-Steuerungen wie manuelles \xDCberf\xE4llig-Markieren","editor.completion_sound":"Abschluss-Sound","editor.completion_sound_help":"Wird als /local/chores4kids/completion.<ext> gespeichert und auf allen Dashboards verwendet","editor.notify_target":"Abschlussbenachrichtigung","editor.notify_target_help":"Sende eine Push-Benachrichtigung, wenn ein Kind eine Aufgabe als erledigt markiert.","editor.notify_target_none":"Person hinzuf\xFCgen","editor.notify_toggle_complete":"Benachrichtigung bei Aufgabenabschluss","editor.notify_toggle_shop":"Benachrichtigung bei Shop-Kauf","editor.notify_toggle_shop_image":"Bild in Shop-Benachrichtigung anzeigen","section.notifications":"Benachrichtigungen","editor.colors":"Farben","editor.color_field_bg":"Hintergrund","editor.color_field_text":"Text","editor.color_group_start":'"Aufgabe starten"-Button',"editor.color_group_complete":'"Aufgabe erledigt"-Button',"editor.color_group_kid_points":"Gesamtpunkte der Kinder","editor.color_group_task_points":"Aufgabenpunkte","editor.color_start_bg":'"Aufgabe starten"-Button (Hintergrund)',"editor.color_start_text":'"Aufgabe starten"-Button (Text)',"editor.color_complete_bg":'"Aufgabe erledigt"-Button (Hintergrund)',"editor.color_complete_text":'"Aufgabe erledigt"-Button (Text)',"editor.color_kid_points_bg":"Gesamtpunkte der Kinder (Hintergrund)","editor.color_kid_points_text":"Gesamtpunkte der Kinder (Text)","editor.color_task_points_bg":"Aufgabenpunkte (Hintergrund)","editor.color_task_points_text":"Aufgabenpunkte (Text)","editor.color_empty_default":"Leer = Standard"},es:{"delivery.required":"Requiere entrega","delivery.pending":"Pendiente de entrega","delivery.mark":"Marcar como entregado","delivery.done":"Entregado","task.due_time":"Hora l\xEDmite (opcional)","shop.visible_to":"Visible para","shop.all_children":"Todos los ni\xF1os","penalty.enable":"Restar puntos al vencer el plazo","status.deadline_missed":"Plazo vencido","editor.sections":"Secciones de esta tarjeta","history.title":"Historial de actividad","history.from":"Desde","history.through":"Hasta","history.empty":"No hay tareas completadas en este periodo.","history.error":"No se pudo cargar el historial.","history.refresh":"Actualizar","history.loading":"Cargando\u2026","editor.unit_name":"Nombre de la unidad de recompensa","editor.task_columns":"Columnas de tareas","editor.columns_auto":"Autom\xE1tico","ph.bonus_points.custom":"Bono ({unit})","ph.early_bonus_points.custom":"Bono anticipado ({unit})","ph.time_bonus_points.custom":"Bono por horario ({unit})","btn.add_points.custom":"A\xF1adir {unit}","btn.reset_points.custom":"Restablecer {unit}","points.title.custom":"A\xF1adir {unit} a {name}","err.points_required.custom":"Introduce una cantidad en {unit}","err.points_number.custom":"Introduce un n\xFAmero para {unit}","err.points_positive.custom":"Introduce al menos 0 {unit}","shop.title.custom":"Tienda de {unit}","lbl.early_bonus_by.custom":"+{points} {unit} si se completa hasta el {date}","editor.enable_points_help.custom":"Mostrar el saldo, la tienda y las acciones de {unit}","editor.color_group_kid_points.custom":"Saldo total ({unit})","editor.color_group_task_points.custom":"Recompensa por tarea ({unit})","icon.library":"Iconos de tareas","icon.upload_failed":"Error al subir","ui.multiple_per_day":"Permitir varias veces al d\xEDa","editor.language_name":"Espa\xF1ol","editor.language":"Idioma","editor.language_auto":"Detectar autom\xE1ticamente","overview.title":"Tareas asignadas","overview.show_all":"Ver todas ({pending} pendientes)","overview.none":"A\xFAn no hay tareas.","card.admin_title":"Chores4Kids \u2013 Padres","input.new_child_name":"Nuevo ni\xF1o \u2014 nombre","btn.add_child":"A\xF1adir ni\xF1o","input.new_category_name":"Nueva categor\xEDa \u2014 nombre","btn.add_category":"A\xF1adir categor\xEDa","section.categories":"Categor\xEDas","th.categories":"Categor\xEDas","ph.categories":"Categor\xEDas","select.categories":"Seleccionar categor\xEDas","section.children":"Ni\xF1os","th.name":"Nombre","th.points":"Puntos","th.pending":"Pendiente","th.actions":"Acciones","th.status":"Estado","th.assign":"Asignado a","th.completed":"Completado","btn.rename":"Renombrar","btn.delete":"Eliminar","section.new_task":"Nueva tarea","ph.title":"T\xEDtulo","ph.points":"Puntos","ph.description":"Descripci\xF3n (opcional)","ph.bonus_title":"T\xEDtulo de tarea de bono","ph.bonus_points":"Puntos de bono","ph.due":"Fecha l\xEDmite (fecha)","ph.early_bonus_days":"D\xEDas de bono por anticipaci\xF3n","ph.early_bonus_points":"Puntos de bono","ui.early_bonus_enabled":"Activar bono por finalizar antes","warn.repeat_overrides_due":"Repetir est\xE1 habilitado, as\xED que la fecha l\xEDmite se basa en los d\xEDas de la semana seleccionados en lugar de esta fecha.","select.assign_child":"Asignar ni\xF1o","ph.icon":"Icono (mdi:...)","icon.choose":"Elegir icono","icon.clear":"Quitar icono","icon.none":"Ninguno","icon.search":"Buscar icono","btn.create_task":"Crear tarea","btn.update_task":"Actualizar tarea","btn.edit":"Editar","editor.loaded_task":"Editando tarea existente","section.unassigned":"Tareas sin asignar","btn.assign":"Asignar","section.tasks_per_child":"Tareas por ni\xF1o","btn.start":"Iniciar","btn.back":"Reasignar","btn.awaiting":"En espera","btn.approve":"Aprobar","btn.approve_bonus":"Aprobar bono","btn.approve_all":"Aprobar todo","btn.approve_partial":"Aprobar parcial","lbl.approved":"Aprobada","section.scoreboard":"Marcador","confirm.delete_child":"\xBFEliminar a {name}?","confirm.delete_task":"\xBFEliminar tarea?","alert.choose_child_first":"Elige un ni\xF1o primero","ui.toggle_off_on":"Apagado/Encendido","ui.persist_until_done":"Pasar tarea no terminada al d\xEDa siguiente","ui.persist_help":"La tarea no terminada se mover\xE1 autom\xE1ticamente al d\xEDa siguiente","ui.quick_complete":"Completar con un toque","ui.skip_approval":"Omitir aprobaci\xF3n de padres","ui.bonus_task":"Activar tarea de bono","section.tasks":"Tareas","form.save":"Guardar","form.add":"A\xF1adir","form.cancel":"Cancelar","form.clear":"Borrar","repeat.label":"Repetir","repeat.auto_assign":"Auto-asignar (repetir)","repeat.save":"Guardar plan","repeat.days.mon":"Lun","repeat.days.tue":"Mar","repeat.days.wed":"Mi\xE9","repeat.days.thu":"Jue","repeat.days.fri":"Vie","repeat.days.sat":"S\xE1b","repeat.days.sun":"Dom","assign.disabled_auto":"Deshabilitado: auto-asignaci\xF3n (repetici\xF3n) activa","assign.auto_to":"Autoasignada a {names}","btn.add_points":"A\xF1adir puntos","btn.reset_points":"Reiniciar puntos","points.title":"A\xF1adir puntos a {name}","points.quick":"A\xF1adir r\xE1pido","points.remove":"Quitar r\xE1pido","points.custom":"Cantidad personalizada","err.title_required":"El t\xEDtulo es obligatorio","err.points_required":"Los puntos son obligatorios","err.points_number":"Los puntos deben ser un n\xFAmero","err.points_positive":"Los puntos deben ser 0 o m\xE1s","status.assigned":"Asignada","status.in_progress":"En curso","status.awaiting_approval":"En espera de aprobaci\xF3n","status.approved":"Aprobada","status.rejected":"Rechazada","status.unassigned":"Sin asignar","status.taken":"Tomada","shop.title":"Tienda","shop.open":"Abrir tienda","shop.item":"Art\xEDculo","shop.price":"Precio","shop.icon":"Icono","shop.image":"Imagen","shop.upload":"Subir imagen","shop.add_item":"A\xF1adir art\xEDculo","shop.history":"Historial de compras","shop.child":"Ni\xF1o","shop.when":"Fecha y hora","shop.date":"Fecha","shop.time":"Hora","shop.active":"Activo","shop.buy":"Comprar","shop.bought":"Comprado","shop.clear_history":"Limpiar historial","confirm.clear_history":"\xBFLimpiar todo el historial de compras?","shop.advanced":"Acciones avanzadas","shop.entity":"Entidad","shop.operation":"Operaci\xF3n","shop.add_action":"A\xF1adir acci\xF3n","shop.add_delay":"A\xF1adir retraso","shop.steps":"Pasos","shop.seconds":"Segundos","shop.minutes":"Minutos","shop.hours":"Horas","shop.delay":"Retraso","sort.configure":"Ordenaci\xF3n","sort.title":"Elegir orden","sort.categories_order":"Orden de categor\xEDas","sort.none":"Sin categor\xEDa","sort.save":"Guardar","sort.reset":"Restablecer","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Ni\xF1o no encontrado. Revisa el nombre en la configuraci\xF3n de la tarjeta.","msg.no_tasks":"No hay tareas por ahora.","btn.done":"Hecho","btn.start_task":"Iniciar tarea","btn.complete_task":"Tarea hecha","btn.task_done":"Tarea hecha","btn.complete_bonus":"Completar bono","lbl.awaiting":"En espera de aprobaci\xF3n","lbl.bonus":"Tarea de bono","lbl.bonus_locked":"Completa la tarea principal primero","lbl.taken_by":"Tarea tomada por {name}","lbl.points":"puntos","section.daily_tasks":"Hoy","section.weekly_tasks":"Tareas semanales","lbl.deadline":"Fecha l\xEDmite: {date}","lbl.early_bonus_by":"+{points} puntos de bono si se completa el {date} o antes","editor.mode":"Modo","editor.mode_admin":"Padres","editor.mode_kid":"Ni\xF1o","editor.mode_overview":"Tareas recientes","editor.child_label":"Ni\xF1o","editor.child_placeholder":"Nombre del ni\xF1o","editor.child_select_prompt":"\u2014 Seleccionar ni\xF1o \u2014","editor.child_hint":"A\xFAn no se encontraron ni\xF1os \u2014 escribe el nombre manualmente.","editor.developer_mode":"Modo desarrollador","editor.developer_mode_help":"Muestra controles de depuraci\xF3n como marcar vencido manualmente","editor.completion_sound":"Sonido de finalizaci\xF3n","editor.completion_sound_help":"Se guarda como /local/chores4kids/completion.<ext> y se usa en todos los paneles","editor.notify_target":"Notificaci\xF3n de finalizaci\xF3n","editor.notify_target_help":"Enviar una notificaci\xF3n push cuando un ni\xF1o marque una tarea como hecha.","editor.notify_target_none":"A\xF1adir persona","editor.notify_toggle_complete":"Notificar al completar una tarea","editor.notify_toggle_shop":"Notificar compra en la tienda","editor.notify_toggle_shop_image":"Mostrar imagen en notificaci\xF3n de tienda","section.notifications":"Notificaciones","editor.colors":"Colores","editor.color_field_bg":"Fondo","editor.color_field_text":"Texto","editor.color_group_start":'Bot\xF3n "Empezar tarea"',"editor.color_group_complete":'Bot\xF3n "Completar tarea"',"editor.color_group_kid_points":"Puntos totales de los ni\xF1os","editor.color_group_task_points":"Puntos de tarea","editor.color_start_bg":'Bot\xF3n "Empezar tarea" (fondo)',"editor.color_start_text":'Bot\xF3n "Empezar tarea" (texto)',"editor.color_complete_bg":'Bot\xF3n "Completar tarea" (fondo)',"editor.color_complete_text":'Bot\xF3n "Completar tarea" (texto)',"editor.color_kid_points_bg":"Puntos totales de los ni\xF1os (fondo)","editor.color_kid_points_text":"Puntos totales de los ni\xF1os (texto)","editor.color_task_points_bg":"Puntos de tarea (fondo)","editor.color_task_points_text":"Puntos de tarea (texto)","editor.color_empty_default":"Vac\xEDo = predeterminado"},fr:{"delivery.required":"Remise n\xE9cessaire","delivery.pending":"En attente de remise","delivery.mark":"Marquer comme remis","delivery.done":"Remis","task.due_time":"Heure limite (facultative)","shop.visible_to":"Visible pour","shop.all_children":"Tous les enfants","penalty.enable":"Retirer des points en cas de retard","status.deadline_missed":"\xC9ch\xE9ance d\xE9pass\xE9e","editor.sections":"Sections de cette carte","history.title":"Historique des activit\xE9s","history.from":"Du","history.through":"Au","history.empty":"Aucune t\xE2che termin\xE9e sur cette p\xE9riode.","history.error":"Impossible de charger l\u2019historique.","history.refresh":"Actualiser","history.loading":"Chargement\u2026","editor.unit_name":"Nom de l\u2019unit\xE9 de r\xE9compense","editor.task_columns":"Colonnes de t\xE2ches","editor.columns_auto":"Automatique","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Bonus anticip\xE9 ({unit})","ph.time_bonus_points.custom":"Bonus horaire ({unit})","btn.add_points.custom":"Ajouter des {unit}","btn.reset_points.custom":"R\xE9initialiser les {unit}","points.title.custom":"Ajouter des {unit} \xE0 {name}","err.points_required.custom":"Indiquez un montant en {unit}","err.points_number.custom":"Indiquez un nombre de {unit}","err.points_positive.custom":"Indiquez au moins 0 {unit}","shop.title.custom":"Boutique en {unit}","lbl.early_bonus_by.custom":"+{points} {unit} si termin\xE9 au plus tard le {date}","editor.enable_points_help.custom":"Afficher le solde, la boutique et les actions en {unit}","editor.color_group_kid_points.custom":"Solde total ({unit})","editor.color_group_task_points.custom":"R\xE9compense par t\xE2che ({unit})","icon.library":"Ic\xF4nes des t\xE2ches","icon.upload_failed":"\xC9chec du t\xE9l\xE9versement","ui.multiple_per_day":"Autoriser plusieurs fois par jour","editor.language_name":"Fran\xE7ais","editor.language":"Langue","editor.language_auto":"D\xE9tection automatique","overview.title":"T\xE2ches assign\xE9es","overview.show_all":"Tout afficher ({pending} en attente)","overview.none":"Aucune t\xE2che pour le moment.","card.admin_title":"Chores4Kids \u2013 Parents","input.new_child_name":"Nouvel enfant \u2014 nom","btn.add_child":"Ajouter un enfant","input.new_category_name":"Nouvelle cat\xE9gorie \u2014 nom","btn.add_category":"Ajouter une cat\xE9gorie","section.categories":"Cat\xE9gories","th.categories":"Cat\xE9gories","ph.categories":"Cat\xE9gories","select.categories":"S\xE9lectionner des cat\xE9gories","section.children":"Enfants","th.name":"Nom","th.points":"Points","th.pending":"En attente","th.actions":"Actions","th.status":"Statut","th.assign":"Attribu\xE9 \xE0","th.completed":"Termin\xE9","btn.rename":"Renommer","btn.delete":"Supprimer","section.new_task":"Nouvelle t\xE2che","ph.title":"Titre","ph.points":"Points","ph.description":"Description (facultatif)","ph.bonus_title":"Titre de la t\xE2che bonus","ph.bonus_points":"Points bonus","ph.due":"Date limite (date)","ph.early_bonus_days":"Jours de bonus (avance)","ph.early_bonus_points":"Points de bonus","ui.early_bonus_enabled":"Activer le bonus d'avance","warn.repeat_overrides_due":"La r\xE9p\xE9tition est activ\xE9e, donc la date limite est bas\xE9e sur les jours de semaine s\xE9lectionn\xE9s plut\xF4t que sur cette date.","select.assign_child":"Attribuer un enfant","ph.icon":"Ic\xF4ne (mdi:...)","icon.choose":"Choisir une ic\xF4ne","icon.clear":"Effacer l\u2019ic\xF4ne","icon.none":"Aucune","icon.search":"Rechercher une ic\xF4ne","btn.create_task":"Cr\xE9er la t\xE2che","btn.update_task":"Mettre \xE0 jour la t\xE2che","btn.edit":"Modifier","editor.loaded_task":"Modification d\u2019une t\xE2che existante","section.unassigned":"T\xE2ches non attribu\xE9es","btn.assign":"Attribuer","section.tasks_per_child":"T\xE2ches par enfant","btn.start":"D\xE9marrer","btn.back":"R\xE9attribuer","btn.awaiting":"En attente","btn.approve":"Approuver","btn.approve_bonus":"Approuver le bonus","btn.approve_all":"Tout approuver","btn.approve_partial":"Approuver partiellement","lbl.approved":"Approuv\xE9e","section.scoreboard":"Classement","confirm.delete_child":"Supprimer {name} ?","confirm.delete_task":"Supprimer la t\xE2che ?","alert.choose_child_first":"Veuillez d\u2019abord choisir un enfant","ui.toggle_off_on":"Arr\xEAt/Marche","ui.persist_until_done":"Reporter la t\xE2che inachev\xE9e au lendemain","ui.persist_help":"La t\xE2che inachev\xE9e est automatiquement report\xE9e au lendemain","ui.quick_complete":"Terminer en un clic","ui.skip_approval":"Ignorer l\u2019approbation des parents","ui.bonus_task":"Activer la t\xE2che bonus","section.tasks":"T\xE2ches","form.save":"Enregistrer","form.add":"Ajouter","form.cancel":"Annuler","form.clear":"Effacer","repeat.label":"R\xE9p\xE9ter","repeat.auto_assign":"Auto-attribuer (r\xE9p\xE9ter)","repeat.save":"Enregistrer le plan","repeat.days.mon":"Lun","repeat.days.tue":"Mar","repeat.days.wed":"Mer","repeat.days.thu":"Jeu","repeat.days.fri":"Ven","repeat.days.sat":"Sam","repeat.days.sun":"Dim","assign.disabled_auto":"D\xE9sactiv\xE9 : auto-attribution (r\xE9p\xE9tition) active","assign.auto_to":"Attribu\xE9e automatiquement \xE0 {names}","btn.add_points":"Ajouter des points","btn.reset_points":"R\xE9initialiser les points","points.title":"Ajouter des points \xE0 {name}","points.quick":"Ajout rapide","points.remove":"Retrait rapide","points.custom":"Montant personnalis\xE9","err.title_required":"Le titre est requis","err.points_required":"Les points sont requis","err.points_number":"Les points doivent \xEAtre un nombre","err.points_positive":"Les points doivent \xEAtre 0 ou plus","status.assigned":"Attribu\xE9e","status.in_progress":"En cours","status.awaiting_approval":"En attente d\u2019approbation","status.approved":"Approuv\xE9e","status.rejected":"Rejet\xE9e","status.unassigned":"Non attribu\xE9e","status.taken":"Prise","shop.title":"Boutique","shop.open":"Ouvrir la boutique","shop.item":"Article","shop.price":"Prix","shop.icon":"Ic\xF4ne","shop.image":"Image","shop.upload":"T\xE9l\xE9verser une image","shop.add_item":"Ajouter un article","shop.history":"Historique des achats","shop.child":"Enfant","shop.when":"Date et heure","shop.date":"Date","shop.time":"Heure","shop.active":"Actif","shop.buy":"Acheter","shop.bought":"Achet\xE9","shop.clear_history":"Effacer l`historique","confirm.clear_history":"Effacer tout l`historique des achats?","shop.advanced":"Actions avanc\xE9es","shop.entity":"Entit\xE9","shop.operation":"Op\xE9ration","shop.add_action":"Ajouter une action","shop.add_delay":"Ajouter un d\xE9lai","shop.steps":"\xC9tapes","shop.seconds":"Secondes","shop.minutes":"Minutes","shop.hours":"Heures","shop.delay":"D\xE9lai","sort.configure":"Tri","sort.title":"Choisir l\u2019ordre","sort.categories_order":"Ordre des cat\xE9gories","sort.none":"Aucune cat\xE9gorie","sort.save":"Enregistrer","sort.reset":"R\xE9initialiser","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Enfant introuvable. V\xE9rifiez le nom dans la configuration de la carte.","msg.no_tasks":"Aucune t\xE2che pour le moment.","btn.done":"Termin\xE9","btn.start_task":"D\xE9marrer la t\xE2che","btn.complete_task":"T\xE2che termin\xE9e","btn.task_done":"T\xE2che termin\xE9e","btn.complete_bonus":"Terminer le bonus","lbl.awaiting":"En attente d\u2019approbation","lbl.bonus":"T\xE2che bonus","lbl.bonus_locked":"Terminer la t\xE2che principale d'abord","lbl.taken_by":"T\xE2che prise par {name}","lbl.points":"points","section.daily_tasks":"Aujourd\u2019hui","section.weekly_tasks":"T\xE2ches hebdomadaires","lbl.deadline":"Date limite : {date}","lbl.early_bonus_by":"+{points} points de bonus si termin\xE9 le {date} ou avant","editor.mode":"Mode","editor.mode_admin":"Parents","editor.mode_kid":"Enfant","editor.mode_overview":"T\xE2ches r\xE9centes","editor.child_label":"Enfant","editor.child_placeholder":"Nom de l\u2019enfant","editor.child_select_prompt":"\u2014 S\xE9lectionner un enfant \u2014","editor.child_hint":"Aucun enfant trouv\xE9 pour l\u2019instant \u2014 saisissez le nom manuellement.","editor.developer_mode":"Mode d\xE9veloppeur","editor.developer_mode_help":"Affiche des contr\xF4les de d\xE9bogage comme marquer en retard manuellement","editor.completion_sound":"Son de fin","editor.completion_sound_help":"Enregistr\xE9 sous /local/chores4kids/completion.<ext> et utilis\xE9 sur tous les tableaux de bord","editor.notify_target":"Notification d\u2019ach\xE8vement","editor.notify_target_help":"Envoyer une notification push lorsqu\u2019un enfant marque une t\xE2che comme termin\xE9e.","editor.notify_target_none":"Ajouter une personne","editor.notify_toggle_complete":"Notifier la fin d\u2019une t\xE2che","editor.notify_toggle_shop":"Notifier un achat dans la boutique","editor.notify_toggle_shop_image":"Afficher l\u2019image dans la notification d\u2019achat","section.notifications":"Notifications","editor.colors":"Couleurs","editor.color_field_bg":"Fond","editor.color_field_text":"Texte","editor.color_group_start":'Bouton "D\xE9marrer"',"editor.color_group_complete":'Bouton "Terminer"',"editor.color_group_kid_points":"Points totaux des enfants","editor.color_group_task_points":"Points de t\xE2che","editor.color_start_bg":'Bouton "D\xE9marrer" (fond)',"editor.color_start_text":'Bouton "D\xE9marrer" (texte)',"editor.color_complete_bg":'Bouton "Terminer" (fond)',"editor.color_complete_text":'Bouton "Terminer" (texte)',"editor.color_kid_points_bg":"Points totaux des enfants (fond)","editor.color_kid_points_text":"Points totaux des enfants (texte)","editor.color_task_points_bg":"Points de t\xE2che (fond)","editor.color_task_points_text":"Points de t\xE2che (texte)","editor.color_empty_default":"Vide = par d\xE9faut"},fi:{"delivery.required":"Vaatii luovutuksen","delivery.pending":"Odottaa luovutusta","delivery.mark":"Merkitse luovutetuksi","delivery.done":"Luovutettu","task.due_time":"M\xE4\xE4r\xE4aika kellonaikana (valinnainen)","shop.visible_to":"N\xE4kyy lapsille","shop.all_children":"Kaikki lapset","penalty.enable":"V\xE4henn\xE4 pisteit\xE4 my\xF6h\xE4stymisest\xE4","status.deadline_missed":"M\xE4\xE4r\xE4aika ylittyi","editor.sections":"T\xE4m\xE4n kortin osiot","history.title":"Teht\xE4v\xE4historia","history.from":"Alkaen","history.through":"Asti","history.empty":"Ei suorituksia t\xE4ll\xE4 aikav\xE4lill\xE4.","history.error":"Historiaa ei voitu ladata.","history.refresh":"P\xE4ivit\xE4","history.loading":"Ladataan\u2026","editor.unit_name":"Palkintoyksik\xF6n nimi","editor.task_columns":"Teht\xE4v\xE4sarakkeet","editor.columns_auto":"Automaattinen","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Aikaisen suorituksen bonus ({unit})","ph.time_bonus_points.custom":"Aikabonus ({unit})","btn.add_points.custom":"Lis\xE4\xE4 {unit}","btn.reset_points.custom":"Nollaa {unit}","points.title.custom":"Lis\xE4\xE4 k\xE4ytt\xE4j\xE4lle {name}: {unit}","err.points_required.custom":"Anna m\xE4\xE4r\xE4 ({unit})","err.points_number.custom":"Anna luku ({unit})","err.points_positive.custom":"Anna v\xE4hint\xE4\xE4n 0 {unit}","shop.title.custom":"Kauppa ({unit})","lbl.early_bonus_by.custom":"+{points} {unit}, jos valmis viimeist\xE4\xE4n {date}","editor.enable_points_help.custom":"N\xE4yt\xE4 saldo, kauppa ja toiminnot ({unit})","editor.color_group_kid_points.custom":"Kokonaissaldo ({unit})","editor.color_group_task_points.custom":"Teht\xE4v\xE4palkkio ({unit})","icon.library":"Teht\xE4v\xE4kuvakkeet","icon.upload_failed":"Lataus ep\xE4onnistui","ui.multiple_per_day":"Salli useita suorituksia p\xE4iv\xE4ss\xE4","editor.language_name":"Suomi","editor.language":"Kieli","editor.language_auto":"Tunnista automaattisesti","overview.title":"M\xE4\xE4ritetyt teht\xE4v\xE4t","overview.show_all":"N\xE4yt\xE4 kaikki ({pending} odottaa)","overview.none":"Ei viel\xE4 teht\xE4vi\xE4.","card.admin_title":"Chores4Kids \u2013 Vanhemmat","input.new_child_name":"Uusi lapsi \u2014 nimi","btn.add_child":"Lis\xE4\xE4 lapsi","input.new_category_name":"Uusi kategoria \u2014 nimi","btn.add_category":"Lis\xE4\xE4 kategoria","section.categories":"Kategoriat","th.categories":"Kategoriat","ph.categories":"Kategoriat","select.categories":"Valitse kategoriat","section.children":"Lapset","th.name":"Nimi","th.points":"Pisteet","th.pending":"Odottaa","th.actions":"Toiminnot","th.status":"Tila","th.assign":"M\xE4\xE4ritetty","th.completed":"Valmis","btn.rename":"Nime\xE4 uudelleen","btn.delete":"Poista","section.new_task":"Uusi teht\xE4v\xE4","ph.title":"Otsikko","ph.points":"Pisteet","ph.description":"Kuvaus (valinnainen)","ph.bonus_title":"Bonus-teht\xE4v\xE4n otsikko","ph.bonus_points":"Bonuspisteet","ph.due":"M\xE4\xE4r\xE4p\xE4iv\xE4 (p\xE4iv\xE4)","ph.early_bonus_days":"Bonusp\xE4ivi\xE4 ennen","ph.early_bonus_points":"Bonuspisteet","ui.early_bonus_enabled":"Ota k\xE4ytt\xF6\xF6n aikaisen valmistumisen bonus","warn.repeat_overrides_due":"Toisto on k\xE4yt\xF6ss\xE4, joten m\xE4\xE4r\xE4p\xE4iv\xE4 perustuu valittuihin viikonp\xE4iviin t\xE4m\xE4n p\xE4iv\xE4m\xE4\xE4r\xE4n sijaan.","select.assign_child":"M\xE4\xE4rit\xE4 lapsi","ph.icon":"Kuvake (mdi:...)","icon.choose":"Valitse kuvake","icon.clear":"Poista kuvake","icon.none":"Ei mit\xE4\xE4n","icon.search":"Hae kuvaketta","btn.create_task":"Luo teht\xE4v\xE4","btn.update_task":"P\xE4ivit\xE4 teht\xE4v\xE4","btn.edit":"Muokkaa","editor.loaded_task":"Muokataan olemassa olevaa teht\xE4v\xE4\xE4","section.unassigned":"M\xE4\xE4ritt\xE4m\xE4tt\xF6m\xE4t teht\xE4v\xE4t","btn.assign":"M\xE4\xE4rit\xE4","section.tasks_per_child":"Teht\xE4v\xE4t per lapsi","btn.start":"Aloita","btn.back":"M\xE4\xE4rit\xE4 uudelleen","btn.awaiting":"Odottaa","btn.approve":"Hyv\xE4ksy","btn.approve_bonus":"Hyv\xE4ksy bonus","btn.approve_all":"Hyv\xE4ksy kaikki","btn.approve_partial":"Osittainen hyv\xE4ksynt\xE4","lbl.approved":"Hyv\xE4ksytty","section.scoreboard":"Pistetaulukko","confirm.delete_child":"Poistetaanko {name}?","confirm.delete_task":"Poistetaanko teht\xE4v\xE4?","alert.choose_child_first":"Valitse ensin lapsi","ui.toggle_off_on":"Pois/P\xE4\xE4ll\xE4","ui.persist_until_done":"Siirr\xE4 keskener\xE4inen teht\xE4v\xE4 seuraavalle p\xE4iv\xE4lle","ui.persist_help":"Keskener\xE4inen teht\xE4v\xE4 siirtyy automaattisesti seuraavalle p\xE4iv\xE4lle","ui.quick_complete":"Valmis yhdell\xE4 painalluksella","ui.skip_approval":"Ohita vanhemman hyv\xE4ksynt\xE4","ui.bonus_task":"Ota bonus-teht\xE4v\xE4 k\xE4ytt\xF6\xF6n","section.tasks":"Teht\xE4v\xE4t","form.save":"Tallenna","form.add":"Lis\xE4\xE4","form.cancel":"Peruuta","form.clear":"Tyhjenn\xE4","repeat.label":"Toisto","repeat.auto_assign":"Automaattinen m\xE4\xE4ritys (toisto)","repeat.save":"Tallenna suunnitelma","repeat.days.mon":"Ma","repeat.days.tue":"Ti","repeat.days.wed":"Ke","repeat.days.thu":"To","repeat.days.fri":"Pe","repeat.days.sat":"La","repeat.days.sun":"Su","assign.disabled_auto":"Pois k\xE4yt\xF6st\xE4: automaattinen m\xE4\xE4ritys (toisto) k\xE4yt\xF6ss\xE4","assign.auto_to":"Automaattisesti m\xE4\xE4ritetty: {names}","btn.add_points":"Lis\xE4\xE4 pisteit\xE4","btn.reset_points":"Nollaa pisteet","points.title":"Lis\xE4\xE4 pisteit\xE4: {name}","points.quick":"Pikalis\xE4ys","points.remove":"Pikav\xE4hennys","points.custom":"Mukautettu m\xE4\xE4r\xE4","err.title_required":"Otsikko on pakollinen","err.points_required":"Pisteet ovat pakolliset","err.points_number":"Pisteiden on oltava numero","err.points_positive":"Pisteiden on oltava 0 tai enemm\xE4n","status.assigned":"M\xE4\xE4ritetty","status.in_progress":"K\xE4ynniss\xE4","status.awaiting_approval":"Odottaa hyv\xE4ksynt\xE4\xE4","status.approved":"Hyv\xE4ksytty","status.rejected":"Hyl\xE4tty","status.unassigned":"Ei m\xE4\xE4ritetty","status.taken":"Varattu","shop.title":"Kauppa","shop.open":"Avaa kauppa","shop.item":"Tuote","shop.price":"Hinta","shop.icon":"Kuvake","shop.image":"Kuva","shop.upload":"Lataa kuva","shop.add_item":"Lis\xE4\xE4 tuote","shop.history":"Ostohistoria","shop.child":"Lapsi","shop.when":"Aika","shop.date":"P\xE4iv\xE4ys","shop.time":"Aika","shop.active":"Aktiivinen","shop.buy":"Osta","shop.bought":"Ostettu","shop.clear_history":"Tyhjenn\xE4 historia","confirm.clear_history":"Tyhjenn\xE4 koko ostohistoria?","shop.advanced":"Edistyneet toiminnot","shop.entity":"Entiteetti","shop.operation":"Toiminto","shop.add_action":"Lis\xE4\xE4 toiminto","shop.add_delay":"Lis\xE4\xE4 viive","shop.steps":"Vaiheet","shop.seconds":"Sekuntia","shop.minutes":"Minuuttia","shop.hours":"Tuntia","shop.delay":"Viive","sort.configure":"Lajittelu","sort.title":"Valitse j\xE4rjestys","sort.categories_order":"Kategorioiden j\xE4rjestys","sort.none":"Ei kategoriaa","sort.save":"Tallenna","sort.reset":"Palauta","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Lasta ei l\xF6ytynyt. Tarkista nimi kortin asetuksista.","msg.no_tasks":"Ei teht\xE4vi\xE4 juuri nyt.","btn.done":"Valmis","btn.start_task":"Aloita teht\xE4v\xE4","btn.complete_task":"Teht\xE4v\xE4 valmis","btn.task_done":"Teht\xE4v\xE4 valmis","btn.complete_bonus":"Suorita bonus","lbl.awaiting":"Odottaa hyv\xE4ksynt\xE4\xE4","lbl.bonus":"Bonusteht\xE4v\xE4","lbl.bonus_locked":"Suorita p\xE4\xE4teht\xE4v\xE4 ensin","lbl.taken_by":"Teht\xE4v\xE4n otti {name}","lbl.points":"pistett\xE4","section.daily_tasks":"T\xE4n\xE4\xE4n","section.weekly_tasks":"Viikkoteht\xE4v\xE4t","lbl.deadline":"M\xE4\xE4r\xE4p\xE4iv\xE4: {date}","lbl.early_bonus_by":"+{points} bonuspistett\xE4, jos valmis {date} tai aiemmin","editor.mode":"Tila","editor.mode_admin":"Vanhemmat","editor.mode_kid":"Lapsi","editor.mode_overview":"Viimeisimm\xE4t teht\xE4v\xE4t","editor.child_label":"Lapsi","editor.child_placeholder":"Lapsen nimi","editor.child_select_prompt":"\u2014 Valitse lapsi \u2014","editor.child_hint":"Lapsia ei viel\xE4 l\xF6ytynyt \u2014 kirjoita nimi manuaalisesti.","editor.developer_mode":"Kehitt\xE4j\xE4tila","editor.developer_mode_help":"N\xE4ytt\xE4\xE4 debug-ohjaimet, kuten manuaalisen my\xF6h\xE4ss\xE4-merkinn\xE4n","editor.completion_sound":"Valmistumis\xE4\xE4ni","editor.completion_sound_help":"Tallennetaan muotoon /local/chores4kids/completion.<ext> ja k\xE4ytet\xE4\xE4n kaikilla n\xE4kymill\xE4","editor.notify_target":"Valmistumisilmoitus","editor.notify_target_help":"L\xE4het\xE4 push-ilmoitus, kun lapsi merkitsee teht\xE4v\xE4n valmiiksi.","editor.notify_target_none":"Lis\xE4\xE4 henkil\xF6","editor.notify_toggle_complete":"Ilmoitus teht\xE4v\xE4n valmistumisesta","editor.notify_toggle_shop":"Ilmoitus ostosta kaupassa","editor.notify_toggle_shop_image":"N\xE4yt\xE4 kuva oston ilmoituksessa","section.notifications":"Ilmoitukset","editor.colors":"V\xE4rit","editor.color_field_bg":"Tausta","editor.color_field_text":"Teksti","editor.color_group_start":"Aloita teht\xE4v\xE4 -painike","editor.color_group_complete":"Suorita teht\xE4v\xE4 -painike","editor.color_group_kid_points":"Lasten kokonaispisteet","editor.color_group_task_points":"Teht\xE4v\xE4pisteet","editor.color_start_bg":"Aloita teht\xE4v\xE4 -painike (tausta)","editor.color_start_text":"Aloita teht\xE4v\xE4 -painike (teksti)","editor.color_complete_bg":"Suorita teht\xE4v\xE4 -painike (tausta)","editor.color_complete_text":"Suorita teht\xE4v\xE4 -painike (teksti)","editor.color_kid_points_bg":"Lasten kokonaispisteet (tausta)","editor.color_kid_points_text":"Lasten kokonaispisteet (teksti)","editor.color_task_points_bg":"Teht\xE4v\xE4pisteet (tausta)","editor.color_task_points_text":"Teht\xE4v\xE4pisteet (teksti)","editor.color_empty_default":"Tyhj\xE4 = oletus"},it:{"delivery.required":"Richiede consegna","delivery.pending":"In attesa di consegna","delivery.mark":"Segna come consegnato","delivery.done":"Consegnato","task.due_time":"Ora di scadenza (facoltativa)","shop.visible_to":"Visibile a","shop.all_children":"Tutti i bambini","penalty.enable":"Sottrai punti in caso di ritardo","status.deadline_missed":"Scadenza superata","editor.sections":"Sezioni di questa scheda","history.title":"Cronologia attivit\xE0","history.from":"Dal","history.through":"Al","history.empty":"Nessuna attivit\xE0 completata in questo periodo.","history.error":"Impossibile caricare la cronologia.","history.refresh":"Aggiorna","history.loading":"Caricamento\u2026","editor.unit_name":"Nome dell\u2019unit\xE0 di ricompensa","editor.task_columns":"Colonne delle attivit\xE0","editor.columns_auto":"Automatico","ph.bonus_points.custom":"Bonus ({unit})","ph.early_bonus_points.custom":"Bonus anticipato ({unit})","ph.time_bonus_points.custom":"Bonus orario ({unit})","btn.add_points.custom":"Aggiungi {unit}","btn.reset_points.custom":"Azzera {unit}","points.title.custom":"Aggiungi {unit} a {name}","err.points_required.custom":"Inserisci un importo in {unit}","err.points_number.custom":"Inserisci un numero per {unit}","err.points_positive.custom":"Inserisci almeno 0 {unit}","shop.title.custom":"Negozio in {unit}","lbl.early_bonus_by.custom":"+{points} {unit} se completata entro il {date}","editor.enable_points_help.custom":"Mostra saldo, negozio e azioni in {unit}","editor.color_group_kid_points.custom":"Saldo totale ({unit})","editor.color_group_task_points.custom":"Ricompensa attivit\xE0 ({unit})","icon.library":"Icone delle attivit\xE0","icon.upload_failed":"Caricamento non riuscito","ui.multiple_per_day":"Consenti pi\xF9 completamenti al giorno","editor.language_name":"Italiano","editor.language":"Lingua","editor.language_auto":"Rilevamento automatico","overview.title":"Attivit\xE0 assegnate","overview.show_all":"Mostra tutto ({pending} in attesa)","overview.none":"Nessuna attivit\xE0.","card.admin_title":"Chores4Kids \u2013 Genitori","input.new_child_name":"Nuovo bambino \u2014 nome","btn.add_child":"Aggiungi bambino","input.new_category_name":"Nuova categoria \u2014 nome","btn.add_category":"Aggiungi categoria","section.categories":"Categorie","th.categories":"Categorie","ph.categories":"Categorie","select.categories":"Seleziona categorie","section.children":"Bambini","th.name":"Nome","th.points":"Punti","th.pending":"In sospeso","th.actions":"Azioni","th.status":"Stato","th.assign":"Assegnato a","th.completed":"Completato","btn.rename":"Rinomina","btn.delete":"Elimina","section.new_task":"Nuova attivit\xE0","ph.title":"Titolo","ph.points":"Punti","ph.description":"Descrizione (opzionale)","ph.bonus_title":"Titolo attivit\xE0 bonus","ph.bonus_points":"Punti bonus","ph.due":"Scadenza (data)","ph.early_bonus_days":"Giorni di bonus (anticipo)","ph.early_bonus_points":"Punti bonus","ui.early_bonus_enabled":"Attiva bonus per completamento anticipato","warn.repeat_overrides_due":"La ripetizione \xE8 attiva, quindi la scadenza si basa sui giorni della settimana selezionati invece di questa data.","select.assign_child":"Assegna bambino","ph.icon":"Icona (mdi:...)","icon.choose":"Scegli icona","icon.clear":"Rimuovi icona","icon.none":"Nessuna","icon.search":"Cerca icona","btn.create_task":"Crea attivit\xE0","btn.update_task":"Aggiorna attivit\xE0","btn.edit":"Modifica","editor.loaded_task":"Modifica attivit\xE0 esistente","section.unassigned":"Attivit\xE0 non assegnate","btn.assign":"Assegna","section.tasks_per_child":"Attivit\xE0 per bambino","btn.start":"Avvia","btn.back":"Riassegna","btn.awaiting":"In attesa","btn.approve":"Approva","btn.approve_bonus":"Approva bonus","btn.approve_all":"Approva tutto","btn.approve_partial":"Approva parzialmente","lbl.approved":"Approvato","section.scoreboard":"Classifica","confirm.delete_child":"Eliminare {name}?","confirm.delete_task":"Eliminare attivit\xE0?","alert.choose_child_first":"Scegli prima un bambino","ui.toggle_off_on":"Spento/Acceso","ui.persist_until_done":"Sposta l\u2019attivit\xE0 non completata al giorno successivo","ui.persist_help":"L\u2019attivit\xE0 non completata verr\xE0 spostata automaticamente al giorno successivo","ui.quick_complete":"Completa con un tocco","ui.skip_approval":"Salta approvazione genitori","ui.bonus_task":"Attiva attivit\xE0 bonus","section.tasks":"Attivit\xE0","form.save":"Salva","form.add":"Aggiungi","form.cancel":"Annulla","form.clear":"Cancella","repeat.label":"Ripeti","repeat.auto_assign":"Assegnazione automatica (ripeti)","repeat.save":"Salva piano","repeat.days.mon":"Lun","repeat.days.tue":"Mar","repeat.days.wed":"Mer","repeat.days.thu":"Gio","repeat.days.fri":"Ven","repeat.days.sat":"Sab","repeat.days.sun":"Dom","assign.disabled_auto":"Disabilitato: assegnazione automatica (ripetizione) attiva","assign.auto_to":"Assegnata automaticamente a {names}","btn.add_points":"Aggiungi punti","btn.reset_points":"Azzera punti","points.title":"Aggiungi punti a {name}","points.quick":"Aggiunta rapida","points.remove":"Rimozione rapida","points.custom":"Quantit\xE0 personalizzata","err.title_required":"Titolo obbligatorio","err.points_required":"Punti obbligatori","err.points_number":"I punti devono essere un numero","err.points_positive":"I punti devono essere 0 o pi\xF9","status.assigned":"Assegnata","status.in_progress":"In corso","status.awaiting_approval":"In attesa di approvazione","status.approved":"Approvata","status.rejected":"Rifiutata","status.unassigned":"Non assegnata","status.taken":"Presa","shop.title":"Negozio","shop.open":"Apri negozio","shop.item":"Articolo","shop.price":"Prezzo","shop.icon":"Icona","shop.image":"Immagine","shop.upload":"Carica immagine","shop.add_item":"Aggiungi articolo","shop.history":"Storico acquisti","shop.child":"Bambino","shop.when":"Data e ora","shop.date":"Data","shop.time":"Ora","shop.active":"Attivo","shop.buy":"Compra","shop.bought":"Comprato","shop.clear_history":"Cancella storico","confirm.clear_history":"Cancellare tutto lo storico acquisti?","shop.advanced":"Azioni avanzate","shop.entity":"Entit\xE0","shop.operation":"Operazione","shop.add_action":"Aggiungi azione","shop.add_delay":"Aggiungi ritardo","shop.steps":"Passi","shop.seconds":"Secondi","shop.minutes":"Minuti","shop.hours":"Ore","shop.delay":"Ritardo","sort.configure":"Ordinamento","sort.title":"Scegli ordine","sort.categories_order":"Ordine categorie","sort.none":"Nessuna categoria","sort.save":"Salva","sort.reset":"Reimposta","card.child_title_fallback":"Chores4Kids \u2013 {name}","msg.child_not_found":"Bambino non trovato. Controlla il nome nella configurazione della scheda.","msg.no_tasks":"Nessuna attivit\xE0 al momento.","btn.done":"Fatto","btn.start_task":"Avvia attivit\xE0","btn.complete_task":"Attivit\xE0 completata","btn.task_done":"Attivit\xE0 completata","btn.complete_bonus":"Completa bonus","lbl.awaiting":"In attesa di approvazione","lbl.bonus":"Attivit\xE0 bonus","lbl.bonus_locked":"Completa prima l'attivit\xE0 principale","lbl.taken_by":"Attivit\xE0 presa da {name}","lbl.points":"punti","section.daily_tasks":"Oggi","section.weekly_tasks":"Attivit\xE0 settimanali","lbl.deadline":"Scadenza: {date}","lbl.early_bonus_by":"+{points} punti bonus se completata il {date} o prima","editor.mode":"Modalit\xE0","editor.mode_admin":"Genitori","editor.mode_kid":"Bambino","editor.mode_overview":"Attivit\xE0 recenti","editor.child_label":"Bambino","editor.child_placeholder":"Nome del bambino","editor.child_select_prompt":"\u2014 Seleziona bambino \u2014","editor.child_hint":"Ancora nessun bambino trovato \u2014 inserisci il nome manualmente.","editor.developer_mode":"Modalit\xE0 sviluppatore","editor.developer_mode_help":"Mostra controlli di debug come segnare scaduto manualmente","editor.completion_sound":"Suono di completamento","editor.completion_sound_help":"Salvato come /local/chores4kids/completion.<ext> e usato su tutte le dashboard","editor.notify_target":"Notifica di completamento","editor.notify_target_help":"Invia una notifica push quando un bambino segna un\u2019attivit\xE0 come completata.","editor.notify_target_none":"Aggiungi persona","editor.notify_toggle_complete":"Notifica completamento attivit\xE0","editor.notify_toggle_shop":"Notifica acquisto nel negozio","editor.notify_toggle_shop_image":"Mostra immagine nella notifica di acquisto","section.notifications":"Notifiche","editor.colors":"Colori","editor.color_field_bg":"Sfondo","editor.color_field_text":"Testo","editor.color_group_start":'Pulsante "Avvia"',"editor.color_group_complete":'Pulsante "Completa"',"editor.color_group_kid_points":"Punti totali dei bambini","editor.color_group_task_points":"Punti attivit\xE0","editor.color_start_bg":'Pulsante "Avvia" (sfondo)',"editor.color_start_text":'Pulsante "Avvia" (testo)',"editor.color_complete_bg":'Pulsante "Completa" (sfondo)',"editor.color_complete_text":'Pulsante "Completa" (testo)',"editor.color_kid_points_bg":"Punti totali dei bambini (sfondo)","editor.color_kid_points_text":"Punti totali dei bambini (testo)","editor.color_task_points_bg":"Punti attivit\xE0 (sfondo)","editor.color_task_points_text":"Punti attivit\xE0 (testo)","editor.color_empty_default":"Vuoto = predefinito"}};function E(h,t=""){return h?/^\/local\/chores4kids\/icons\/[a-f0-9]{64}\.png$/.test(h)?n`<img class=${t} src=${h} width="24" height="24" alt="" style="vertical-align:middle;object-fit:contain">`:n`<ha-icon class=${t} icon=${h}></ha-icon>`:""}var vt=["awaiting_approval","taken","approved"],Kt={no:"nb"};try{let h=B.en||{};for(let t of Object.keys(B)){if(t==="en")continue;let e=B[t]||={};for(let i of Object.keys(h))i in e||(e[i]=h[i])}}catch{}function Wt(h){let t=h?.locale?.language||h?.language||navigator.language||"en";return String(t).toLowerCase()}function et(h,t){let e=String(h||"").toLowerCase();return Object.hasOwn(B,e)?e:Wt(t)}var ft=new WeakMap;function S(h){let t=h?.states;if(!t)return{};if(!ft.has(t)){let e=t["sensor.chores4kids_ui"]||Object.values(t).find(i=>i.entity_id?.startsWith("sensor.")&&("chore_columns"in(i.attributes||{})||"start_task_bg"in(i.attributes||{})));ft.set(t,e?.attributes||{})}return ft.get(t)}function yt(h,t,e,i){let s=typeof t=="string"?t:Wt(t),a=String(s).toLowerCase(),r=a.split("-"),p=[a,r[0],Kt[a],Kt[r[0]],"en"].filter(Boolean);if(i){if(["lbl.points","th.points","ph.points","editor.enable_points"].includes(h))return i;B.en[h+".custom"]&&(h+=".custom",e={...e,unit:i})}let o=null;for(let c of p){let u=B[c];if(u&&u[h]){o=u[h];break}}return o||(o=B.en[h]||h),e&&typeof e=="object"&&(o=String(o).replace(/\{(\w+)\}/g,(c,u)=>e[u]!==void 0?String(e[u]):"{"+u+"}")),o}var Ht=[{id:"mdi:broom",label:"Sweep"},{id:"mdi:bucket",label:"Mop"},{id:"mdi:vacuum",label:"Vacuum"},{id:"mdi:robot-vacuum",label:"Robot vacuum"},{id:"mdi:spray-bottle",label:"Wipe surfaces"},{id:"mdi:window-closed-variant",label:"Windows"},{id:"mdi:bucket-outline",label:"Bucket"},{id:"mdi:washing-machine",label:"Laundry wash"},{id:"mdi:tumble-dryer",label:"Laundry dry"},{id:"mdi:iron",label:"Iron clothes"},{id:"mdi:hanger",label:"Put away clothes"},{id:"mdi:wardrobe-outline",label:"Closet"},{id:"mdi:bed",label:"Make bed"},{id:"mdi:bed-single",label:"Tidy room"},{id:"mdi:trash-can-outline",label:"Take out trash"},{id:"mdi:recycle",label:"Recycling"},{id:"mdi:watering-can",label:"Water plants"},{id:"mdi:flower",label:"Garden"},{id:"mdi:leaf",label:"Leaves"},{id:"mdi:car-wash",label:"Wash car"},{id:"mdi:silverware-clean",label:"Dishes"},{id:"mdi:dishwasher",label:"Load dishwasher"},{id:"mdi:dishwasher-off",label:"Unload dishwasher"},{id:"mdi:table-furniture",label:"Set table"},{id:"mdi:table-chair",label:"Clear table"},{id:"mdi:pot-steam",label:"Cook"},{id:"mdi:stove",label:"Kitchen"},{id:"mdi:toothbrush-paste",label:"Brush teeth"},{id:"mdi:shower",label:"Shower"},{id:"mdi:toilet",label:"Bathroom"},{id:"mdi:book",label:"Homework"},{id:"mdi:school",label:"Study"},{id:"mdi:dog-side",label:"Walk dog"},{id:"mdi:cat",label:"Feed cat"},{id:"mdi:paw",label:"Pet care"},{id:"mdi:fish",label:"Feed fish"},{id:"mdi:sofa",label:"Living room"},{id:"mdi:bookshelf",label:"Books"}],kt=class extends C{static get properties(){return{hass:{},config:{},_mode:{state:!0},_childName:{state:!0},_taskBusy:{state:!0},_collapsed:{state:!0},_name:{state:!0},_taskTitle:{state:!0},_taskPoints:{state:!0},_taskDesc:{state:!0},_taskIcon:{state:!0},_iconModalOpen:{state:!0},_taskCategories:{state:!0},_openCategoriesMenu:{state:!0},_newCategoryName:{state:!0},_newCategoryColor:{state:!0},_taskBonusEnabled:{state:!0},_taskBonusTitle:{state:!0},_taskBonusPoints:{state:!0},_repeatEnabled:{state:!0},_weeklyEnabled:{state:!0},_monthlyEnabled:{state:!0},_repeatAssign:{state:!0},_persistUntilDone:{state:!0},_markOverdue:{state:!0},_taskDueTime:{state:!0},_penaltyEnabled:{state:!0},_penaltyAmount:{state:!0},_penaltyTime:{state:!0},_multiplePerDay:{state:!0},_quickComplete:{state:!0},_skipApproval:{state:!0},_fastestWins:{state:!0},_editingTask:{state:!0},_tasksModalOpen:{state:!0},_customIconModalOpen:{state:!0},_customIconSearch:{state:!0},_customIconPreview:{state:!0},_customIconLabel:{state:!0},_shopModalOpen:{state:!0},_shopTitle:{state:!0},_shopRequiresDelivery:{state:!0},_shopAudienceDrafts:{state:!0},_shopPrice:{state:!0},_shopImage:{state:!0},_editItem:{state:!0},_advItem:{state:!0},_openAssignMenuFor:{state:!0},_assignMenuStyle:{state:!0},_openRepeatMenu:{state:!0},_reassignTask:{state:!0},_shopOpen:{state:!0},_sortModalOpen:{state:!0},_catOrderDraft:{state:!0},_viewingTaskDesc:{state:!0},_taskTimeBonusEnabled:{state:!0},_taskTimeBonusBefore:{state:!0},_taskTimeBonusPoints:{state:!0}}}static get styles(){return Q`
 		ha-card { padding: 16px; }
 		.row { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; margin-bottom:12px; }
 		.row.fields{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; align-items:flex-start; margin-bottom:18px; padding-right:8px; }
@@ -1914,1126 +347,331 @@ class Chores4KidsDevCard extends LitElement {
 		.collapsible{ display:inline-flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
 		.chev{ transition: transform .2s ease; }
 		.chev.rot{ transform: rotate(-90deg); }
-	`; }
-
-	constructor(){
-		super();
-		// Defaults
-		this._mode = 'admin';
-		this._childName = '';
-		this._taskBusy = {};
-		// Admin
-		this._repeatDays = new Set();
-		this._repeatAssign = new Set();
-		this._repeatEnabled = false;
-		this._weeklyEnabled = false;
-		this._monthlyEnabled = false;
-		this._editingTask = null;
-		this._taskIcon = '';
-		this._iconModalOpen = false;
-		this._customIconModalOpen = false;
-		this._customIconSearch = '';
-		this._customIconPreview = '';
-		this._customIconLabel = '';
-		this._iconDisplayLimit = 200;
-		this._taskCategories = new Set();
-		this._openCategoriesMenu = false;
-		this._taskBonusEnabled = false;
-		this._taskBonusTitle = '';
-		this._taskBonusPoints = '';
-		this._newCategoryName = '';
-		this._newCategoryColor = '';
-		this._tasksModalOpen = false;
-		this._shopModalOpen = false;
-		this._shopTitle = ''; this._shopPrice = ''; this._shopImage = '';
-		this._editItem = null; this._advItem = null; this._advSteps = [];
-		this._touchedTitle = false; this._touchedPoints = false;
-		this._openAssignMenuFor = null;
-		this._openRepeatMenu = false;
-		this._persistUntilDone = false;
-		this._markOverdue = true;
-		this._multiplePerDay = false;
-		this._quickComplete = false;
-		this._skipApproval = false;
-		this._fastestWins = false;
-		// Zimgar--
-		this._taskTimeBonusEnabled = false;
-		this._taskTimeBonusBefore = '';
-		this._taskTimeBonusPoints = '';
-		// Child
-		this._shopOpen = false;
-		this._viewingTaskDesc = null;
-		// caches
-		this._idTasks = null; this._idShop = null; this._idChild = null;
-		try{ this._iconRecents = JSON.parse(localStorage.getItem('c4k_icn_recent')||'[]') || []; }catch{ this._iconRecents = []; }
-		try{ this._customIcons = JSON.parse(localStorage.getItem('c4k_custom_icons')||'[]') || []; }catch{ this._customIcons = []; }
-		this._iconSearch = '';
-		this._availableIcons = [];
-		// sorting (category order itself now comes from the backend - see
-		// _catOrderResolved() - this only holds an in-progress drag draft)
-		this._catOrderDraft = null;
-		// collapsed sections
-		try{ this._collapsed = JSON.parse(localStorage.getItem('c4k_admin_collapsed')||'{}') || {}; }catch{ this._collapsed = {}; }
-		// completed timestamps
-		try{ this._completed = JSON.parse(localStorage.getItem('c4k_completed_ts')||'{}') || {}; }catch{ this._completed = {}; }
-		// child-only visual bonus progress (no backend persistence)
-		try{ this._bonusVisual = JSON.parse(localStorage.getItem('c4k_bonus_visual')||'{}') || {}; }catch{ this._bonusVisual = {}; }
-		
-		// Bind storage listener
-		this._storageListener = this._handleStorageChange.bind(this);
-	}
-	_normalizeScheduleFlags(){
-		try{
-			// Carry unfinished cannot be combined with weekly/monthly
-			if (this._persistUntilDone){
-				this._weeklyEnabled = false;
-				this._monthlyEnabled = false;
-			}
-			// Weekly/monthly are mutually exclusive with repeat and with each other
-			if (this._weeklyEnabled){
-				this._monthlyEnabled = false;
-				this._repeatEnabled = false;
-				this._repeatDays = new Set();
-				this._openRepeatMenu = false;
-				this._persistUntilDone = false;
-				this._markOverdue = true;
-			}
-			if (this._monthlyEnabled){
-				this._weeklyEnabled = false;
-				this._repeatEnabled = false;
-				this._repeatDays = new Set();
-				this._openRepeatMenu = false;
-				this._persistUntilDone = false;
-				this._markOverdue = true;
-			}
-			if (this._repeatEnabled){
-				this._weeklyEnabled = false;
-				this._monthlyEnabled = false;
-			}
-		}catch{ /* ignore */ }
-	}
-
-	connectedCallback() {
-		super.connectedCallback();
-		// Listen for localStorage changes from other tabs/cards
-		window.addEventListener('storage', this._storageListener);
-		// Also poll localStorage for changes (for same-page updates)
-		this._storageInterval = setInterval(() => {
-			try {
-				const stored = JSON.parse(localStorage.getItem('c4k_completed_ts') || '{}');
-				if (JSON.stringify(stored) !== JSON.stringify(this._completed)) {
-					console.log('Detected completed timestamp changes, updating...');
-					this._completed = stored;
-					this.requestUpdate();
-				}
-				const bonusStored = JSON.parse(localStorage.getItem('c4k_bonus_visual') || '{}');
-				if (JSON.stringify(bonusStored) !== JSON.stringify(this._bonusVisual)) {
-					this._bonusVisual = bonusStored;
-					this.requestUpdate();
-				}
-			} catch {}
-		}, 1000);
-	}
-
-	disconnectedCallback() {
-		super.disconnectedCallback();
-		window.removeEventListener('storage', this._storageListener);
-		if (this._storageInterval) {
-			clearInterval(this._storageInterval);
-		}
-	}
-
-	_handleStorageChange(e) {
-		if (e.key === 'c4k_completed_ts' && e.newValue) {
-			try {
-				console.log('Storage event detected for completed timestamps');
-				this._completed = JSON.parse(e.newValue);
-				this.requestUpdate();
-			} catch {}
-		}
-		if (e.key === 'c4k_bonus_visual') {
-			try {
-				this._bonusVisual = e.newValue ? JSON.parse(e.newValue) : {};
-				this.requestUpdate();
-			} catch {}
-		}
-	}
-
-	updated(changedProps){
-		if (this._historyOpen && this._mode === 'admin' && changedProps.has('hass')) {
-			const snapshot = this.hass?.states?.[this._idTasks];
-			if (snapshot !== this._historySnapshot) this._loadHistory();
-		}
-		// Ensure CSS variables follow both config changes and backend state updates.
-		if (changedProps?.has?.('hass') || changedProps?.has?.('config')){
-			this._applyColorVars();
-		}
-	}
-
-	setConfig(config){
-		// config: { mode: 'admin' | 'kid', child?: 'Name' }
-		this.config = config || {};
-		this._mode = this.config.mode || 'admin';
-		if (this._childName !== (this.config.child || '')) this._idChild = null;
-		this._childName = this.config.child || '';
-		this._applyColorVars();
-	}
-
-	_pointsEnabled(){
-		try{
-			const global = this._getBackendUiColors?.() || {};
-			if (typeof global.enable_points === 'boolean') return global.enable_points;
-		}catch{ /* ignore */ }
-		return this.config?.enable_points !== false;
-	}
-
-	_confettiEnabled(){
-		// Global only (admin card controls this); default ON.
-		try{
-			const global = this._getBackendUiColors?.() || {};
-			if (typeof global.confetti_enabled === 'boolean') return global.confetti_enabled;
-		}catch{ /* ignore */ }
-		return true;
-	}
-
-	_isTaskBusy(taskId){
-		const id = String(taskId ?? '');
-		if (!id) return false;
-		return !!(this._taskBusy && this._taskBusy[id]);
-	}
-
-	_setTaskBusy(taskId, busy){
-		const id = String(taskId ?? '');
-		if (!id) return;
-		const cur = this._taskBusy || {};
-		if (busy){
-			if (cur[id]) return;
-			this._taskBusy = { ...cur, [id]: true };
-			return;
-		}
-		if (!cur[id]) return;
-		const next = { ...cur };
-		delete next[id];
-		this._taskBusy = next;
-	}
-
-	_getBackendUiColors(){
-		try{
-			const states = this.hass?.states || {};
-			let s = states['sensor.chores4kids_ui'];
-			if (!s){
-				s = Object.values(states).find(st=>{
-					try{
-						if (!st?.entity_id?.startsWith('sensor.')) return false;
-						const a = st.attributes || {};
-						return ('enable_points' in a) || ('start_task_bg' in a) || ('complete_task_bg' in a) || ('kid_points_bg' in a)
-							|| ('task_done_bg' in a) || ('task_done_text' in a)
-							|| ('start_task_text' in a) || ('complete_task_text' in a) || ('kid_points_text' in a)
-							|| ('task_points_bg' in a) || ('task_points_text' in a)
-							|| ('kid_task_title_size' in a) || ('kid_task_points_size' in a) || ('kid_task_button_size' in a)
-							|| ('confetti_enabled' in a);
-					}catch{ return false; }
-				});
-			}
-			const a = s?.attributes || {};
-			const out = {
-				task_icons: a.task_icons || {},
-				start_task_bg: a.start_task_bg,
-				complete_task_bg: a.complete_task_bg,
-				kid_points_bg: a.kid_points_bg,
-				task_done_bg: a.task_done_bg,
-				start_task_text: a.start_task_text,
-				complete_task_text: a.complete_task_text,
-				kid_points_text: a.kid_points_text,
-				task_done_text: a.task_done_text,
-				task_points_bg: a.task_points_bg,
-				task_points_text: a.task_points_text,
-				kid_task_title_size: a.kid_task_title_size,
-				kid_task_points_size: a.kid_task_points_size,
-				kid_task_button_size: a.kid_task_button_size,
-			};
-			for (const state of C4K_COLOR_STATES) {
-				out[state + '_bg'] = a[state + '_bg'];
-				out[state + '_text'] = a[state + '_text'];
-			}
-			if (typeof a.enable_points === 'boolean') out.enable_points = a.enable_points;
-			if (typeof a.confetti_enabled === 'boolean') out.confetti_enabled = a.confetti_enabled;
-			return out;
-		}catch{ return {}; }
-	}
-
-	_applyColorVars(){
-		try{
-			const setVar = (name, value)=>{
-				if (value) this.style.setProperty(name, String(value));
-				else this.style.removeProperty(name);
-			};
-			const global = this._getBackendUiColors();
-			for (const state of C4K_COLOR_STATES) {
-				for (const part of ['bg', 'text']) {
-					const key = state + '_' + part;
-					setVar('--c4k-' + key, global[key] ?? this.config?.[key]);
-				}
-			}
-			setVar('--c4k-start-task-bg', this.config?.start_task_bg || global.start_task_bg);
-			setVar('--c4k-complete-task-bg', this.config?.complete_task_bg || global.complete_task_bg);
-			setVar('--c4k-kid-points-bg', this.config?.kid_points_bg || global.kid_points_bg);
-			setVar('--c4k-task-done-bg', this.config?.task_done_bg || global.task_done_bg);
-			setVar('--c4k-start-task-text', this.config?.start_task_text || global.start_task_text);
-			setVar('--c4k-complete-task-text', this.config?.complete_task_text || global.complete_task_text);
-			setVar('--c4k-kid-points-text', this.config?.kid_points_text || global.kid_points_text);
-			setVar('--c4k-task-done-text', this.config?.task_done_text || global.task_done_text);
-			setVar('--c4k-task-points-bg', this.config?.task_points_bg || global.task_points_bg);
-			setVar('--c4k-task-points-text', this.config?.task_points_text || global.task_points_text);
-			// Font sizes are global (synced via integration)
-			setVar('--c4k-kid-task-title-size', global.kid_task_title_size);
-			setVar('--c4k-kid-task-points-size', global.kid_task_points_size);
-			setVar('--c4k-kid-task-button-size', global.kid_task_button_size);
-		}catch{ /* ignore */ }
-	}
-
-	_toggleRepeat(e){
-		const enabled = !!(e?.target?.checked);
-		this._repeatEnabled = enabled;
-		if (enabled){
-			this._weeklyEnabled = false;
-			this._monthlyEnabled = false;
-		}
-		if (!enabled){
-			this._repeatDays = new Set();
-			this._repeatAssign = new Set();
-			this._openRepeatMenu = false;
-		}
-		this._normalizeScheduleFlags();
-		this.requestUpdate();
-	}
-	_toggleWeekly(e){
-		const enabled = !!(e?.target?.checked);
-		this._weeklyEnabled = enabled;
-		if (enabled){
-			this._monthlyEnabled = false;
-			this._repeatEnabled = false;
-			this._repeatDays = new Set();
-			this._openRepeatMenu = false;
-			// Weekly/monthly must not be used with carry unfinished
-			this._persistUntilDone = false;
-			this._markOverdue = true;
-		}
-		this._normalizeScheduleFlags();
-		this.requestUpdate();
-	}
-	_toggleMonthly(e){
-		const enabled = !!(e?.target?.checked);
-		this._monthlyEnabled = enabled;
-		if (enabled){
-			this._weeklyEnabled = false;
-			this._repeatEnabled = false;
-			this._repeatDays = new Set();
-			this._openRepeatMenu = false;
-			// Weekly/monthly must not be used with carry unfinished
-			this._persistUntilDone = false;
-			this._markOverdue = true;
-		}
-		this._normalizeScheduleFlags();
-		this.requestUpdate();
-	}
-
-	static getConfigElement(){ return document.createElement('chores4kids-card-editor'); }
-	static getStubConfig(){ return { mode: 'admin' }; }
-
-	getCardSize(){ return this._mode==='admin'? 8 : 3; }
-
-	// Helpers
-	_t(key, vars){ return c4kLocalize(key, this._locale(), vars, c4kSettings(this.hass).points_label); }
-	_resolveUrl(url){
-		if (!url) return '';
-		if (String(url).startsWith('http') || String(url).startsWith('data:')) return url;
-		try{
-			const baseUrl = this.hass?.auth?.data?.hassUrl || '';
-			if (baseUrl && String(url).startsWith('/')) {
-				const base = baseUrl.endsWith('/') ? baseUrl.slice(0,-1) : baseUrl;
-				return base + url;
-			}
-		}catch(e){}
-		return url;
-	}
-	_statusLabel(s){ return this._t(`status.${s}`) || s; }
-	_effectiveStatus(t){
-		try{
-			if (!t) return t?.status;
-			if (!t?.fastest_wins) return t?.status;
-			const claimedBy = t?.fastest_wins_claimed_by_child_id;
-			const assignedTo = t?.assigned_to;
-			if (claimedBy && assignedTo && claimedBy !== assignedTo) return 'taken';
-			return t?.status;
-		}catch{
-			return t?.status;
-		}
-	}
-	_renderDeadline(task){
-		const date = task.due ? this._formatDueDate(task.due) : '';
-		const value = [date, task.due_time].filter(Boolean).join(' · ');
-		return value ? html`<span class="chip chip-deadline">${this._t('lbl.deadline',{date:value})}</span>` : '';
-	}
-	_renderStatusBadge(t){
-		const st = this._effectiveStatus(t);
-		const claimedByName = t?.fastest_wins_claimed_by_child_name || t?.fastest_wins_claimed_by_child_id;
-		const tip = st==='taken' ? this._t('lbl.taken_by',{name: claimedByName||'—'}) : '';
-		return html`<span class="badge status-${st}" title="${tip}">${this._statusLabel(st)}</span>${this._isTaskOverdue(t)? html` <span class="badge status-overdue">${this._t('status.overdue')}</span>`:''}`;
-	}
-	_autoAssignActive(task){
-		try{
-			const mode = String(task?.schedule_mode||'').toLowerCase();
-			const d=Array.isArray(task?.repeat_days)? task.repeat_days:[];
-			const ks = Array.isArray(task?.repeat_child_ids)? task.repeat_child_ids:[];
-			const k=task?.repeat_child_id;
-			const hasTargets = (ks.length>0 || !!k);
-			const hasSchedule = (mode==='weekly' || mode==='monthly' || d.length>0);
-			return hasSchedule && hasTargets;
-		}catch{ return false; }
-	}
-	_isScheduledToday(task){
-		try{
-			const mode = String(task?.schedule_mode||'').toLowerCase();
-			const today = new Date();
-			if (mode === 'monthly') return today.getDate() === 1;
-			if (mode === 'weekly'){
-				const jsDay = today.getDay(); // 0=Sun
-				const weekdayMap = [6, 0, 1, 2, 3, 4, 5];
-				const todayBackend = weekdayMap[jsDay];
-				return todayBackend === 0; // Mon
-			}
-			const repeatDays = Array.isArray(task?.repeat_days) ? task.repeat_days : [];
-			const jsDay = today.getDay();
-			const weekdayMap = [6, 0, 1, 2, 3, 4, 5];
-			const todayBackend = weekdayMap[jsDay];
-			const map = ['mon','tue','wed','thu','fri','sat','sun'];
-			const todayKey = map[todayBackend];
-			return (repeatDays.includes(todayBackend) || repeatDays.includes(todayKey));
-		}catch{ return false; }
-	}
-	_isTaskOverdue(task){ try{ if(task?.mark_overdue === false) return false; if(!task?.carried_over) return false; return task.carried_over === true; }catch{ return false; } }
-	_isFromBeforeToday(task){
-		try{
-			const created = task?.created;
-			if(!created) return false;
-			const ms = new Date(created).getTime();
-			if(!Number.isFinite(ms)) return false;
-			const start = new Date();
-			start.setHours(0,0,0,0);
-			return ms < start.getTime();
-		}catch{ return false; }
-	}
-	_locale(){ return c4kCardLocale(this.config?.language, this.hass); }
-	_fmtDateTime(ts){
-		try{
-			const d = ts ? new Date(ts) : null;
-			if (!d || isNaN(d.getTime())) return { formatted:'—', date:'—', time:'—' };
-			const loc = this._locale();
-			const weekday = new Intl.DateTimeFormat(loc, { weekday: 'short' }).format(d);
-			const day = new Intl.DateTimeFormat(loc, { day: 'numeric' }).format(d);
-			const month = new Intl.DateTimeFormat(loc, { month: 'short' }).format(d);
-			const year = new Intl.DateTimeFormat(loc, { year: 'numeric' }).format(d);
-			const time = new Intl.DateTimeFormat(loc, { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false }).format(d);
-			const date = new Intl.DateTimeFormat(loc, { year:'numeric', month:'2-digit', day:'2-digit' }).format(d);
-			const formatted = `${weekday} d. ${day} ${month} ${year} - kl ${time}`;
-			return { formatted, date, time };
-		}catch{
-			const fallback = String(ts||'—');
-			return { formatted: fallback, date: fallback, time: '—' };
-		}
-	}
-
-	_parseDueToDate(due){
-		try{
-			if (!due) return null;
-			let d;
-			if (due instanceof Date){
-				d = due;
-			}else if (typeof due === 'string'){
-				if (/^\d{4}-\d{2}-\d{2}$/.test(due)) d = new Date(`${due}T00:00:00`);
-				else d = new Date(due);
-			}else{
-				return null;
-			}
-			if (!d || isNaN(d.getTime())) return null;
-			// Normalize to local date (midnight)
-			const local = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-			local.setHours(0,0,0,0);
-			return local;
-		}catch{ return null; }
-	}
-	_formatDueDate(due){
-		try{
-			const d = this._parseDueToDate(due);
-			if (!d) return '—';
-			const loc = this._locale();
-			return new Intl.DateTimeFormat(loc, { year:'numeric', month:'short', day:'numeric' }).format(d);
-		}catch{ return String(due||'—'); }
-	}
-	_formatDateISO(dateObj){
-		try{
-			const d = dateObj instanceof Date ? new Date(dateObj.getTime()) : null;
-			if (!d || isNaN(d.getTime())) return '';
-			d.setHours(0,0,0,0);
-			const y = d.getFullYear();
-			const m = String(d.getMonth()+1).padStart(2,'0');
-			const day = String(d.getDate()).padStart(2,'0');
-			return `${y}-${m}-${day}`;
-		}catch{ return ''; }
-	}
-	_bonusByDateStr(task){
-		try{
-			const enabledRaw = task?.early_bonus_enabled;
-			if (enabledRaw === false) return null;
-			const days = Number(task?.early_bonus_days || 0);
-			const points = Number(task?.early_bonus_points || 0);
-			const dueDate = this._parseDueToDate(task?.due);
-			const enabled = (enabledRaw === true) || (enabledRaw == null && (days > 0) && (points > 0));
-			if (!enabled || !dueDate || !(days > 0) || !(points > 0)) return null;
-			const by = new Date(dueDate.getTime());
-			by.setDate(by.getDate() - days);
-			return this._formatDueDate(by);
-		}catch{ return null; }
-	}
-	_bonusByDateInfo(task){
-		try{
-			const enabledRaw = task?.early_bonus_enabled;
-			if (enabledRaw === false) return null;
-			const days = Number(task?.early_bonus_days || 0);
-			const points = Number(task?.early_bonus_points || 0);
-			const dueDate = this._parseDueToDate(task?.due);
-			const enabled = (enabledRaw === true) || (enabledRaw == null && (days > 0) && (points > 0));
-			if (!enabled || !dueDate || !(days > 0) || !(points > 0)) return null;
-
-			const by = new Date(dueDate.getTime());
-			by.setDate(by.getDate() - days);
-			by.setHours(0,0,0,0);
-
-			const toLocalDate = (ts)=>{
-				try{
-					if (ts == null) return null;
-					let d;
-					if (ts instanceof Date) d = ts;
-					else if (typeof ts === 'number') d = new Date(ts < 1000000000000 ? ts * 1000 : ts);
-					else d = new Date(ts);
-					if (!d || isNaN(d.getTime())) return null;
-					const local = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-					local.setHours(0,0,0,0);
-					return local;
-				}catch{ return null; }
-			};
-
-			const completedDate = toLocalDate(task?.completed_ts);
-			const compareDate = completedDate || new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-			compareDate.setHours(0,0,0,0);
-
-			return {
-				dateStr: this._formatDueDate(by),
-				expired: compareDate.getTime() > by.getTime(),
-			};
-		}catch{ return null; }
-	}
-
-	// Completed timestamp helpers
-	_completedTsFor(task){ 
-		try{ 
-			// Prefer timestamp from task entity (stored in backend)
-			const ts = task?.completed_ts || this._completed?.[task?.id]; 
-			if(task?.status === 'awaiting_approval' && ts) {
-				console.log('Getting timestamp for task', task.id, ':', ts);
-			}
-			return ts;
-		}catch{ return undefined; } 
-	}
-	_takenTsFor(task){ try{ return task?.fastest_wins_claimed_ts; }catch{ return undefined; } }
-	_displayedTsFor(task){
-		try{
-			return this._effectiveStatus(task)==='taken' ? (this._takenTsFor(task) || undefined) : this._completedTsFor(task);
-		}catch{ return this._completedTsFor(task); }
-	}
-	_recordCompleted(taskId, ts){ try{ const map={...(this._completed||{})}; map[String(taskId)]=ts; this._completed=map; localStorage.setItem('c4k_completed_ts', JSON.stringify(map)); }catch{} }
-	_clearCompleted(taskId){ try{ const map={...(this._completed||{})}; delete map[String(taskId)]; this._completed=map; localStorage.setItem('c4k_completed_ts', JSON.stringify(map)); }catch{} }
-
-	// ===== CATEGORY SORTING HELPERS =====
-	_catOrderResolved(){
-		// Categories now arrive from the backend already in the admin's chosen
-		// order (see the reorder_categories service, called from the sort
-		// modal's save()) - use that directly instead of the old per-browser
-		// localStorage override, which only ever matched on whichever single
-		// device last saved it and left every other device/tablet on raw
-		// (creation-order) list order (#37).
-		const cats = this._store.categories||[];
-		const NONE='__none__';
-		const order = cats.map(c=> c.id);
-		if (!order.includes(NONE)) order.push(NONE);
-		return order;
-	}
-	_catRankForId(id){ const order=this._catOrderResolved(); const idx=order.indexOf(id); return idx>=0? idx : 9999; }
-	_taskCatRank(t){ const ids=Array.isArray(t?.categories)? t.categories:[]; if(ids.length){ let best=9999; for(const cid of ids){ const r=this._catRankForId(cid); if(r<best) best=r; } return best; } return this._catRankForId('__none__'); }
-	_sortTasks(list, withStatus=false){
-		const parse=(x)=>{ try{ return x? new Date(x).getTime():0; }catch{return 0;} };
-		const stWeight=(s)=> s==='awaiting_approval'?0: s==='in_progress'?1: s==='assigned'?2: 3;
-		return [...list].sort((a,b)=>{
-			const ra=this._taskCatRank(a), rb=this._taskCatRank(b);
-			if (ra!==rb) return ra-rb;
-			if (withStatus){ const sw=stWeight(a.status)-stWeight(b.status); if (sw!==0) return sw; return parse(b.created)-parse(a.created); }
-			return String(a.title||'').localeCompare(String(b.title||''));
-		});
-	}
-	_categoryById(id){ try{ return (this._store.categories||[]).find(c=> c.id===id); }catch{ return null; } }
-	_normalizeHexColor(value){
-		try{
-			let v = String(value||'').trim().toLowerCase();
-			if (!v) return '';
-			if (!v.startsWith('#')) v = '#' + v;
-			const m3 = v.match(/^#([0-9a-f]{3})$/);
-			if (m3){ const s=m3[1]; return `#${s[0]}${s[0]}${s[1]}${s[1]}${s[2]}${s[2]}`; }
-			if (/^#[0-9a-f]{6}$/.test(v)) return v;
-			return '';
-		}catch{ return ''; }
-	}
-	_colorInputValue(value){ return this._normalizeHexColor(value) || '#808080'; }
-	_textColorForBg(bg){
-		try{
-			const hex = this._normalizeHexColor(bg);
-			if (!hex) return '';
-			const r = parseInt(hex.slice(1,3), 16);
-			const g = parseInt(hex.slice(3,5), 16);
-			const b = parseInt(hex.slice(5,7), 16);
-			const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
-			return lum > 0.6 ? '#000000' : '#ffffff';
-		}catch{ return ''; }
-	}
-	_renderCategoryChip(cat){
-		try{
-			const name = String(cat?.name||'').trim();
-			if (!name) return '';
-			const bg = this._normalizeHexColor(cat?.color);
-			if (!bg) return html`<span class="chip">${name}</span>`;
-			const fg = this._textColorForBg(bg) || 'var(--primary-text-color)';
-			return html`<span class="chip" style="background:${bg}; color:${fg};">${name}</span>`;
-		}catch{ return html``; }
-	}
-	_orderedCategories(ids){
-		try{
-			const cats=this._store.categories||[];
-			const catMap=new Map(cats.map(c=>[c.id,c]));
-			const clean=(ids||[]).filter(id=> catMap.has(id));
-			const sorted=[...clean].sort((a,b)=> this._catRankForId(a)-this._catRankForId(b));
-			return sorted.map(id=> catMap.get(id)).filter(Boolean);
-		}catch{ return []; }
-	}
-	_orderedCategoryNames(ids){ const cats=this._store.categories||[]; const catMap=new Map(cats.map(c=>[c.id,c.name])); const clean=(ids||[]).filter(id=> catMap.has(id)); const sorted=[...clean].sort((a,b)=> this._catRankForId(a)-this._catRankForId(b)); return sorted.map(id=> catMap.get(id)); }
-
-	// ===== STORE =====
-	get _store(){
-		const states = this.hass?.states || {};
-		const children = Object.values(states)
-			.filter((s)=> s && s.entity_id?.startsWith('sensor.') && s.attributes?.child_id && (s.attributes?.slug !== undefined))
-			.map((s)=> ({ id: s.attributes.child_id, name: s.attributes.name, slug: s.attributes.slug, points: Number(s.state||0), tasks: s.attributes.tasks||[] }));
-		// tasks
-		let allTasksSensor = this._idTasks && states[this._idTasks];
-		if (!allTasksSensor){ allTasksSensor = Object.values(states).find((s)=> s?.entity_id?.includes('chores4kids_tasks') && s.attributes?.tasks); if (allTasksSensor?.entity_id) this._idTasks = allTasksSensor.entity_id; }
-		const allTasks = allTasksSensor?.attributes?.tasks || [];
-		const categories = allTasksSensor?.attributes?.categories || [];
-		// shop
-		let shopSensor = this._idShop && states[this._idShop];
-		if (!shopSensor){ shopSensor = Object.values(states).find((s)=> s?.entity_id?.includes('chores4kids_shop')); if (shopSensor?.entity_id) this._idShop = shopSensor.entity_id; }
-		const items = shopSensor?.attributes?.items || [];
-		const purchases = shopSensor?.attributes?.purchases || [];
-		return { children, allTasks, items, purchases, categories };
-	}
-
-	// ===== RENDER =====
-	render(){
-		return this._mode==='admin' ? this._renderAdmin() : (this._mode==='kid' ? this._renderChild() : this._renderOverviewOnly());
-	}
-
-	_isCollapsed(key){ try{ return !!(this._collapsed && this._collapsed[key]); }catch{ return false; } }
-	_toggleSection(key){ const next={ ...(this._collapsed||{}) }; next[key]=!this._isCollapsed(key); this._collapsed=next; try{ localStorage.setItem('c4k_admin_collapsed', JSON.stringify(next)); }catch{} this.requestUpdate(); }
-
-	// ------- ADMIN VIEW -------
-	_hasBonusTask(t){
-		const bonusTitle = String(t?.bonus_title||'').trim();
-		const bonusPoints = Number(t?.bonus_points||0);
-		return !!t?.bonus_enabled || !!bonusTitle || bonusPoints > 0;
-	}
-
-	_getBonusVisualState(t){
-		try{
-			if (!(t?.status === 'awaiting_approval' || t?.status === 'approved')) return 'assigned';
-			if (t?.bonus_approved) return 'done';
-			if (t?.bonus_completed_ts) return 'done';
-			const id = String(t?.id||'');
-			if (!id) return 'assigned';
-			const cur = this._bonusVisual || {};
-			const state = String(cur[id]||'assigned');
-			return state === 'in_progress' ? 'in_progress' : 'assigned';
-		}catch{ return 'assigned'; }
-	}
-
-	_setBonusVisualState(taskId, state){
-		const id = String(taskId||'');
-		if (!id) return;
-		const next = { ...(this._bonusVisual||{}), [id]: String(state||'assigned') };
-		this._bonusVisual = next;
-		try{ localStorage.setItem('c4k_bonus_visual', JSON.stringify(next)); }catch{}
-		this.requestUpdate();
-	}
-
-	async _onChildBonusVisualClick(t){
-		if (!t?.id) return;
-		if (!(t.status === 'awaiting_approval' || t.status === 'approved')) return;
-		const cur = this._getBonusVisualState(t);
-		if (cur === 'assigned') return this._setBonusVisualState(t.id, 'in_progress');
-		if (cur !== 'in_progress') return;
-		if (this._isTaskBusy(t.id)) return;
-		this._setTaskBusy(t.id, true);
-		try{
-			if (!t?.bonus_completed_ts){
-				await this.hass.callService('chores4kids','complete_bonus_task',{ task_id: t.id, completed_ts: Date.now() });
-				t.bonus_completed_ts = Date.now();
-			}
-			this._setBonusVisualState(t.id, 'done');
-			this._playCompletionSound();
-			if (this._confettiEnabled()) this._triggerConfetti();
-		} catch(err){
-			console.error('Failed to complete bonus task:', err);
-			const msg = String(err?.message || err || 'Unknown error');
-			alert(`Kunne ikke markere bonus som færdig: ${msg}`);
-		} finally {
-			this._setTaskBusy(t.id, false);
-		}
-	}
-
-	async _approveBonusOnly(t){
-		if(!t?.id) return;
-		if(!this._hasBonusTask(t)) return;
-		if (this._isTaskBusy(t.id)) return;
-		this._setTaskBusy(t.id, true);
-		try{
-			if (!t?.bonus_completed_ts){
-				await this.hass.callService('chores4kids','complete_bonus_task',{ task_id: t.id, completed_ts: Date.now() });
-			}
-			await this.hass.callService('chores4kids','approve_bonus_task',{ task_id: t.id });
-			this._setBonusVisualState(t.id, 'done');
-		} finally {
-			this._setTaskBusy(t.id, false);
-		}
-	}
-
-	async _approveMainAndBonus(t){
-		if(!t?.id) return;
-		if (this._isTaskBusy(t.id)) return;
-		this._setTaskBusy(t.id, true);
-		try{
-			if (!await this._approve(t, true)) return;
-			if (this._reassignTask?.id === t.id) return;
-			if (!this._hasBonusTask(t)) return;
-			if (!t?.bonus_completed_ts){
-				await this.hass.callService('chores4kids','complete_bonus_task',{ task_id: t.id, completed_ts: Date.now() });
-			}
-			await this.hass.callService('chores4kids','approve_bonus_task',{ task_id: t.id });
-			this._setBonusVisualState(t.id, 'done');
-		} finally {
-			this._setTaskBusy(t.id, false);
-		}
-	}
-
-	_renderAwaitingApproveBtns(t){
-		if (!this._hasBonusTask(t)){
-			return html`<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${(e)=>{ e?.stopPropagation?.(); this._approve(t); }}>${this._t('btn.approve')}</button>`;
-		}
-		return html`
-			<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${(e)=>{ e?.stopPropagation?.(); this._approveMainAndBonus(t); }}>${this._t('btn.approve_all')}</button>
-			<button class="btn-ghost" ?disabled=${this._isTaskBusy(t.id)} @click=${(e)=>{ e?.stopPropagation?.(); this._approve(t); }}>${this._t('btn.approve_partial')}</button>
-		`;
-	}
-
-	_renderAwaitingActions(t){
-		if (!this._hasBonusTask(t)){
-			return html`${this._renderAwaitingApproveBtns(t)}
-				<button class="btn-ghost" @click=${()=>this._setStatus(t.id,'assigned')}>${this._t('btn.back')}</button>
-				<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>`;
-		}
-		return html`
+	`}constructor(){super(),this._mode="admin",this._childName="",this._taskBusy={},this._repeatDays=new Set,this._repeatAssign=new Set,this._repeatEnabled=!1,this._weeklyEnabled=!1,this._monthlyEnabled=!1,this._editingTask=null,this._taskIcon="",this._iconModalOpen=!1,this._customIconModalOpen=!1,this._customIconSearch="",this._customIconPreview="",this._customIconLabel="",this._iconDisplayLimit=200,this._taskCategories=new Set,this._openCategoriesMenu=!1,this._taskBonusEnabled=!1,this._taskBonusTitle="",this._taskBonusPoints="",this._newCategoryName="",this._newCategoryColor="",this._tasksModalOpen=!1,this._shopModalOpen=!1,this._shopTitle="",this._shopPrice="",this._shopImage="",this._editItem=null,this._advItem=null,this._advSteps=[],this._touchedTitle=!1,this._touchedPoints=!1,this._openAssignMenuFor=null,this._openRepeatMenu=!1,this._persistUntilDone=!1,this._markOverdue=!0,this._multiplePerDay=!1,this._quickComplete=!1,this._skipApproval=!1,this._fastestWins=!1,this._taskTimeBonusEnabled=!1,this._taskTimeBonusBefore="",this._taskTimeBonusPoints="",this._shopOpen=!1,this._viewingTaskDesc=null,this._idTasks=null,this._idShop=null,this._idChild=null;try{this._iconRecents=JSON.parse(localStorage.getItem("c4k_icn_recent")||"[]")||[]}catch{this._iconRecents=[]}try{this._customIcons=JSON.parse(localStorage.getItem("c4k_custom_icons")||"[]")||[]}catch{this._customIcons=[]}this._iconSearch="",this._availableIcons=[],this._catOrderDraft=null;try{this._collapsed=JSON.parse(localStorage.getItem("c4k_admin_collapsed")||"{}")||{}}catch{this._collapsed={}}try{this._completed=JSON.parse(localStorage.getItem("c4k_completed_ts")||"{}")||{}}catch{this._completed={}}try{this._bonusVisual=JSON.parse(localStorage.getItem("c4k_bonus_visual")||"{}")||{}}catch{this._bonusVisual={}}this._storageListener=this._handleStorageChange.bind(this)}_normalizeScheduleFlags(){try{this._persistUntilDone&&(this._weeklyEnabled=!1,this._monthlyEnabled=!1),this._weeklyEnabled&&(this._monthlyEnabled=!1,this._repeatEnabled=!1,this._repeatDays=new Set,this._openRepeatMenu=!1,this._persistUntilDone=!1,this._markOverdue=!0),this._monthlyEnabled&&(this._weeklyEnabled=!1,this._repeatEnabled=!1,this._repeatDays=new Set,this._openRepeatMenu=!1,this._persistUntilDone=!1,this._markOverdue=!0),this._repeatEnabled&&(this._weeklyEnabled=!1,this._monthlyEnabled=!1)}catch{}}connectedCallback(){super.connectedCallback(),window.addEventListener("storage",this._storageListener),this._storageInterval=setInterval(()=>{try{let t=JSON.parse(localStorage.getItem("c4k_completed_ts")||"{}");JSON.stringify(t)!==JSON.stringify(this._completed)&&(console.log("Detected completed timestamp changes, updating..."),this._completed=t,this.requestUpdate());let e=JSON.parse(localStorage.getItem("c4k_bonus_visual")||"{}");JSON.stringify(e)!==JSON.stringify(this._bonusVisual)&&(this._bonusVisual=e,this.requestUpdate())}catch{}},1e3)}disconnectedCallback(){super.disconnectedCallback(),window.removeEventListener("storage",this._storageListener),this._storageInterval&&clearInterval(this._storageInterval)}_handleStorageChange(t){if(t.key==="c4k_completed_ts"&&t.newValue)try{console.log("Storage event detected for completed timestamps"),this._completed=JSON.parse(t.newValue),this.requestUpdate()}catch{}if(t.key==="c4k_bonus_visual")try{this._bonusVisual=t.newValue?JSON.parse(t.newValue):{},this.requestUpdate()}catch{}}updated(t){this._historyOpen&&this._mode==="admin"&&t.has("hass")&&this.hass?.states?.[this._idTasks]!==this._historySnapshot&&this._loadHistory(),(t?.has?.("hass")||t?.has?.("config"))&&this._applyColorVars()}setConfig(t){this.config=t||{},this._mode=this.config.mode||"admin",this._childName!==(this.config.child||"")&&(this._idChild=null),this._childName=this.config.child||"",this._applyColorVars()}_pointsEnabled(){try{let t=this._getBackendUiColors?.()||{};if(typeof t.enable_points=="boolean")return t.enable_points}catch{}return this.config?.enable_points!==!1}_confettiEnabled(){try{let t=this._getBackendUiColors?.()||{};if(typeof t.confetti_enabled=="boolean")return t.confetti_enabled}catch{}return!0}_isTaskBusy(t){let e=String(t??"");return e?!!(this._taskBusy&&this._taskBusy[e]):!1}_setTaskBusy(t,e){let i=String(t??"");if(!i)return;let s=this._taskBusy||{};if(e){if(s[i])return;this._taskBusy={...s,[i]:!0};return}if(!s[i])return;let a={...s};delete a[i],this._taskBusy=a}_getBackendUiColors(){try{let t=this.hass?.states||{},e=t["sensor.chores4kids_ui"];e||(e=Object.values(t).find(a=>{try{if(!a?.entity_id?.startsWith("sensor."))return!1;let r=a.attributes||{};return"enable_points"in r||"start_task_bg"in r||"complete_task_bg"in r||"kid_points_bg"in r||"task_done_bg"in r||"task_done_text"in r||"start_task_text"in r||"complete_task_text"in r||"kid_points_text"in r||"task_points_bg"in r||"task_points_text"in r||"kid_task_title_size"in r||"kid_task_points_size"in r||"kid_task_button_size"in r||"confetti_enabled"in r}catch{return!1}}));let i=e?.attributes||{},s={task_icons:i.task_icons||{},start_task_bg:i.start_task_bg,complete_task_bg:i.complete_task_bg,kid_points_bg:i.kid_points_bg,task_done_bg:i.task_done_bg,start_task_text:i.start_task_text,complete_task_text:i.complete_task_text,kid_points_text:i.kid_points_text,task_done_text:i.task_done_text,task_points_bg:i.task_points_bg,task_points_text:i.task_points_text,kid_task_title_size:i.kid_task_title_size,kid_task_points_size:i.kid_task_points_size,kid_task_button_size:i.kid_task_button_size};for(let a of vt)s[a+"_bg"]=i[a+"_bg"],s[a+"_text"]=i[a+"_text"];return typeof i.enable_points=="boolean"&&(s.enable_points=i.enable_points),typeof i.confetti_enabled=="boolean"&&(s.confetti_enabled=i.confetti_enabled),s}catch{return{}}}_applyColorVars(){try{let t=(i,s)=>{s?this.style.setProperty(i,String(s)):this.style.removeProperty(i)},e=this._getBackendUiColors();for(let i of vt)for(let s of["bg","text"]){let a=i+"_"+s;t("--c4k-"+a,e[a]??this.config?.[a])}t("--c4k-start-task-bg",this.config?.start_task_bg||e.start_task_bg),t("--c4k-complete-task-bg",this.config?.complete_task_bg||e.complete_task_bg),t("--c4k-kid-points-bg",this.config?.kid_points_bg||e.kid_points_bg),t("--c4k-task-done-bg",this.config?.task_done_bg||e.task_done_bg),t("--c4k-start-task-text",this.config?.start_task_text||e.start_task_text),t("--c4k-complete-task-text",this.config?.complete_task_text||e.complete_task_text),t("--c4k-kid-points-text",this.config?.kid_points_text||e.kid_points_text),t("--c4k-task-done-text",this.config?.task_done_text||e.task_done_text),t("--c4k-task-points-bg",this.config?.task_points_bg||e.task_points_bg),t("--c4k-task-points-text",this.config?.task_points_text||e.task_points_text),t("--c4k-kid-task-title-size",e.kid_task_title_size),t("--c4k-kid-task-points-size",e.kid_task_points_size),t("--c4k-kid-task-button-size",e.kid_task_button_size)}catch{}}_toggleRepeat(t){let e=!!t?.target?.checked;this._repeatEnabled=e,e&&(this._weeklyEnabled=!1,this._monthlyEnabled=!1),e||(this._repeatDays=new Set,this._repeatAssign=new Set,this._openRepeatMenu=!1),this._normalizeScheduleFlags(),this.requestUpdate()}_toggleWeekly(t){let e=!!t?.target?.checked;this._weeklyEnabled=e,e&&(this._monthlyEnabled=!1,this._repeatEnabled=!1,this._repeatDays=new Set,this._openRepeatMenu=!1,this._persistUntilDone=!1,this._markOverdue=!0),this._normalizeScheduleFlags(),this.requestUpdate()}_toggleMonthly(t){let e=!!t?.target?.checked;this._monthlyEnabled=e,e&&(this._weeklyEnabled=!1,this._repeatEnabled=!1,this._repeatDays=new Set,this._openRepeatMenu=!1,this._persistUntilDone=!1,this._markOverdue=!0),this._normalizeScheduleFlags(),this.requestUpdate()}static getConfigElement(){return document.createElement("chores4kids-card-editor")}static getStubConfig(){return{mode:"admin"}}getCardSize(){return this._mode==="admin"?8:3}_t(t,e){return yt(t,this._locale(),e,S(this.hass).points_label)}_resolveUrl(t){if(!t)return"";if(String(t).startsWith("http")||String(t).startsWith("data:"))return t;try{let e=this.hass?.auth?.data?.hassUrl||"";if(e&&String(t).startsWith("/"))return(e.endsWith("/")?e.slice(0,-1):e)+t}catch{}return t}_statusLabel(t){return this._t(`status.${t}`)||t}_effectiveStatus(t){try{if(!t||!t?.fastest_wins)return t?.status;let e=t?.fastest_wins_claimed_by_child_id,i=t?.assigned_to;return e&&i&&e!==i?"taken":t?.status}catch{return t?.status}}_renderDeadline(t){let i=[t.due?this._formatDueDate(t.due):"",t.due_time].filter(Boolean).join(" \xB7 ");return i?n`<span class="chip chip-deadline">${this._t("lbl.deadline",{date:i})}</span>`:""}_renderStatusBadge(t){let e=this._effectiveStatus(t),i=t?.fastest_wins_claimed_by_child_name||t?.fastest_wins_claimed_by_child_id,s=e==="taken"?this._t("lbl.taken_by",{name:i||"\u2014"}):"";return n`<span class="badge status-${e}" title="${s}">${this._statusLabel(e)}</span>${this._isTaskOverdue(t)?n` <span class="badge status-overdue">${this._t("status.overdue")}</span>`:""}`}_autoAssignActive(t){try{let e=String(t?.schedule_mode||"").toLowerCase(),i=Array.isArray(t?.repeat_days)?t.repeat_days:[],s=Array.isArray(t?.repeat_child_ids)?t.repeat_child_ids:[],a=t?.repeat_child_id,r=s.length>0||!!a;return(e==="weekly"||e==="monthly"||i.length>0)&&r}catch{return!1}}_isScheduledToday(t){try{let e=String(t?.schedule_mode||"").toLowerCase(),i=new Date;if(e==="monthly")return i.getDate()===1;if(e==="weekly"){let u=i.getDay();return[6,0,1,2,3,4,5][u]===0}let s=Array.isArray(t?.repeat_days)?t.repeat_days:[],a=i.getDay(),p=[6,0,1,2,3,4,5][a],c=["mon","tue","wed","thu","fri","sat","sun"][p];return s.includes(p)||s.includes(c)}catch{return!1}}_isTaskOverdue(t){try{return t?.mark_overdue===!1||!t?.carried_over?!1:t.carried_over===!0}catch{return!1}}_isFromBeforeToday(t){try{let e=t?.created;if(!e)return!1;let i=new Date(e).getTime();if(!Number.isFinite(i))return!1;let s=new Date;return s.setHours(0,0,0,0),i<s.getTime()}catch{return!1}}_locale(){return et(this.config?.language,this.hass)}_fmtDateTime(t){try{let e=t?new Date(t):null;if(!e||isNaN(e.getTime()))return{formatted:"\u2014",date:"\u2014",time:"\u2014"};let i=this._locale(),s=new Intl.DateTimeFormat(i,{weekday:"short"}).format(e),a=new Intl.DateTimeFormat(i,{day:"numeric"}).format(e),r=new Intl.DateTimeFormat(i,{month:"short"}).format(e),p=new Intl.DateTimeFormat(i,{year:"numeric"}).format(e),o=new Intl.DateTimeFormat(i,{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:!1}).format(e),c=new Intl.DateTimeFormat(i,{year:"numeric",month:"2-digit",day:"2-digit"}).format(e);return{formatted:`${s} d. ${a} ${r} ${p} - kl ${o}`,date:c,time:o}}catch{let e=String(t||"\u2014");return{formatted:e,date:e,time:"\u2014"}}}_parseDueToDate(t){try{if(!t)return null;let e;if(t instanceof Date)e=t;else if(typeof t=="string")/^\d{4}-\d{2}-\d{2}$/.test(t)?e=new Date(`${t}T00:00:00`):e=new Date(t);else return null;if(!e||isNaN(e.getTime()))return null;let i=new Date(e.getFullYear(),e.getMonth(),e.getDate());return i.setHours(0,0,0,0),i}catch{return null}}_formatDueDate(t){try{let e=this._parseDueToDate(t);if(!e)return"\u2014";let i=this._locale();return new Intl.DateTimeFormat(i,{year:"numeric",month:"short",day:"numeric"}).format(e)}catch{return String(t||"\u2014")}}_formatDateISO(t){try{let e=t instanceof Date?new Date(t.getTime()):null;if(!e||isNaN(e.getTime()))return"";e.setHours(0,0,0,0);let i=e.getFullYear(),s=String(e.getMonth()+1).padStart(2,"0"),a=String(e.getDate()).padStart(2,"0");return`${i}-${s}-${a}`}catch{return""}}_bonusByDateStr(t){try{let e=t?.early_bonus_enabled;if(e===!1)return null;let i=Number(t?.early_bonus_days||0),s=Number(t?.early_bonus_points||0),a=this._parseDueToDate(t?.due);if(!(e===!0||e==null&&i>0&&s>0)||!a||!(i>0)||!(s>0))return null;let p=new Date(a.getTime());return p.setDate(p.getDate()-i),this._formatDueDate(p)}catch{return null}}_bonusByDateInfo(t){try{let e=t?.early_bonus_enabled;if(e===!1)return null;let i=Number(t?.early_bonus_days||0),s=Number(t?.early_bonus_points||0),a=this._parseDueToDate(t?.due);if(!(e===!0||e==null&&i>0&&s>0)||!a||!(i>0)||!(s>0))return null;let p=new Date(a.getTime());p.setDate(p.getDate()-i),p.setHours(0,0,0,0);let u=(l=>{try{if(l==null)return null;let d;if(l instanceof Date?d=l:typeof l=="number"?d=new Date(l<1e12?l*1e3:l):d=new Date(l),!d||isNaN(d.getTime()))return null;let m=new Date(d.getFullYear(),d.getMonth(),d.getDate());return m.setHours(0,0,0,0),m}catch{return null}})(t?.completed_ts)||new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());return u.setHours(0,0,0,0),{dateStr:this._formatDueDate(p),expired:u.getTime()>p.getTime()}}catch{return null}}_completedTsFor(t){try{let e=t?.completed_ts||this._completed?.[t?.id];return t?.status==="awaiting_approval"&&e&&console.log("Getting timestamp for task",t.id,":",e),e}catch{return}}_takenTsFor(t){try{return t?.fastest_wins_claimed_ts}catch{return}}_displayedTsFor(t){try{return this._effectiveStatus(t)==="taken"?this._takenTsFor(t)||void 0:this._completedTsFor(t)}catch{return this._completedTsFor(t)}}_recordCompleted(t,e){try{let i={...this._completed||{}};i[String(t)]=e,this._completed=i,localStorage.setItem("c4k_completed_ts",JSON.stringify(i))}catch{}}_clearCompleted(t){try{let e={...this._completed||{}};delete e[String(t)],this._completed=e,localStorage.setItem("c4k_completed_ts",JSON.stringify(e))}catch{}}_catOrderResolved(){let t=this._store.categories||[],e="__none__",i=t.map(s=>s.id);return i.includes(e)||i.push(e),i}_catRankForId(t){let i=this._catOrderResolved().indexOf(t);return i>=0?i:9999}_taskCatRank(t){let e=Array.isArray(t?.categories)?t.categories:[];if(e.length){let i=9999;for(let s of e){let a=this._catRankForId(s);a<i&&(i=a)}return i}return this._catRankForId("__none__")}_sortTasks(t,e=!1){let i=a=>{try{return a?new Date(a).getTime():0}catch{return 0}},s=a=>a==="awaiting_approval"?0:a==="in_progress"?1:a==="assigned"?2:3;return[...t].sort((a,r)=>{let p=this._taskCatRank(a),o=this._taskCatRank(r);if(p!==o)return p-o;if(e){let c=s(a.status)-s(r.status);return c!==0?c:i(r.created)-i(a.created)}return String(a.title||"").localeCompare(String(r.title||""))})}_categoryById(t){try{return(this._store.categories||[]).find(e=>e.id===t)}catch{return null}}_normalizeHexColor(t){try{let e=String(t||"").trim().toLowerCase();if(!e)return"";e.startsWith("#")||(e="#"+e);let i=e.match(/^#([0-9a-f]{3})$/);if(i){let s=i[1];return`#${s[0]}${s[0]}${s[1]}${s[1]}${s[2]}${s[2]}`}return/^#[0-9a-f]{6}$/.test(e)?e:""}catch{return""}}_colorInputValue(t){return this._normalizeHexColor(t)||"#808080"}_textColorForBg(t){try{let e=this._normalizeHexColor(t);if(!e)return"";let i=parseInt(e.slice(1,3),16),s=parseInt(e.slice(3,5),16),a=parseInt(e.slice(5,7),16);return(.299*i+.587*s+.114*a)/255>.6?"#000000":"#ffffff"}catch{return""}}_renderCategoryChip(t){try{let e=String(t?.name||"").trim();if(!e)return"";let i=this._normalizeHexColor(t?.color);if(!i)return n`<span class="chip">${e}</span>`;let s=this._textColorForBg(i)||"var(--primary-text-color)";return n`<span class="chip" style="background:${i}; color:${s};">${e}</span>`}catch{return n``}}_orderedCategories(t){try{let e=this._store.categories||[],i=new Map(e.map(r=>[r.id,r]));return[...(t||[]).filter(r=>i.has(r))].sort((r,p)=>this._catRankForId(r)-this._catRankForId(p)).map(r=>i.get(r)).filter(Boolean)}catch{return[]}}_orderedCategoryNames(t){let e=this._store.categories||[],i=new Map(e.map(r=>[r.id,r.name]));return[...(t||[]).filter(r=>i.has(r))].sort((r,p)=>this._catRankForId(r)-this._catRankForId(p)).map(r=>i.get(r))}get _store(){let t=this.hass?.states||{},e=Object.values(t).filter(c=>c&&c.entity_id?.startsWith("sensor.")&&c.attributes?.child_id&&c.attributes?.slug!==void 0).map(c=>({id:c.attributes.child_id,name:c.attributes.name,slug:c.attributes.slug,points:Number(c.state||0),tasks:c.attributes.tasks||[]})),i=this._idTasks&&t[this._idTasks];i||(i=Object.values(t).find(c=>c?.entity_id?.includes("chores4kids_tasks")&&c.attributes?.tasks),i?.entity_id&&(this._idTasks=i.entity_id));let s=i?.attributes?.tasks||[],a=i?.attributes?.categories||[],r=this._idShop&&t[this._idShop];r||(r=Object.values(t).find(c=>c?.entity_id?.includes("chores4kids_shop")),r?.entity_id&&(this._idShop=r.entity_id));let p=r?.attributes?.items||[],o=r?.attributes?.purchases||[];return{children:e,allTasks:s,items:p,purchases:o,categories:a}}render(){return this._mode==="admin"?this._renderAdmin():this._mode==="kid"?this._renderChild():this._renderOverviewOnly()}_isCollapsed(t){try{return!!(this._collapsed&&this._collapsed[t])}catch{return!1}}_toggleSection(t){let e={...this._collapsed||{}};e[t]=!this._isCollapsed(t),this._collapsed=e;try{localStorage.setItem("c4k_admin_collapsed",JSON.stringify(e))}catch{}this.requestUpdate()}_hasBonusTask(t){let e=String(t?.bonus_title||"").trim(),i=Number(t?.bonus_points||0);return!!t?.bonus_enabled||!!e||i>0}_getBonusVisualState(t){try{if(!(t?.status==="awaiting_approval"||t?.status==="approved"))return"assigned";if(t?.bonus_approved||t?.bonus_completed_ts)return"done";let e=String(t?.id||"");if(!e)return"assigned";let i=this._bonusVisual||{};return String(i[e]||"assigned")==="in_progress"?"in_progress":"assigned"}catch{return"assigned"}}_setBonusVisualState(t,e){let i=String(t||"");if(!i)return;let s={...this._bonusVisual||{},[i]:String(e||"assigned")};this._bonusVisual=s;try{localStorage.setItem("c4k_bonus_visual",JSON.stringify(s))}catch{}this.requestUpdate()}async _onChildBonusVisualClick(t){if(!t?.id||!(t.status==="awaiting_approval"||t.status==="approved"))return;let e=this._getBonusVisualState(t);if(e==="assigned")return this._setBonusVisualState(t.id,"in_progress");if(e==="in_progress"&&!this._isTaskBusy(t.id)){this._setTaskBusy(t.id,!0);try{t?.bonus_completed_ts||(await this.hass.callService("chores4kids","complete_bonus_task",{task_id:t.id,completed_ts:Date.now()}),t.bonus_completed_ts=Date.now()),this._setBonusVisualState(t.id,"done"),this._playCompletionSound(),this._confettiEnabled()&&this._triggerConfetti()}catch(i){console.error("Failed to complete bonus task:",i);let s=String(i?.message||i||"Unknown error");alert(`Kunne ikke markere bonus som f\xE6rdig: ${s}`)}finally{this._setTaskBusy(t.id,!1)}}}async _approveBonusOnly(t){if(t?.id&&this._hasBonusTask(t)&&!this._isTaskBusy(t.id)){this._setTaskBusy(t.id,!0);try{t?.bonus_completed_ts||await this.hass.callService("chores4kids","complete_bonus_task",{task_id:t.id,completed_ts:Date.now()}),await this.hass.callService("chores4kids","approve_bonus_task",{task_id:t.id}),this._setBonusVisualState(t.id,"done")}finally{this._setTaskBusy(t.id,!1)}}}async _approveMainAndBonus(t){if(t?.id&&!this._isTaskBusy(t.id)){this._setTaskBusy(t.id,!0);try{if(!await this._approve(t,!0)||this._reassignTask?.id===t.id||!this._hasBonusTask(t))return;t?.bonus_completed_ts||await this.hass.callService("chores4kids","complete_bonus_task",{task_id:t.id,completed_ts:Date.now()}),await this.hass.callService("chores4kids","approve_bonus_task",{task_id:t.id}),this._setBonusVisualState(t.id,"done")}finally{this._setTaskBusy(t.id,!1)}}}_renderAwaitingApproveBtns(t){return this._hasBonusTask(t)?n`
+			<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${e=>{e?.stopPropagation?.(),this._approveMainAndBonus(t)}}>${this._t("btn.approve_all")}</button>
+			<button class="btn-ghost" ?disabled=${this._isTaskBusy(t.id)} @click=${e=>{e?.stopPropagation?.(),this._approve(t)}}>${this._t("btn.approve_partial")}</button>
+		`:n`<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${e=>{e?.stopPropagation?.(),this._approve(t)}}>${this._t("btn.approve")}</button>`}_renderAwaitingActions(t){return this._hasBonusTask(t)?n`
 			<div class="awaiting-actions">
 				<div class="awaiting-row">
 					${this._renderAwaitingApproveBtns(t)}
 				</div>
 				<div class="awaiting-row">
-					<button class="btn-ghost" @click=${()=>this._setStatus(t.id,'assigned')}>${this._t('btn.back')}</button>
-					<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>
+					<button class="btn-ghost" @click=${()=>this._setStatus(t.id,"assigned")}>${this._t("btn.back")}</button>
+					<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t("btn.delete")}</button>
 				</div>
 			</div>
-		`;
-	}
-
-	_renderBonusApproveBtn(t){
-		if (!this._hasBonusTask(t)) return '';
-		if (!!t?.bonus_approved) return html`<span class="chip status-approved">✓ ${this._t('lbl.bonus')}</span>`;
-		if (t?.status === 'awaiting_approval') return '';
-		if (t?.status !== 'approved') return '';
-		return html`<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._approveBonusOnly(t)}>${this._t('btn.approve_bonus')}</button>`;
-	}
-	async _loadHistory() {
-		const request = this._historyRequest = (this._historyRequest || 0) + 1;
-		this._historySnapshot = this.hass?.states?.[this._idTasks];
-		this._historyRows = null;
-		this._historyError = false;
-		this.requestUpdate();
-		try {
-			const {response} = await this.hass.callWS({
-				type:'call_service', domain:'chores4kids', service:'get_activity_history', return_response:true,
-				service_data:{start:this._historyStart, end:this._historyEnd}
-			});
-			if (this._historyRequest !== request) return;
-			this._historyStart = response.start;
-			this._historyEnd = response.end;
-			this._historyRows = response.entries;
-		} catch {
-			if (this._historyRequest !== request) return;
-			this._historyError = true;
-		}
-		this.requestUpdate();
-	}
-
-	_renderHistory() {
-		const toggle = () => {
-			this._historyOpen = !this._historyOpen;
-			if (this._historyOpen) this._loadHistory();
-			this.requestUpdate();
-		};
-		const columns = ['shop.date','shop.child','ph.title','th.status'];
-		if (this._pointsEnabled()) columns.push('th.points');
-		const formatter = new Intl.DateTimeFormat(this._locale(), {
-			timeZone:this.hass?.config?.time_zone, dateStyle:'medium', timeStyle:'short'
-		});
-		return html`<h3><button type="button" class="btn-ghost" aria-expanded=${!!this._historyOpen} @click=${toggle}>
-			${this._t('history.title')}</button></h3>
-			${this._historyOpen ? html`<div class="row">
-				<label>${this._t('history.from')} <input type="date" .value=${this._historyStart || ''} max=${this._historyEnd || ''}
-					@change=${e=>{this._historyStart=e.target.value; this._loadHistory();}}></label>
-				<label>${this._t('history.through')} <input type="date" .value=${this._historyEnd || ''} min=${this._historyStart || ''}
-					@change=${e=>{this._historyEnd=e.target.value; this._loadHistory();}}></label>
-				<button class="btn-ghost" @click=${()=>this._loadHistory()}>${this._t('history.refresh')}</button>
+		`:n`${this._renderAwaitingApproveBtns(t)}
+				<button class="btn-ghost" @click=${()=>this._setStatus(t.id,"assigned")}>${this._t("btn.back")}</button>
+				<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t("btn.delete")}</button>`}_renderBonusApproveBtn(t){return this._hasBonusTask(t)?t?.bonus_approved?n`<span class="chip status-approved">✓ ${this._t("lbl.bonus")}</span>`:t?.status==="awaiting_approval"||t?.status!=="approved"?"":n`<button class="btn-primary" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._approveBonusOnly(t)}>${this._t("btn.approve_bonus")}</button>`:""}async _loadHistory(){let t=this._historyRequest=(this._historyRequest||0)+1;this._historySnapshot=this.hass?.states?.[this._idTasks],this._historyRows=null,this._historyError=!1,this.requestUpdate();try{let{response:e}=await this.hass.callWS({type:"call_service",domain:"chores4kids",service:"get_activity_history",return_response:!0,service_data:{start:this._historyStart,end:this._historyEnd}});if(this._historyRequest!==t)return;this._historyStart=e.start,this._historyEnd=e.end,this._historyRows=e.entries}catch{if(this._historyRequest!==t)return;this._historyError=!0}this.requestUpdate()}_renderHistory(){let t=()=>{this._historyOpen=!this._historyOpen,this._historyOpen&&this._loadHistory(),this.requestUpdate()},e=["shop.date","shop.child","ph.title","th.status"];this._pointsEnabled()&&e.push("th.points");let i=new Intl.DateTimeFormat(this._locale(),{timeZone:this.hass?.config?.time_zone,dateStyle:"medium",timeStyle:"short"});return n`<h3><button type="button" class="btn-ghost" aria-expanded=${!!this._historyOpen} @click=${t}>
+			${this._t("history.title")}</button></h3>
+			${this._historyOpen?n`<div class="row">
+				<label>${this._t("history.from")} <input type="date" .value=${this._historyStart||""} max=${this._historyEnd||""}
+					@change=${s=>{this._historyStart=s.target.value,this._loadHistory()}}></label>
+				<label>${this._t("history.through")} <input type="date" .value=${this._historyEnd||""} min=${this._historyStart||""}
+					@change=${s=>{this._historyEnd=s.target.value,this._loadHistory()}}></label>
+				<button class="btn-ghost" @click=${()=>this._loadHistory()}>${this._t("history.refresh")}</button>
 			</div>
-			${this._historyRows?.length ? html`<div class="table-wrap"><table><thead><tr>
-				${columns.map(key=>html`<th>${this._t(key)}</th>`)}
-			</tr></thead><tbody>${this._historyRows.map(row=>html`<tr>
-				<td data-label=${this._t('shop.date')}>${formatter.format(row.completed_ts)}</td>
-				<td data-label=${this._t('shop.child')}>${row.child_name}</td>
-				<td data-label=${this._t('ph.title')}>${row.title}${row.bonus_title ? ' · '+this._t('lbl.bonus')+' · '+row.bonus_title : ''}</td>
-				<td data-label=${this._t('th.status')}><span class="badge status-${row.status}">${this._statusLabel(row.status)}</span></td>
-				${this._pointsEnabled() ? html`<td data-label=${this._t('th.points')}>${row.points ?? '—'}</td>` : ''}
-			</tr>`)}</tbody></table></div>` : html`<p role="status">${this._t(this._historyError ? 'history.error' : this._historyRows ? 'history.empty' : 'history.loading')}</p>`}` : ''}`;
-	}
-
-	_renderAdmin(){
-		const { children } = this._store; const totalKids = children.length;
-		const pointsEnabled = this._pointsEnabled();
-		const showScoreboard = pointsEnabled && (this.config?.show_scoreboard !== false);
-		const sections = this.config?.admin_sections;
-		const customized = Array.isArray(sections);
-		const visible = key => !customized || sections.includes(key);
-		return html`
-			<ha-card header="${this._t('card.admin_title')}">
+			${this._historyRows?.length?n`<div class="table-wrap"><table><thead><tr>
+				${e.map(s=>n`<th>${this._t(s)}</th>`)}
+			</tr></thead><tbody>${this._historyRows.map(s=>n`<tr>
+				<td data-label=${this._t("shop.date")}>${i.format(s.completed_ts)}</td>
+				<td data-label=${this._t("shop.child")}>${s.child_name}</td>
+				<td data-label=${this._t("ph.title")}>${s.title}${s.bonus_title?" \xB7 "+this._t("lbl.bonus")+" \xB7 "+s.bonus_title:""}</td>
+				<td data-label=${this._t("th.status")}><span class="badge status-${s.status}">${this._statusLabel(s.status)}</span></td>
+				${this._pointsEnabled()?n`<td data-label=${this._t("th.points")}>${s.points??"\u2014"}</td>`:""}
+			</tr>`)}</tbody></table></div>`:n`<p role="status">${this._t(this._historyError?"history.error":this._historyRows?"history.empty":"history.loading")}</p>`}`:""}`}_renderAdmin(){let{children:t}=this._store,e=t.length,i=this._pointsEnabled(),s=i&&this.config?.show_scoreboard!==!1,a=this.config?.admin_sections,r=Array.isArray(a),p=o=>!r||a.includes(o);return n`
+			<ha-card header="${this._t("card.admin_title")}">
 				<div class="card-content">
-					${visible('children') ? html`
+					${p("children")?n`
 					<div class="row">
-						<input placeholder="${this._t('input.new_child_name')}" .value=${this._name||''} @input=${(e)=>this._name=e.target.value} />
-						<button class="btn-primary" @click=${this._addChild}>${this._t('btn.add_child')}</button>
-						${pointsEnabled && !customized ? html`<button class="btn-ghost" style="margin-left:auto; min-height:40px;" @click=${()=>this._shopModalOpen=true}>${this._t('shop.open')}</button>` : ''}
+						<input placeholder="${this._t("input.new_child_name")}" .value=${this._name||""} @input=${o=>this._name=o.target.value} />
+						<button class="btn-primary" @click=${this._addChild}>${this._t("btn.add_child")}</button>
+						${i&&!r?n`<button class="btn-ghost" style="margin-left:auto; min-height:40px;" @click=${()=>this._shopModalOpen=!0}>${this._t("shop.open")}</button>`:""}
 					</div>
 
 					<div class="list section">
 						<h3 class="h3-row">
-							<span class="collapsible" @click=${()=>this._toggleSection('children')}><ha-icon class="chev ${this._isCollapsed('children')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('section.children')} (${totalKids})</span>
+							<span class="collapsible" @click=${()=>this._toggleSection("children")}><ha-icon class="chev ${this._isCollapsed("children")?"rot":""}" icon="mdi:chevron-down"></ha-icon>${this._t("section.children")} (${e})</span>
 						</h3>
-						${this._isCollapsed('children')? '' : html`<div class="table-wrap"><table class="table-center">
-							<thead><tr><th>${this._t('th.name')}</th>${pointsEnabled ? html`<th>${this._t('th.points')}</th>`:''}<th>${this._t('th.pending')}</th><th>${this._t('th.actions')}</th></tr></thead>
+						${this._isCollapsed("children")?"":n`<div class="table-wrap"><table class="table-center">
+							<thead><tr><th>${this._t("th.name")}</th>${i?n`<th>${this._t("th.points")}</th>`:""}<th>${this._t("th.pending")}</th><th>${this._t("th.actions")}</th></tr></thead>
 							<tbody>
-								${children.map((c)=> html`
+								${t.map(o=>n`
 									<tr>
-										<td data-label="${this._t('th.name')}">${c.name}</td>
-										${pointsEnabled ? html`<td data-label="${this._t('th.points')}"><b>${c.points}</b></td>`:''}
-										<td data-label="${this._t('th.pending')}"><span class="badge status-awaiting_approval">${(c.tasks||[]).filter(t=>t.status==="awaiting_approval").length}</span></td>
-										<td data-label="${this._t('th.actions')}">
-											<button class="btn-ghost" @click=${()=>this._promptRename(c)}>${this._t('btn.rename')}</button>
-											${pointsEnabled ? html`<button class="btn-ghost" @click=${()=>this._openPoints(c)}>${this._t('btn.add_points')}</button>`:''}
-											${pointsEnabled ? html`<button class="btn-ghost" @click=${()=>this._resetPoints(c)}>${this._t('btn.reset_points')}</button>`:''}
-											<button class="btn-danger" @click=${()=>this._removeChild(c)}>${this._t('btn.delete')}</button>
+										<td data-label="${this._t("th.name")}">${o.name}</td>
+										${i?n`<td data-label="${this._t("th.points")}"><b>${o.points}</b></td>`:""}
+										<td data-label="${this._t("th.pending")}"><span class="badge status-awaiting_approval">${(o.tasks||[]).filter(c=>c.status==="awaiting_approval").length}</span></td>
+										<td data-label="${this._t("th.actions")}">
+											<button class="btn-ghost" @click=${()=>this._promptRename(o)}>${this._t("btn.rename")}</button>
+											${i?n`<button class="btn-ghost" @click=${()=>this._openPoints(o)}>${this._t("btn.add_points")}</button>`:""}
+											${i?n`<button class="btn-ghost" @click=${()=>this._resetPoints(o)}>${this._t("btn.reset_points")}</button>`:""}
+											<button class="btn-danger" @click=${()=>this._removeChild(o)}>${this._t("btn.delete")}</button>
 										</td>
 									</tr>
 								`)}
 							</tbody>
 						</table></div>`}
 					</div>
-					` : ''}
+					`:""}
 
-					${visible('categories') ? html`
+					${p("categories")?n`
 					<hr />
 
 					<!-- Categories management -->
 					<div class="list section">
 						<h3 class="h3-row">
-							<span class="collapsible" @click=${()=>this._toggleSection('categories')}><ha-icon class="chev ${this._isCollapsed('categories')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('section.categories')} (${(this._store.categories||[]).length})</span>
+							<span class="collapsible" @click=${()=>this._toggleSection("categories")}><ha-icon class="chev ${this._isCollapsed("categories")?"rot":""}" icon="mdi:chevron-down"></ha-icon>${this._t("section.categories")} (${(this._store.categories||[]).length})</span>
 						</h3>
-						${this._isCollapsed('categories')? '' : html`<div class="row">
-							<input placeholder="${this._t('input.new_category_name')}" .value=${this._newCategoryName||''} @input=${(e)=> this._newCategoryName = e.target.value} />
+						${this._isCollapsed("categories")?"":n`<div class="row">
+							<input placeholder="${this._t("input.new_category_name")}" .value=${this._newCategoryName||""} @input=${o=>this._newCategoryName=o.target.value} />
 							<div class="color-cell" style="flex:0 0 auto; align-items:center;">
-								<input type="color" .value=${this._colorInputValue(this._newCategoryColor)} @change=${(e)=>{ this._newCategoryColor = e?.target?.value || ''; }} />
+								<input type="color" .value=${this._colorInputValue(this._newCategoryColor)} @change=${o=>{this._newCategoryColor=o?.target?.value||""}} />
 							</div>
-							<button class="btn-ghost" @click=${this._addCategory}>${this._t('btn.add_category')}</button>
+							<button class="btn-ghost" @click=${this._addCategory}>${this._t("btn.add_category")}</button>
 						</div>
 						<div class="table-wrap"><table class="table-center">
-							<thead><tr><th>${this._t('th.name')}</th><th>${this._t('th.color')}</th><th>${this._t('th.actions')}</th></tr></thead>
+							<thead><tr><th>${this._t("th.name")}</th><th>${this._t("th.color")}</th><th>${this._t("th.actions")}</th></tr></thead>
 							<tbody>
-								${(this._store.categories||[]).map(cat=> html`
+								${(this._store.categories||[]).map(o=>n`
 									<tr>
-										<td data-label="${this._t('th.name')}">${cat.name}</td>
-										<td data-label="${this._t('th.color')}">
+										<td data-label="${this._t("th.name")}">${o.name}</td>
+										<td data-label="${this._t("th.color")}">
 											<div class="color-cell">
-												<input type="color" .value=${this._colorInputValue(cat?.color)} @change=${(e)=>this._setCategoryColor(cat, e)} />
+												<input type="color" .value=${this._colorInputValue(o?.color)} @change=${c=>this._setCategoryColor(o,c)} />
 											</div>
 										</td>
-										<td data-label="${this._t('th.actions')}">
-											<button class="btn-ghost" @click=${()=> this._promptRenameCategory(cat)}>${this._t('btn.rename')}</button>
-											<button class="btn-danger" @click=${()=> this._deleteCategory(cat)}>${this._t('btn.delete')}</button>
+										<td data-label="${this._t("th.actions")}">
+											<button class="btn-ghost" @click=${()=>this._promptRenameCategory(o)}>${this._t("btn.rename")}</button>
+											<button class="btn-danger" @click=${()=>this._deleteCategory(o)}>${this._t("btn.delete")}</button>
 										</td>
 									</tr>
 								`)}
 							</tbody>
 						</table></div>`}
 					</div>
-					` : ''}
+					`:""}
 
-					${visible('create') || (visible('tasks') && this._editingTask) ? html`
+					${p("create")||p("tasks")&&this._editingTask?n`
 					<hr />
-					<h3 class="h3-row"><span class="collapsible" @click=${()=>this._toggleSection('newtask')}><ha-icon class="chev ${this._isCollapsed('newtask')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('section.new_task')}</span></h3>
-					${!this._editingTask && this._isCollapsed('newtask')? '' : html`<div class="row fields">
+					<h3 class="h3-row"><span class="collapsible" @click=${()=>this._toggleSection("newtask")}><ha-icon class="chev ${this._isCollapsed("newtask")?"rot":""}" icon="mdi:chevron-down"></ha-icon>${this._t("section.new_task")}</span></h3>
+					${!this._editingTask&&this._isCollapsed("newtask")?"":n`<div class="row fields">
 						<div class="form-field title">
-							<input class="${this._showTitleError? 'invalid':''}" placeholder="${this._t('ph.title')}" .value=${this._taskTitle||''} @input=${e=>{this._taskTitle=e.target.value; this.requestUpdate();}} />
-							<div class="error-space">${this._showTitleError? html`<span class="error-text">${this._t('err.title_required')}</span>`:''}</div>
+							<input class="${this._showTitleError?"invalid":""}" placeholder="${this._t("ph.title")}" .value=${this._taskTitle||""} @input=${o=>{this._taskTitle=o.target.value,this.requestUpdate()}} />
+							<div class="error-space">${this._showTitleError?n`<span class="error-text">${this._t("err.title_required")}</span>`:""}</div>
 						</div>
-						${pointsEnabled ? html`
+						${i?n`
 							<div class="form-field points">
-								<input class="${this._showPointsError? 'invalid':''}" type="number" placeholder="${this._t('ph.points')}" .value=${this._taskPoints||''} @input=${e=>{this._taskPoints=e.target.value; this.requestUpdate();}} />
-								<div class="error-space">${this._pointsErrorKey? html`<span class="error-text">${this._t(this._pointsErrorKey)}</span>`:''}</div>
+								<input class="${this._showPointsError?"invalid":""}" type="number" placeholder="${this._t("ph.points")}" .value=${this._taskPoints||""} @input=${o=>{this._taskPoints=o.target.value,this.requestUpdate()}} />
+								<div class="error-space">${this._pointsErrorKey?n`<span class="error-text">${this._t(this._pointsErrorKey)}</span>`:""}</div>
 							</div>
-						` : ''}
+						`:""}
 					</div>
-					<label class="row">${this._t('task.due_time')}
-						<input type="time" .value=${this._taskDueTime || ''} @input=${e=>this._taskDueTime=e.target.value}>
+					<label class="row">${this._t("task.due_time")}
+						<input type="time" .value=${this._taskDueTime||""} @input=${o=>this._taskDueTime=o.target.value}>
 					</label>
-					${pointsEnabled ? html`<label class="row"><input type="checkbox" .checked=${!!this._penaltyEnabled}
-						@change=${e=>this._penaltyEnabled=e.target.checked}> ${this._t('penalty.enable')}</label>
-						${this._penaltyEnabled ? html`<div class="row fields">
-							<label>${this._t('th.points')} <input type="number" min="1" step="1" .value=${String(this._penaltyAmount ?? 1)} @input=${e=>this._penaltyAmount=e.target.value}></label>
-							<label>${this._t('shop.time')} <input type="time" .value=${this._penaltyTime || ''} @input=${e=>this._penaltyTime=e.target.value}></label>
-						</div>` : ''}` : ''}
-					<div class="row"><textarea rows="2" placeholder="${this._t('ph.description')}" .value=${this._taskDesc||''} @input=${e=>this._taskDesc=e.target.value}></textarea></div>
+					${i?n`<label class="row"><input type="checkbox" .checked=${!!this._penaltyEnabled}
+						@change=${o=>this._penaltyEnabled=o.target.checked}> ${this._t("penalty.enable")}</label>
+						${this._penaltyEnabled?n`<div class="row fields">
+							<label>${this._t("th.points")} <input type="number" min="1" step="1" .value=${String(this._penaltyAmount??1)} @input=${o=>this._penaltyAmount=o.target.value}></label>
+							<label>${this._t("shop.time")} <input type="time" .value=${this._penaltyTime||""} @input=${o=>this._penaltyTime=o.target.value}></label>
+						</div>`:""}`:""}
+					<div class="row"><textarea rows="2" placeholder="${this._t("ph.description")}" .value=${this._taskDesc||""} @input=${o=>this._taskDesc=o.target.value}></textarea></div>
 					<div class="row">
 						<div style="flex:1 1 260px;">
-							<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:4px;">${this._t('ph.categories')}</div>
-							<div class="multi-dd" @click=${(e)=>{ e.stopPropagation(); this._openCategoriesMenu = !this._openCategoriesMenu; }}>
+							<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:4px;">${this._t("ph.categories")}</div>
+							<div class="multi-dd" @click=${o=>{o.stopPropagation(),this._openCategoriesMenu=!this._openCategoriesMenu}}>
 								<div class="box">
-									<span class="multi-dd-value ${this._taskCategories && this._taskCategories.size ? '' : 'placeholder'}">
-										${(()=>{ const ids=this._taskCategories||new Set(); const names=(this._store.categories||[]).filter(c=> ids.has(c.id)).map(c=>c.name); return names.length? (names.slice(0,2).join(', ')+(names.length>2?` +${names.length-2}`:'')) : this._t('select.categories'); })()}
+									<span class="multi-dd-value ${this._taskCategories&&this._taskCategories.size?"":"placeholder"}">
+										${(()=>{let o=this._taskCategories||new Set,c=(this._store.categories||[]).filter(u=>o.has(u.id)).map(u=>u.name);return c.length?c.slice(0,2).join(", ")+(c.length>2?` +${c.length-2}`:""):this._t("select.categories")})()}
 									</span>
 									<ha-icon icon="mdi:chevron-down"></ha-icon>
 								</div>
-								${this._openCategoriesMenu ? html`
-									<div class="multi-dd-menu" @click=${e=> e.stopPropagation()}>
-										${(this._store.categories||[]).map(c=> html`<label><input type="checkbox" .checked=${this._taskCategories?.has?.(c.id)} @change=${(e)=>{ const s=this._taskCategories instanceof Set? this._taskCategories : new Set(this._taskCategories||[]); if(e.target.checked){ s.add(c.id);}else{ s.delete(c.id);} this._taskCategories=s; this.requestUpdate(); }} /><span>${c.name}</span></label>`) }
+								${this._openCategoriesMenu?n`
+									<div class="multi-dd-menu" @click=${o=>o.stopPropagation()}>
+										${(this._store.categories||[]).map(o=>n`<label><input type="checkbox" .checked=${this._taskCategories?.has?.(o.id)} @change=${c=>{let u=this._taskCategories instanceof Set?this._taskCategories:new Set(this._taskCategories||[]);c.target.checked?u.add(o.id):u.delete(o.id),this._taskCategories=u,this.requestUpdate()}} /><span>${o.name}</span></label>`)}
 									</div>
-								` : ''}
+								`:""}
 							</div>
 						</div>
 					</div>
 					<div class="row" style="justify-content:flex-start; align-items:flex-start;">
 						<div style="flex:1 1 520px; min-width:260px;">
 							<div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
-								${pointsEnabled ? html`
+								${i?n`
 									<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-										<input style="margin:0;" type="checkbox" .checked=${!!this._taskEarlyBonusEnabled} @change=${e=>{ this._taskEarlyBonusEnabled = !!e.target.checked; this.requestUpdate(); }} />
-										<span style="white-space:nowrap;">${this._t('ui.early_bonus_enabled')}</span>
+										<input style="margin:0;" type="checkbox" .checked=${!!this._taskEarlyBonusEnabled} @change=${o=>{this._taskEarlyBonusEnabled=!!o.target.checked,this.requestUpdate()}} />
+										<span style="white-space:nowrap;">${this._t("ui.early_bonus_enabled")}</span>
 									</label>
 									<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-										<input style="margin:0;" type="checkbox" .checked=${!!this._taskBonusEnabled} @change=${e=>{ this._taskBonusEnabled = !!e.target.checked; this.requestUpdate(); }} />
-										<span style="white-space:nowrap;">${this._t('ui.bonus_task')}</span>
+										<input style="margin:0;" type="checkbox" .checked=${!!this._taskBonusEnabled} @change=${o=>{this._taskBonusEnabled=!!o.target.checked,this.requestUpdate()}} />
+										<span style="white-space:nowrap;">${this._t("ui.bonus_task")}</span>
 									</label>
-									${this._taskBonusEnabled ? html`
+									${this._taskBonusEnabled?n`
 										<div style="width:100%;">
 											<div class="row fields" style="margin-top:4px;">
 												<div class="form-field">
-													<input placeholder="${this._t('ph.bonus_title')}" .value=${this._taskBonusTitle||''} @input=${e=>{ this._taskBonusTitle=e.target.value; this.requestUpdate(); }} />
+													<input placeholder="${this._t("ph.bonus_title")}" .value=${this._taskBonusTitle||""} @input=${o=>{this._taskBonusTitle=o.target.value,this.requestUpdate()}} />
 												</div>
 												<div class="form-field">
-													<input type="number" min="0" step="1" placeholder="${this._t('ph.bonus_points')}" .value=${this._taskBonusPoints||''} @input=${e=>{ this._taskBonusPoints=e.target.value; this.requestUpdate(); }} />
+													<input type="number" min="0" step="1" placeholder="${this._t("ph.bonus_points")}" .value=${this._taskBonusPoints||""} @input=${o=>{this._taskBonusPoints=o.target.value,this.requestUpdate()}} />
 												</div>
 											</div>
 										</div>
-									` : ''}
-									${(!!this._taskEarlyBonusEnabled || this._penaltyEnabled || String(this._taskDue||'').trim()) ? html`
+									`:""}
+									${this._taskEarlyBonusEnabled||this._penaltyEnabled||String(this._taskDue||"").trim()?n`
 										<div style="width:100%;">
 											<div class="row fields" style="margin-top:4px;">
 												<div class="form-field">
-													<input type="date" placeholder="${this._t('ph.due')}" ?disabled=${(!!this._taskEarlyBonusEnabled) && (!!this._repeatEnabled || !!this._weeklyEnabled || !!this._monthlyEnabled)} .value=${this._taskDue||''} @input=${e=>{ this._taskDue=e.target.value; this.requestUpdate(); }} />
-													<div class="error-space">${((!!this._taskEarlyBonusEnabled) && (!!this._repeatEnabled || !!this._weeklyEnabled || !!this._monthlyEnabled)) ? html`<span class="error-text">${this._t('warn.schedule_overrides_due')}</span>` : ''}</div>
+													<input type="date" placeholder="${this._t("ph.due")}" ?disabled=${!!this._taskEarlyBonusEnabled&&(!!this._repeatEnabled||!!this._weeklyEnabled||!!this._monthlyEnabled)} .value=${this._taskDue||""} @input=${o=>{this._taskDue=o.target.value,this.requestUpdate()}} />
+													<div class="error-space">${this._taskEarlyBonusEnabled&&(this._repeatEnabled||this._weeklyEnabled||this._monthlyEnabled)?n`<span class="error-text">${this._t("warn.schedule_overrides_due")}</span>`:""}</div>
 												</div>
-												${this._taskEarlyBonusEnabled ? html`
+												${this._taskEarlyBonusEnabled?n`
 													<div class="form-field">
-														<input type="number" min="0" step="1" placeholder="${this._t('ph.early_bonus_days')}" .value=${this._taskEarlyBonusDays||''} @input=${e=>{ this._taskEarlyBonusDays=e.target.value; this.requestUpdate(); }} />
+														<input type="number" min="0" step="1" placeholder="${this._t("ph.early_bonus_days")}" .value=${this._taskEarlyBonusDays||""} @input=${o=>{this._taskEarlyBonusDays=o.target.value,this.requestUpdate()}} />
 													</div>
-												` : html`<div class="form-field"></div>`}
+												`:n`<div class="form-field"></div>`}
 											</div>
-											${this._taskEarlyBonusEnabled ? html`
+											${this._taskEarlyBonusEnabled?n`
 												<div class="row fields">
 													<div class="form-field">
-														<input type="number" min="0" step="1" placeholder="${this._t('ph.early_bonus_points')}" .value=${this._taskEarlyBonusPoints||''} @input=${e=>{ this._taskEarlyBonusPoints=e.target.value; this.requestUpdate(); }} />
+														<input type="number" min="0" step="1" placeholder="${this._t("ph.early_bonus_points")}" .value=${this._taskEarlyBonusPoints||""} @input=${o=>{this._taskEarlyBonusPoints=o.target.value,this.requestUpdate()}} />
 													</div>
 													<div class="form-field"></div>
 												</div>
-											` : ''}
+											`:""}
 										</div>
-									` : ''}
-								` : ''}
+									`:""}
+								`:""}
 									<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
 									<input style="margin:0;" type="checkbox" .checked=${!!this._taskTimeBonusEnabled}
-										@change=${e=>{ this._taskTimeBonusEnabled = !!e.target.checked; this.requestUpdate(); }} />
-									<span style="white-space:nowrap;">${this._t('ui.time_bonus_enabled')}</span>
+										@change=${o=>{this._taskTimeBonusEnabled=!!o.target.checked,this.requestUpdate()}} />
+									<span style="white-space:nowrap;">${this._t("ui.time_bonus_enabled")}</span>
 									</label>
 
-									${this._taskTimeBonusEnabled ? html`
+									${this._taskTimeBonusEnabled?n`
 									<div style="width:100%;">
 										<div class="row fields" style="margin-top:4px;">
 										<div class="form-field">
-											<input placeholder="${this._t('ph.time_bonus_before')}" .value=${this._taskTimeBonusBefore||''}
-											@input=${e=>{ this._taskTimeBonusBefore = e.target.value; this.requestUpdate(); }} />
+											<input placeholder="${this._t("ph.time_bonus_before")}" .value=${this._taskTimeBonusBefore||""}
+											@input=${o=>{this._taskTimeBonusBefore=o.target.value,this.requestUpdate()}} />
 										</div>
 										<div class="form-field">
-											<input type="number" min="0" step="1" placeholder="${this._t('ph.time_bonus_points')}" .value=${this._taskTimeBonusPoints||''}
-											@input=${e=>{ this._taskTimeBonusPoints = e.target.value; this.requestUpdate(); }} />
+											<input type="number" min="0" step="1" placeholder="${this._t("ph.time_bonus_points")}" .value=${this._taskTimeBonusPoints||""}
+											@input=${o=>{this._taskTimeBonusPoints=o.target.value,this.requestUpdate()}} />
 										</div>
 										</div>
 									</div>
-									` : ''}
+									`:""}
 									<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-																	<input style="margin:0;" type="checkbox" .checked=${!!this._persistUntilDone} ?disabled=${!!this._weeklyEnabled || !!this._monthlyEnabled} @change=${e=>{ this._persistUntilDone = !!e.target.checked; this._normalizeScheduleFlags(); this.requestUpdate(); }} />
-																	<span style="white-space:nowrap;">${this._t('ui.persist_until_done')}</span>
+																	<input style="margin:0;" type="checkbox" .checked=${!!this._persistUntilDone} ?disabled=${!!this._weeklyEnabled||!!this._monthlyEnabled} @change=${o=>{this._persistUntilDone=!!o.target.checked,this._normalizeScheduleFlags(),this.requestUpdate()}} />
+																	<span style="white-space:nowrap;">${this._t("ui.persist_until_done")}</span>
 																</label>
-																${this._persistUntilDone ? html`
+																${this._persistUntilDone?n`
 																	<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin-left:24px; font-size:.9rem; width:fit-content; text-align:left;">
-																		<input style="margin:0;" type="checkbox" .checked=${this._markOverdue!==false} @change=${e=>{ this._markOverdue = !!e.target.checked; this.requestUpdate(); }} />
-																		<span style="white-space:nowrap;">${this._t('ui.mark_overdue')}</span>
+																		<input style="margin:0;" type="checkbox" .checked=${this._markOverdue!==!1} @change=${o=>{this._markOverdue=!!o.target.checked,this.requestUpdate()}} />
+																		<span style="white-space:nowrap;">${this._t("ui.mark_overdue")}</span>
 																	</label>
-																` : ''}
+																`:""}
 								<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-									<input style="margin:0;" type="checkbox" .checked=${!!this._multiplePerDay} @change=${e=>{ this._multiplePerDay = !!e.target.checked; }} />
-									<span style="white-space:nowrap;">${this._t('ui.multiple_per_day')}</span>
+									<input style="margin:0;" type="checkbox" .checked=${!!this._multiplePerDay} @change=${o=>{this._multiplePerDay=!!o.target.checked}} />
+									<span style="white-space:nowrap;">${this._t("ui.multiple_per_day")}</span>
 								</label>
 								<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-									<input style="margin:0;" type="checkbox" .checked=${!!this._quickComplete} @change=${e=>{ this._quickComplete = !!e.target.checked; }} />
-									<span style="white-space:nowrap;">${this._t('ui.quick_complete')}</span>
+									<input style="margin:0;" type="checkbox" .checked=${!!this._quickComplete} @change=${o=>{this._quickComplete=!!o.target.checked}} />
+									<span style="white-space:nowrap;">${this._t("ui.quick_complete")}</span>
 								</label>
 								<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-									<input style="margin:0;" type="checkbox" .checked=${!!this._skipApproval} @change=${e=>{ this._skipApproval = !!e.target.checked; }} />
-									<span style="white-space:nowrap;">${this._t('ui.skip_approval')}</span>
+									<input style="margin:0;" type="checkbox" .checked=${!!this._skipApproval} @change=${o=>{this._skipApproval=!!o.target.checked}} />
+									<span style="white-space:nowrap;">${this._t("ui.skip_approval")}</span>
 								</label>
 								<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-									<input style="margin:0;" type="checkbox" .checked=${!!this._fastestWins} @change=${e=>{ this._fastestWins = !!e.target.checked; }} />
-									<span style="white-space:nowrap;">${this._t('ui.fastest_wins')}</span>
+									<input style="margin:0;" type="checkbox" .checked=${!!this._fastestWins} @change=${o=>{this._fastestWins=!!o.target.checked}} />
+									<span style="white-space:nowrap;">${this._t("ui.fastest_wins")}</span>
 								</label>
 								<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-																	<input style="margin:0;" type="checkbox" .checked=${!!this._repeatEnabled} ?disabled=${(!!this._weeklyEnabled || !!this._monthlyEnabled) && !this._repeatEnabled} @change=${this._toggleRepeat} />
-									<span style="white-space:nowrap;">${this._t('repeat.enable')}</span>
+																	<input style="margin:0;" type="checkbox" .checked=${!!this._repeatEnabled} ?disabled=${(!!this._weeklyEnabled||!!this._monthlyEnabled)&&!this._repeatEnabled} @change=${this._toggleRepeat} />
+									<span style="white-space:nowrap;">${this._t("repeat.enable")}</span>
 								</label>
 																<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-																	<input style="margin:0;" type="checkbox" .checked=${!!this._weeklyEnabled} ?disabled=${!!this._persistUntilDone || ((!!this._repeatEnabled || !!this._monthlyEnabled) && !this._weeklyEnabled)} @change=${this._toggleWeekly} />
-																	<span style="white-space:nowrap;">${this._t('schedule.weekly')}</span>
+																	<input style="margin:0;" type="checkbox" .checked=${!!this._weeklyEnabled} ?disabled=${!!this._persistUntilDone||(!!this._repeatEnabled||!!this._monthlyEnabled)&&!this._weeklyEnabled} @change=${this._toggleWeekly} />
+																	<span style="white-space:nowrap;">${this._t("schedule.weekly")}</span>
 																</label>
 																<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
-																	<input style="margin:0;" type="checkbox" .checked=${!!this._monthlyEnabled} ?disabled=${!!this._persistUntilDone || ((!!this._repeatEnabled || !!this._weeklyEnabled) && !this._monthlyEnabled)} @change=${this._toggleMonthly} />
-																	<span style="white-space:nowrap;">${this._t('schedule.monthly')}</span>
+																	<input style="margin:0;" type="checkbox" .checked=${!!this._monthlyEnabled} ?disabled=${!!this._persistUntilDone||(!!this._repeatEnabled||!!this._weeklyEnabled)&&!this._monthlyEnabled} @change=${this._toggleMonthly} />
+																	<span style="white-space:nowrap;">${this._t("schedule.monthly")}</span>
 																</label>
 							</div>
-															${(this._repeatEnabled || this._weeklyEnabled || this._monthlyEnabled) ? html`
+															${this._repeatEnabled||this._weeklyEnabled||this._monthlyEnabled?n`
 								<div class="repeat-line">
-									${this._repeatEnabled ? html`<div class="repeat-days">
-										<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:4px;">${this._t('repeat.label')}</div>
+									${this._repeatEnabled?n`<div class="repeat-days">
+										<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:4px;">${this._t("repeat.label")}</div>
 										<div class="days">
-											${['mon','tue','wed','thu','fri','sat','sun'].map(k=> html`
-												<span class="day ${this._repeatDays.has(k)?'on':''}" @click=${()=>{ const s=this._repeatDays; s.has(k)?s.delete(k):s.add(k); this.requestUpdate(); }}>${this._t('repeat.days.'+k)}</span>
+											${["mon","tue","wed","thu","fri","sat","sun"].map(o=>n`
+												<span class="day ${this._repeatDays.has(o)?"on":""}" @click=${()=>{let c=this._repeatDays;c.has(o)?c.delete(o):c.add(o),this.requestUpdate()}}>${this._t("repeat.days."+o)}</span>
 											`)}
 										</div>
-									</div>` : ''}
+									</div>`:""}
 									<div class="repeat-assign">
-										<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:4px;">${this._t('repeat.auto_assign')}</div>
-										<div class="multi-dd" @click=${(e)=>{ e.stopPropagation(); this._openRepeatMenu = !this._openRepeatMenu; }}>
+										<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:4px;">${this._t("repeat.auto_assign")}</div>
+										<div class="multi-dd" @click=${o=>{o.stopPropagation(),this._openRepeatMenu=!this._openRepeatMenu}}>
 											<div class="box">
-												<span class="multi-dd-value ${this._repeatAssign && this._repeatAssign.size ? '' : 'placeholder'}">
-													${(()=>{ const ids=this._repeatAssign||new Set(); const names=children.filter(c=>ids.has(c.id)).map(c=>c.name); return names.length? (names.slice(0,2).join(', ')+(names.length>2?` +${names.length-2}`:'')) : '—'; })()}
+												<span class="multi-dd-value ${this._repeatAssign&&this._repeatAssign.size?"":"placeholder"}">
+													${(()=>{let o=this._repeatAssign||new Set,c=t.filter(u=>o.has(u.id)).map(u=>u.name);return c.length?c.slice(0,2).join(", ")+(c.length>2?` +${c.length-2}`:""):"\u2014"})()}
 												</span>
 												<ha-icon icon="mdi:chevron-down"></ha-icon>
 											</div>
-											${this._openRepeatMenu ? html`
-												<div class="multi-dd-menu" @click=${e=> e.stopPropagation()}>
-													${children.map(c=> html`<label><input type="checkbox" .checked=${this._repeatAssign?.has?.(c.id)} @change=${(e)=>{ const s=this._repeatAssign instanceof Set? this._repeatAssign : new Set(this._repeatAssign||[]); if(e.target.checked){ s.add(c.id);}else{ s.delete(c.id);} this._repeatAssign=s; this.requestUpdate(); }} /><span>${c.name}</span></label>`)}
+											${this._openRepeatMenu?n`
+												<div class="multi-dd-menu" @click=${o=>o.stopPropagation()}>
+													${t.map(o=>n`<label><input type="checkbox" .checked=${this._repeatAssign?.has?.(o.id)} @change=${c=>{let u=this._repeatAssign instanceof Set?this._repeatAssign:new Set(this._repeatAssign||[]);c.target.checked?u.add(o.id):u.delete(o.id),this._repeatAssign=u,this.requestUpdate()}} /><span>${o.name}</span></label>`)}
 												</div>
-											` : ''}
+											`:""}
 										</div>
 									</div>
 								</div>
-							` : ''}
+							`:""}
 						</div>
 					</div>
 					<div class="row">
-						<button type="button" class="btn-ghost" @click=${()=> this._iconModalOpen = true}>${this._t('icon.choose')}</button>
-						${this._editingTask ? html`
-							<button class="btn-primary" ?disabled=${this._hasFormErrors} @click=${this._saveEditedTask}>${this._t('btn.update_task')}</button>
-							<span style="font-size:.9rem; color: var(--secondary-text-color);">${this._t('editor.loaded_task')}</span>
-						` : html`
-							<button class="btn-primary" ?disabled=${this._hasFormErrors} @click=${this._createTask}>${this._t('btn.create_task')}</button>
+						<button type="button" class="btn-ghost" @click=${()=>this._iconModalOpen=!0}>${this._t("icon.choose")}</button>
+						${this._editingTask?n`
+							<button class="btn-primary" ?disabled=${this._hasFormErrors} @click=${this._saveEditedTask}>${this._t("btn.update_task")}</button>
+							<span style="font-size:.9rem; color: var(--secondary-text-color);">${this._t("editor.loaded_task")}</span>
+						`:n`
+							<button class="btn-primary" ?disabled=${this._hasFormErrors} @click=${this._createTask}>${this._t("btn.create_task")}</button>
 						`}
 					</div>
 				`}
-					` : ''}
+					`:""}
 
 
-					${visible('tasks') ? html`
+					${p("tasks")?n`
 					<hr />
 					<h3 class="h3-row">
-						<span class="collapsible" @click=${()=>this._toggleSection('tasks')}><ha-icon class="chev ${this._isCollapsed('tasks')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('section.tasks')}</span>
-						<button class="btn-ghost icon-btn" title="${this._t('sort.configure')}" @click=${()=> this._sortModalOpen = true}><ha-icon icon="mdi:sort-variant"></ha-icon></button>
+						<span class="collapsible" @click=${()=>this._toggleSection("tasks")}><ha-icon class="chev ${this._isCollapsed("tasks")?"rot":""}" icon="mdi:chevron-down"></ha-icon>${this._t("section.tasks")}</span>
+						<button class="btn-ghost icon-btn" title="${this._t("sort.configure")}" @click=${()=>this._sortModalOpen=!0}><ha-icon icon="mdi:sort-variant"></ha-icon></button>
 					</h3>
-					${this._isCollapsed('tasks')? '' : html`<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center">
-						<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th class="assign-col">${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
-						<tbody @click=${()=>{ this._openAssignMenuFor = null; this._assignMenuStyle=''; }}>
-										${this._sortTasks(this._store.allTasks.filter(t=>!t.assigned_to), false).map(t=> html`
-								<tr data-task="${t.id}">
-									<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}${t.due_time ? this._renderDeadline(t) : ''}</td>
-								${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
-									<td data-label="${this._t('th.categories')}">
-										${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const cats=this._orderedCategories(ids); return cats.length? cats.map(c=> this._renderCategoryChip(c)) : html`—`; })()}
+					${this._isCollapsed("tasks")?"":n`<div class="table-wrap chore-layout" data-columns=${S(this.hass).chore_columns||"auto"}><table class="table-center">
+						<thead><tr><th>${this._t("ph.title")}</th>${i?n`<th>${this._t("ph.points")}</th>`:""}<th>${this._t("th.categories")}</th><th class="assign-col">${this._t("th.assign")}</th><th>${this._t("th.actions")}</th></tr></thead>
+						<tbody @click=${()=>{this._openAssignMenuFor=null,this._assignMenuStyle=""}}>
+										${this._sortTasks(this._store.allTasks.filter(o=>!o.assigned_to),!1).map(o=>n`
+								<tr data-task="${o.id}">
+									<td data-label="${this._t("ph.title")}">${o.title}${String(o?.bonus_title||"").trim()?` \u2022 ${this._t("lbl.bonus")}: ${String(o?.bonus_title||"").trim()}`:""}${E(o.icon,"inline-ico")}${o.due_time?this._renderDeadline(o):""}</td>
+								${i?n`<td data-label="${this._t("ph.points")}"><b>${o.points}</b></td>`:""}
+									<td data-label="${this._t("th.categories")}">
+										${(()=>{let c=Array.isArray(o.categories)?o.categories:[],u=this._orderedCategories(c);return u.length?u.map(l=>this._renderCategoryChip(l)):n`—`})()}
 									</td>
-												<td class="assign-cell" data-label="${this._t('th.assign')}">
-													${this._autoAssignActive(t) ? (()=>{
-														const ids = (Array.isArray(t.repeat_child_ids)&&t.repeat_child_ids.length)? t.repeat_child_ids : (t.repeat_child_id? [t.repeat_child_id]:[]);
-														const names = this._store.children.filter(c=> ids.includes(c.id)).map(c=> c.name);
-														return html`<span>${this._t('assign.auto_to',{names: (names.length? names.join(', ') : '—')})}</span>`;
-													})() : html`
-													<div class="multi-dd task-assign-dd" @click=${(e)=>{ e.stopPropagation(); const open = this._openAssignMenuFor===t.id? null : t.id; this._openAssignMenuFor = open; if (open){ try{ const box=e.currentTarget.querySelector('.box'); const r=box.getBoundingClientRect(); this._assignMenuStyle=`position:fixed;left:${Math.round(r.left)}px;top:${Math.round(r.bottom+4)}px;width:${Math.round(r.width)}px;z-index:200000`; }catch{ this._assignMenuStyle=''; } } else { this._assignMenuStyle=''; } }}>
-														<div class="box"><span class="multi-dd-value placeholder">${this._t('select.assign_child')}</span><ha-icon icon="mdi:chevron-down"></ha-icon></div>
-														${this._openAssignMenuFor===t.id ? html`
-															<div class="multi-dd-menu" style="${this._assignMenuStyle||''}" @click=${e=> e.stopPropagation()}>
-																${this._store.children.map(c=> html`<label><input class="c4k-assign" type="checkbox" value=${c.id} @change=${(e)=> this._updateAssignSummary(t.id, t)} /><span>${c.name}</span></label>`)}
+												<td class="assign-cell" data-label="${this._t("th.assign")}">
+													${this._autoAssignActive(o)?(()=>{let c=Array.isArray(o.repeat_child_ids)&&o.repeat_child_ids.length?o.repeat_child_ids:o.repeat_child_id?[o.repeat_child_id]:[],u=this._store.children.filter(l=>c.includes(l.id)).map(l=>l.name);return n`<span>${this._t("assign.auto_to",{names:u.length?u.join(", "):"\u2014"})}</span>`})():n`
+													<div class="multi-dd task-assign-dd" @click=${c=>{c.stopPropagation();let u=this._openAssignMenuFor===o.id?null:o.id;if(this._openAssignMenuFor=u,u)try{let d=c.currentTarget.querySelector(".box").getBoundingClientRect();this._assignMenuStyle=`position:fixed;left:${Math.round(d.left)}px;top:${Math.round(d.bottom+4)}px;width:${Math.round(d.width)}px;z-index:200000`}catch{this._assignMenuStyle=""}else this._assignMenuStyle=""}}>
+														<div class="box"><span class="multi-dd-value placeholder">${this._t("select.assign_child")}</span><ha-icon icon="mdi:chevron-down"></ha-icon></div>
+														${this._openAssignMenuFor===o.id?n`
+															<div class="multi-dd-menu" style="${this._assignMenuStyle||""}" @click=${c=>c.stopPropagation()}>
+																${this._store.children.map(c=>n`<label><input class="c4k-assign" type="checkbox" value=${c.id} @change=${u=>this._updateAssignSummary(o.id,o)} /><span>${c.name}</span></label>`)}
 															</div>
-														`: ''}
+														`:""}
 													</div>`}
 												</td>
-									<td data-label="${this._t('th.actions')}">
+									<td data-label="${this._t("th.actions")}">
 														<!-- Weekly/monthly auto-assign is edited via the task edit modal
 														     (see _editTask + the repeat-assign block above around
 														     line 1998), which properly scopes _repeatAssign to the
@@ -3043,259 +681,198 @@ class Chores4KidsDevCard extends LitElement {
 														     across every row in the table (so checking a box appeared
 														     to "auto assign" every other weekly/monthly task too) and
 														     never called any service to save the change - removed (#39). -->
-										<button class="btn-ghost" @click=${()=> this._editTask(t)}>${this._t('btn.edit')}</button>
-										<button class="btn-primary" ?disabled=${this._autoAssignActive(t)} title="${this._autoAssignActive(t)? this._t('assign.disabled_auto') : ''}" @click=${()=> {
-											const row = this.shadowRoot.querySelector(`tr[data-task="${t.id}"]`);
-											const checkedNow = Array.from(row?.querySelectorAll('.c4k-assign:checked')||[]).map(i=> i.value);
-											const ids = (Array.isArray(t._assignToMulti) && t._assignToMulti.length) ? t._assignToMulti : checkedNow;
-											this._assignTaskMulti(t, ids);
-										}}>${this._t('btn.assign')}</button>
-										<button class="btn-danger" @click=${()=> this._deleteTask(t.id)}>${this._t('btn.delete')}</button>
+										<button class="btn-ghost" @click=${()=>this._editTask(o)}>${this._t("btn.edit")}</button>
+										<button class="btn-primary" ?disabled=${this._autoAssignActive(o)} title="${this._autoAssignActive(o)?this._t("assign.disabled_auto"):""}" @click=${()=>{let c=this.shadowRoot.querySelector(`tr[data-task="${o.id}"]`),u=Array.from(c?.querySelectorAll(".c4k-assign:checked")||[]).map(d=>d.value),l=Array.isArray(o._assignToMulti)&&o._assignToMulti.length?o._assignToMulti:u;this._assignTaskMulti(o,l)}}>${this._t("btn.assign")}</button>
+										<button class="btn-danger" @click=${()=>this._deleteTask(o.id)}>${this._t("btn.delete")}</button>
 									</td>
 								</tr>
 							`)}
 						</tbody>
 						</table></div>`}
-					` : ''}
+					`:""}
 
-					${visible('assigned') ? html`
+					${p("assigned")?n`
 					<hr />
 					<h3 class="h3-row">
-						<span class="collapsible" @click=${()=>this._toggleSection('overview')}><ha-icon class="chev ${this._isCollapsed('overview')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('overview.title')}</span>
-						<button class="btn-ghost icon-btn" title="${this._t('sort.configure')}" @click=${()=> this._sortModalOpen = true}><ha-icon icon="mdi:sort-variant"></ha-icon></button>
+						<span class="collapsible" @click=${()=>this._toggleSection("overview")}><ha-icon class="chev ${this._isCollapsed("overview")?"rot":""}" icon="mdi:chevron-down"></ha-icon>${this._t("overview.title")}</span>
+						<button class="btn-ghost icon-btn" title="${this._t("sort.configure")}" @click=${()=>this._sortModalOpen=!0}><ha-icon icon="mdi:sort-variant"></ha-icon></button>
 					</h3>
-					${this._isCollapsed('overview')? '' : (()=>{
-						const allAssigned=(this._store.allTasks||[]).filter(t=>!!t.assigned_to);
-						const active=allAssigned.filter(t=>!['approved','awaiting_approval','taken'].includes(this._effectiveStatus(t)));
-						if(!active.length) return html`<i>${this._t('overview.none_active')}</i>`;
-						const sorted=this._sortTasks(active, true);
-						const top=sorted.slice(0,3); const pending=allAssigned.filter(t=>t.status==='awaiting_approval').length;
-						const row=(t)=> html`<tr>
-							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}${t.due_time ? this._renderDeadline(t) : ''}</td>
-							${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
-							<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=this._orderedCategoryNames(ids); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
-							<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
-							<td data-label="${this._t('th.completed')}">${(()=>{ const ts=this._displayedTsFor(t); if(!ts) return html`—`; const dt=this._fmtDateTime(ts); return html`${dt.formatted}`; })()}</td>
-							<td data-label="${this._t('th.assign')}">${t.assigned_to_name || this._t('status.unassigned')}</td>
-							<td data-label="${this._t('th.actions')}">
-								${t.status==="assigned" ? html`
-									${this._canManualReassign(t) ? html`<button class="btn-ghost" @click=${()=>this._manualReassign(t)}>${this._t('btn.back')}</button>`:''}
-									<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>
-								`: t.status==="in_progress" ? html`
-									<button class="btn-ghost" @click=${()=>this._setStatus(t.id,'awaiting_approval')}>${this._t('btn.awaiting')}</button>
-									<button class="btn-ghost" @click=${()=>this._setStatus(t.id,'assigned')}>${this._t('btn.back')}</button>
-									<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>
-								`: t.status==="awaiting_approval" ? html`
-									${this._renderAwaitingActions(t)}
-								`: html`${this._renderBonusApproveBtn(t)}${this._canManualReassign(t) ? html`<button class="btn-ghost" @click=${()=>this._manualReassign(t)}>${this._t('btn.back')}</button>`:''}<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>`}
+					${this._isCollapsed("overview")?"":(()=>{let o=(this._store.allTasks||[]).filter(g=>!!g.assigned_to),c=o.filter(g=>!["approved","awaiting_approval","taken"].includes(this._effectiveStatus(g)));if(!c.length)return n`<i>${this._t("overview.none_active")}</i>`;let l=this._sortTasks(c,!0).slice(0,3),d=o.filter(g=>g.status==="awaiting_approval").length,m=g=>n`<tr>
+							<td data-label="${this._t("ph.title")}">${g.title}${String(g?.bonus_title||"").trim()?` \u2022 ${this._t("lbl.bonus")}: ${String(g?.bonus_title||"").trim()}`:""}${E(g.icon,"inline-ico")}${g.due_time?this._renderDeadline(g):""}</td>
+							${i?n`<td data-label="${this._t("ph.points")}"><b>${g.points}</b></td>`:""}
+							<td data-label="${this._t("th.categories")}">${(()=>{let _=Array.isArray(g.categories)?g.categories:[],f=this._orderedCategoryNames(_);return f.length?f.map(y=>n`<span class='chip'>${y}</span>`):n`—`})()}</td>
+							<td data-label="${this._t("th.status")}">${this._renderStatusBadge(g)}</td>
+							<td data-label="${this._t("th.completed")}">${(()=>{let _=this._displayedTsFor(g);if(!_)return n`—`;let f=this._fmtDateTime(_);return n`${f.formatted}`})()}</td>
+							<td data-label="${this._t("th.assign")}">${g.assigned_to_name||this._t("status.unassigned")}</td>
+							<td data-label="${this._t("th.actions")}">
+								${g.status==="assigned"?n`
+									${this._canManualReassign(g)?n`<button class="btn-ghost" @click=${()=>this._manualReassign(g)}>${this._t("btn.back")}</button>`:""}
+									<button class="btn-danger" @click=${()=>this._deleteTask(g.id)}>${this._t("btn.delete")}</button>
+								`:g.status==="in_progress"?n`
+									<button class="btn-ghost" @click=${()=>this._setStatus(g.id,"awaiting_approval")}>${this._t("btn.awaiting")}</button>
+									<button class="btn-ghost" @click=${()=>this._setStatus(g.id,"assigned")}>${this._t("btn.back")}</button>
+									<button class="btn-danger" @click=${()=>this._deleteTask(g.id)}>${this._t("btn.delete")}</button>
+								`:g.status==="awaiting_approval"?n`
+									${this._renderAwaitingActions(g)}
+								`:n`${this._renderBonusApproveBtn(g)}${this._canManualReassign(g)?n`<button class="btn-ghost" @click=${()=>this._manualReassign(g)}>${this._t("btn.back")}</button>`:""}<button class="btn-danger" @click=${()=>this._deleteTask(g.id)}>${this._t("btn.delete")}</button>`}
 							</td>
-						</tr>`;
-						return html`
-							<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
-								<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
-								<tbody>${top.map(row)}</tbody>
+						</tr>`;return n`
+							<div class="table-wrap chore-layout" data-columns=${S(this.hass).chore_columns||"auto"}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
+								<thead><tr><th>${this._t("ph.title")}</th>${i?n`<th>${this._t("ph.points")}</th>`:""}<th>${this._t("th.categories")}</th><th>${this._t("th.status")}</th><th>${this._t("th.completed")}</th><th>${this._t("th.assign")}</th><th>${this._t("th.actions")}</th></tr></thead>
+								<tbody>${l.map(m)}</tbody>
 							</table></div>
-							<div class="row" style="justify-content:flex-end;">${active.length>3? html`<button class="btn-primary" @click=${()=>this._tasksModalOpen=true}>${this._t('overview.show_all',{pending})}</button>`:''}</div>
-						`;
-					})()}
-					` : ''}
+							<div class="row" style="justify-content:flex-end;">${c.length>3?n`<button class="btn-primary" @click=${()=>this._tasksModalOpen=!0}>${this._t("overview.show_all",{pending:d})}</button>`:""}</div>
+						`})()}
+					`:""}
 
-					${visible('approvals') ? html`
+					${p("approvals")?n`
 					<h3 class="h3-row">
-						<span class="collapsible" @click=${()=>this._toggleSection('awaiting')}><ha-icon class="chev ${this._isCollapsed('awaiting')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('lbl.awaiting')}</span>
+						<span class="collapsible" @click=${()=>this._toggleSection("awaiting")}><ha-icon class="chev ${this._isCollapsed("awaiting")?"rot":""}" icon="mdi:chevron-down"></ha-icon>${this._t("lbl.awaiting")}</span>
 					</h3>
-					${this._isCollapsed('awaiting')? '' : (()=>{
-						const allAssigned=(this._store.allTasks||[]).filter(t=>!!t.assigned_to);
-						const awaiting=allAssigned.filter(t=>this._effectiveStatus(t)==='awaiting_approval');
-						if(!awaiting.length) return html`<i>${this._t('overview.none_active')}</i>`;
-						const sorted=this._sortTasks(awaiting, true);
-						const row=(t)=> html`<tr>
-							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}${t.due_time ? this._renderDeadline(t) : ''}</td>
-							${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
-							<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=this._orderedCategoryNames(ids); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
-							<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
-							<td data-label="${this._t('th.completed')}">${(()=>{ const ts=this._displayedTsFor(t); if(!ts) return html`—`; const dt=this._fmtDateTime(ts); return html`${dt.formatted}`; })()}</td>
-							<td data-label="${this._t('th.assign')}">${t.assigned_to_name || this._t('status.unassigned')}</td>
-							<td data-label="${this._t('th.actions')}">
-								${this._renderAwaitingActions(t)}
+					${this._isCollapsed("awaiting")?"":(()=>{let c=(this._store.allTasks||[]).filter(d=>!!d.assigned_to).filter(d=>this._effectiveStatus(d)==="awaiting_approval");if(!c.length)return n`<i>${this._t("overview.none_active")}</i>`;let u=this._sortTasks(c,!0),l=d=>n`<tr>
+							<td data-label="${this._t("ph.title")}">${d.title}${String(d?.bonus_title||"").trim()?` \u2022 ${this._t("lbl.bonus")}: ${String(d?.bonus_title||"").trim()}`:""}${E(d.icon,"inline-ico")}${d.due_time?this._renderDeadline(d):""}</td>
+							${i?n`<td data-label="${this._t("ph.points")}"><b>${d.points}</b></td>`:""}
+							<td data-label="${this._t("th.categories")}">${(()=>{let m=Array.isArray(d.categories)?d.categories:[],g=this._orderedCategoryNames(m);return g.length?g.map(_=>n`<span class='chip'>${_}</span>`):n`—`})()}</td>
+							<td data-label="${this._t("th.status")}">${this._renderStatusBadge(d)}</td>
+							<td data-label="${this._t("th.completed")}">${(()=>{let m=this._displayedTsFor(d);if(!m)return n`—`;let g=this._fmtDateTime(m);return n`${g.formatted}`})()}</td>
+							<td data-label="${this._t("th.assign")}">${d.assigned_to_name||this._t("status.unassigned")}</td>
+							<td data-label="${this._t("th.actions")}">
+								${this._renderAwaitingActions(d)}
 							</td>
-						</tr>`;
-						return html`
-							<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
-								<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
-								<tbody>${sorted.map(row)}</tbody>
+						</tr>`;return n`
+							<div class="table-wrap chore-layout" data-columns=${S(this.hass).chore_columns||"auto"}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
+								<thead><tr><th>${this._t("ph.title")}</th>${i?n`<th>${this._t("ph.points")}</th>`:""}<th>${this._t("th.categories")}</th><th>${this._t("th.status")}</th><th>${this._t("th.completed")}</th><th>${this._t("th.assign")}</th><th>${this._t("th.actions")}</th></tr></thead>
+								<tbody>${u.map(l)}</tbody>
 							</table></div>
-						`;
-					})()}
-					` : ''}
+						`})()}
+					`:""}
 
-					${visible('finished') ? html`
+					${p("finished")?n`
 					<h3 class="h3-row">
-						<span class="collapsible" @click=${()=>this._toggleSection('finished')}><ha-icon class="chev ${this._isCollapsed('finished')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('overview.finished_title')}</span>
+						<span class="collapsible" @click=${()=>this._toggleSection("finished")}><ha-icon class="chev ${this._isCollapsed("finished")?"rot":""}" icon="mdi:chevron-down"></ha-icon>${this._t("overview.finished_title")}</span>
 					</h3>
-					${this._isCollapsed('finished')? '' : (()=>{
-						const allAssigned=(this._store.allTasks||[]).filter(t=>!!t.assigned_to);
-						const finished=allAssigned.filter(t=>['approved','taken'].includes(this._effectiveStatus(t)));
-						if(!finished.length) return html`<i>${this._t('overview.finished_none')}</i>`;
-						const sorted=this._sortTasks(finished, true);
-						const row=(t)=> html`<tr>
-							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}${t.due_time ? this._renderDeadline(t) : ''}</td>
-							${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
-							<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=this._orderedCategoryNames(ids); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
-								<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
-							<td data-label="${this._t('th.completed')}">${(()=>{ const ts=this._displayedTsFor(t); if(!ts) return html`—`; const dt=this._fmtDateTime(ts); return html`${dt.formatted}`; })()}</td>
-							<td data-label="${this._t('th.assign')}">${t.assigned_to_name || this._t('status.unassigned')}</td>
-							<td data-label="${this._t('th.actions')}">
-								${t.status==="awaiting_approval" ? html`
-									${this._renderAwaitingActions(t)}
-								` : html`
-									${this._renderBonusApproveBtn(t)}
-									${this._canManualReassign(t) ? html`<button class="btn-ghost" @click=${()=>this._manualReassign(t)}>${this._t('btn.back')}</button>`:''}
-									<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>
+					${this._isCollapsed("finished")?"":(()=>{let c=(this._store.allTasks||[]).filter(d=>!!d.assigned_to).filter(d=>["approved","taken"].includes(this._effectiveStatus(d)));if(!c.length)return n`<i>${this._t("overview.finished_none")}</i>`;let u=this._sortTasks(c,!0),l=d=>n`<tr>
+							<td data-label="${this._t("ph.title")}">${d.title}${String(d?.bonus_title||"").trim()?` \u2022 ${this._t("lbl.bonus")}: ${String(d?.bonus_title||"").trim()}`:""}${E(d.icon,"inline-ico")}${d.due_time?this._renderDeadline(d):""}</td>
+							${i?n`<td data-label="${this._t("ph.points")}"><b>${d.points}</b></td>`:""}
+							<td data-label="${this._t("th.categories")}">${(()=>{let m=Array.isArray(d.categories)?d.categories:[],g=this._orderedCategoryNames(m);return g.length?g.map(_=>n`<span class='chip'>${_}</span>`):n`—`})()}</td>
+								<td data-label="${this._t("th.status")}">${this._renderStatusBadge(d)}</td>
+							<td data-label="${this._t("th.completed")}">${(()=>{let m=this._displayedTsFor(d);if(!m)return n`—`;let g=this._fmtDateTime(m);return n`${g.formatted}`})()}</td>
+							<td data-label="${this._t("th.assign")}">${d.assigned_to_name||this._t("status.unassigned")}</td>
+							<td data-label="${this._t("th.actions")}">
+								${d.status==="awaiting_approval"?n`
+									${this._renderAwaitingActions(d)}
+								`:n`
+									${this._renderBonusApproveBtn(d)}
+									${this._canManualReassign(d)?n`<button class="btn-ghost" @click=${()=>this._manualReassign(d)}>${this._t("btn.back")}</button>`:""}
+									<button class="btn-danger" @click=${()=>this._deleteTask(d.id)}>${this._t("btn.delete")}</button>
 								`}
 							</td>
-						</tr>`;
-						return html`
-							<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
-								<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
-								<tbody>${sorted.map(row)}</tbody>
+						</tr>`;return n`
+							<div class="table-wrap chore-layout" data-columns=${S(this.hass).chore_columns||"auto"}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
+								<thead><tr><th>${this._t("ph.title")}</th>${i?n`<th>${this._t("ph.points")}</th>`:""}<th>${this._t("th.categories")}</th><th>${this._t("th.status")}</th><th>${this._t("th.completed")}</th><th>${this._t("th.assign")}</th><th>${this._t("th.actions")}</th></tr></thead>
+								<tbody>${u.map(l)}</tbody>
 							</table></div>
-						`;
-					})()}
-					` : ''}
+						`})()}
+					`:""}
 
-				${visible('history') ? this._renderHistory() : ''}
+				${p("history")?this._renderHistory():""}
 
-				${visible('scoreboard') && showScoreboard ? html`
+				${p("scoreboard")&&s?n`
 					<hr />
-					<h3 class="h3-row"><span class="collapsible" @click=${()=>this._toggleSection('scoreboard')}><ha-icon class="chev ${this._isCollapsed('scoreboard')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('section.scoreboard')}</span></h3>
-					${this._isCollapsed('scoreboard')? '' : html`
+					<h3 class="h3-row"><span class="collapsible" @click=${()=>this._toggleSection("scoreboard")}><ha-icon class="chev ${this._isCollapsed("scoreboard")?"rot":""}" icon="mdi:chevron-down"></ha-icon>${this._t("section.scoreboard")}</span></h3>
+					${this._isCollapsed("scoreboard")?"":n`
 						<ol style="display:grid; gap:8px; padding-left:18px;">
-							${[...children].sort((a,b)=>b.points-a.points).map((c,i)=> html`
-								<li style="display:flex; align-items:center; gap:10px;"><span class="badge status-in_progress">#${i+1}</span><span style="flex:1;">${c.name}</span><b>${c.points} ${this._t('lbl.points')}</b></li>
+							${[...t].sort((o,c)=>c.points-o.points).map((o,c)=>n`
+								<li style="display:flex; align-items:center; gap:10px;"><span class="badge status-in_progress">#${c+1}</span><span style="flex:1;">${o.name}</span><b>${o.points} ${this._t("lbl.points")}</b></li>
 							`)}
 						</ol>
 					`}
-				` : ''}
-				${visible('deliveries') ? this._renderDeliveries(customized) : ''}
-				${customized && visible('shop') && pointsEnabled ? html`<section class="shop-modal">${this._renderAdminShop()}</section>` : ''}
+				`:""}
+				${p("deliveries")?this._renderDeliveries(r):""}
+				${r&&p("shop")&&i?n`<section class="shop-modal">${this._renderAdminShop()}</section>`:""}
 				</div>
 
-				${pointsEnabled ? this._renderPointsModal() : ''}
+				${i?this._renderPointsModal():""}
 				${this._renderAllTasksModal()}
-				${!customized && pointsEnabled ? this._renderShopModal() : ''}
+				${!r&&i?this._renderShopModal():""}
 			${this._renderAdvancedModal()}
 			${this._renderSortModal()}
 				${this._renderReassignModal()}
 		</ha-card>
 		${this._renderIconModal()}
 		${this._renderCustomIconModal()}
-	`;
-}	// ------- OVERVIEW-ONLY VIEW -------
-	_renderOverviewOnly(){
-		const pointsEnabled = this._pointsEnabled();
-		const all=(this._store.allTasks||[]).filter(t=>!!t.assigned_to && !['approved','awaiting_approval','taken'].includes(this._effectiveStatus(t)));
-		return html`
-			<ha-card header="${this._t('overview.title')}">
+	`}_renderOverviewOnly(){let t=this._pointsEnabled(),e=(this._store.allTasks||[]).filter(i=>!!i.assigned_to&&!["approved","awaiting_approval","taken"].includes(this._effectiveStatus(i)));return n`
+			<ha-card header="${this._t("overview.title")}">
 				<div class="card-content">
-					${all.length===0 ? html`<i>${this._t('overview.none')}</i>` : (()=>{
-						const parse=(x)=>{ try{ return x? new Date(x).getTime():0; }catch{return 0;} };
-						const sorted=this._sortTasks(all, true);
-						const top=sorted.slice(0,3); const pending=all.filter(t=>t.status==='awaiting_approval').length;
-						const row=(t)=> html`<tr>
-							<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}${t.due_time ? this._renderDeadline(t) : ''}</td>
-							${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
-							<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=(this._store.categories||[]).filter(c=> ids.includes(c.id)).map(c=> c.name); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
-							<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
-							<td data-label="${this._t('th.assign')}">${t.assigned_to_name || this._t('status.unassigned')}</td>
-							<td data-label="${this._t('th.actions')}">
-								${t.status==="assigned" ? html`
-									${this._canManualReassign(t) ? html`<button class="btn-ghost" @click=${()=>this._manualReassign(t)}>${this._t('btn.back')}</button>`:''}
-									<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>
-								` : t.status==="in_progress" ? html`
-									<button class="btn-ghost" @click=${()=>this._setStatus(t.id,'awaiting_approval')}>${this._t('btn.awaiting')}</button>
-									<button class="btn-ghost" @click=${()=>this._setStatus(t.id,'assigned')}>${this._t('btn.back')}</button>
-									<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>
-								`: t.status==="awaiting_approval" ? html`
-									${this._renderAwaitingApproveBtns(t)}
-									<button class="btn-ghost" @click=${()=>this._setStatus(t.id,'assigned')}>${this._t('btn.back')}</button>
-									<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>
-								`: html`${this._renderBonusApproveBtn(t)}${this._canManualReassign(t) ? html`<button class="btn-ghost" @click=${()=>this._manualReassign(t)}>${this._t('btn.back')}</button>`:''}<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>`}
+					${e.length===0?n`<i>${this._t("overview.none")}</i>`:(()=>{let i=o=>{try{return o?new Date(o).getTime():0}catch{return 0}},a=this._sortTasks(e,!0).slice(0,3),r=e.filter(o=>o.status==="awaiting_approval").length,p=o=>n`<tr>
+							<td data-label="${this._t("ph.title")}">${o.title}${String(o?.bonus_title||"").trim()?` \u2022 ${this._t("lbl.bonus")}: ${String(o?.bonus_title||"").trim()}`:""}${E(o.icon,"inline-ico")}${o.due_time?this._renderDeadline(o):""}</td>
+							${t?n`<td data-label="${this._t("ph.points")}"><b>${o.points}</b></td>`:""}
+							<td data-label="${this._t("th.categories")}">${(()=>{let c=Array.isArray(o.categories)?o.categories:[],u=(this._store.categories||[]).filter(l=>c.includes(l.id)).map(l=>l.name);return u.length?u.map(l=>n`<span class='chip'>${l}</span>`):n`—`})()}</td>
+							<td data-label="${this._t("th.status")}">${this._renderStatusBadge(o)}</td>
+							<td data-label="${this._t("th.assign")}">${o.assigned_to_name||this._t("status.unassigned")}</td>
+							<td data-label="${this._t("th.actions")}">
+								${o.status==="assigned"?n`
+									${this._canManualReassign(o)?n`<button class="btn-ghost" @click=${()=>this._manualReassign(o)}>${this._t("btn.back")}</button>`:""}
+									<button class="btn-danger" @click=${()=>this._deleteTask(o.id)}>${this._t("btn.delete")}</button>
+								`:o.status==="in_progress"?n`
+									<button class="btn-ghost" @click=${()=>this._setStatus(o.id,"awaiting_approval")}>${this._t("btn.awaiting")}</button>
+									<button class="btn-ghost" @click=${()=>this._setStatus(o.id,"assigned")}>${this._t("btn.back")}</button>
+									<button class="btn-danger" @click=${()=>this._deleteTask(o.id)}>${this._t("btn.delete")}</button>
+								`:o.status==="awaiting_approval"?n`
+									${this._renderAwaitingApproveBtns(o)}
+									<button class="btn-ghost" @click=${()=>this._setStatus(o.id,"assigned")}>${this._t("btn.back")}</button>
+									<button class="btn-danger" @click=${()=>this._deleteTask(o.id)}>${this._t("btn.delete")}</button>
+								`:n`${this._renderBonusApproveBtn(o)}${this._canManualReassign(o)?n`<button class="btn-ghost" @click=${()=>this._manualReassign(o)}>${this._t("btn.back")}</button>`:""}<button class="btn-danger" @click=${()=>this._deleteTask(o.id)}>${this._t("btn.delete")}</button>`}
 							</td>
-						</tr>`;
-						return html`
-							<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center">
-								<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
-								<tbody>${top.map(row)}</tbody>
+						</tr>`;return n`
+							<div class="table-wrap chore-layout" data-columns=${S(this.hass).chore_columns||"auto"}><table class="table-center">
+								<thead><tr><th>${this._t("ph.title")}</th>${t?n`<th>${this._t("ph.points")}</th>`:""}<th>${this._t("th.categories")}</th><th>${this._t("th.status")}</th><th>${this._t("th.completed")}</th><th>${this._t("th.assign")}</th><th>${this._t("th.actions")}</th></tr></thead>
+								<tbody>${a.map(p)}</tbody>
 							</table></div>
-							<div class="row" style="justify-content:flex-end;">${all.length>3? html`<button class="btn-primary" @click=${()=>this._tasksModalOpen=true}>${this._t('overview.show_all',{pending})}</button>`:''}</div>
-						`;
-					})()}
+							<div class="row" style="justify-content:flex-end;">${e.length>3?n`<button class="btn-primary" @click=${()=>this._tasksModalOpen=!0}>${this._t("overview.show_all",{pending:r})}</button>`:""}</div>
+						`})()}
 				</div>
 				${this._renderAllTasksModal()}
-			</ha-card>`;
-	}
-
-	_renderPointsModal(){
-		return html`<div class="overlay ${this._pointsChild?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) this._closePoints(); }}>
-			<div class="modal" @click=${e=>e.stopPropagation()}>
-				<h3>${this._pointsChild ? this._t('points.title', { name: this._pointsChild.name }) : ''}</h3>
-				<div style="font-size:.85rem; color: var(--secondary-text-color);">${this._t('points.quick')}</div>
-				<div class="row" style="gap:8px;">${[5,10,15,20].map(n=> html`<button class="btn-primary" @click=${()=>this._addPointsQuick(n)}>+${n}</button>`)}</div>
-				<div style="font-size:.85rem; color: var(--secondary-text-color);">${this._t('points.remove')}</div>
-				<div class="row" style="gap:8px;">${[5,10,15,20].map(n=> html`<button class="btn-danger" @click=${()=>this._addPointsQuick(-n)}>−${n}</button>`)}</div>
-				<div style="font-size:.85rem; color: var(--secondary-text-color);">${this._t('points.custom')}</div>
+			</ha-card>`}_renderPointsModal(){return n`<div class="overlay ${this._pointsChild?"open":""}" @click=${t=>{t.target.classList.contains("overlay")&&this._closePoints()}}>
+			<div class="modal" @click=${t=>t.stopPropagation()}>
+				<h3>${this._pointsChild?this._t("points.title",{name:this._pointsChild.name}):""}</h3>
+				<div style="font-size:.85rem; color: var(--secondary-text-color);">${this._t("points.quick")}</div>
+				<div class="row" style="gap:8px;">${[5,10,15,20].map(t=>n`<button class="btn-primary" @click=${()=>this._addPointsQuick(t)}>+${t}</button>`)}</div>
+				<div style="font-size:.85rem; color: var(--secondary-text-color);">${this._t("points.remove")}</div>
+				<div class="row" style="gap:8px;">${[5,10,15,20].map(t=>n`<button class="btn-danger" @click=${()=>this._addPointsQuick(-t)}>−${t}</button>`)}</div>
+				<div style="font-size:.85rem; color: var(--secondary-text-color);">${this._t("points.custom")}</div>
 				<div class="row" style="gap:6px; align-items:center;">
-					<input type="number" .value=${String(this._pointsValue||0)} @input=${e=> this._pointsValue = Number(e.target.value||0)} style="max-width:120px;" />
-					<button class="btn-primary" @click=${()=>this._addPointsQuick(this._pointsValue||0)}>${this._t('form.add')}</button>
-					<button class="btn-ghost" @click=${this._closePoints}>${this._t('form.cancel')}</button>
+					<input type="number" .value=${String(this._pointsValue||0)} @input=${t=>this._pointsValue=Number(t.target.value||0)} style="max-width:120px;" />
+					<button class="btn-primary" @click=${()=>this._addPointsQuick(this._pointsValue||0)}>${this._t("form.add")}</button>
+					<button class="btn-ghost" @click=${this._closePoints}>${this._t("form.cancel")}</button>
 				</div>
 			</div>
-		</div>`;
-	}
-	_renderAllTasksModal(){
-		const pointsEnabled = this._pointsEnabled();
-		return html`<div class="overlay ${this._tasksModalOpen?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) this._tasksModalOpen=false; }}>
-			${this._tasksModalOpen ? html`<div class="modal" style="max-width: 820px; width: min(95vw, 820px);" @click=${e=>e.stopPropagation()}>
-				<h3>${this._t('overview.title')}</h3>
+		</div>`}_renderAllTasksModal(){let t=this._pointsEnabled();return n`<div class="overlay ${this._tasksModalOpen?"open":""}" @click=${e=>{e.target.classList.contains("overlay")&&(this._tasksModalOpen=!1)}}>
+			${this._tasksModalOpen?n`<div class="modal" style="max-width: 820px; width: min(95vw, 820px);" @click=${e=>e.stopPropagation()}>
+				<h3>${this._t("overview.title")}</h3>
 				<div style="max-height:60vh; overflow:visible;">
-						<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
-							<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
-						<tbody>${(()=>{
-							const all=(this._store.allTasks||[]).filter(t=>!!t.assigned_to && !['approved','awaiting_approval','taken'].includes(this._effectiveStatus(t)));
-							const parse=(x)=>{ try{ return x? new Date(x).getTime():0; }catch{return 0;} };
-							const sorted=this._sortTasks(all, true);
-							return sorted.map((t)=> html`<tr>
-								<td data-label="${this._t('ph.title')}">${t.title}${String(t?.bonus_title||'').trim() ? ` • ${this._t('lbl.bonus')}: ${String(t?.bonus_title||'').trim()}` : ''}${c4kTaskIcon(t.icon, 'inline-ico')}${t.due_time ? this._renderDeadline(t) : ''}</td>
-								${pointsEnabled ? html`<td data-label="${this._t('ph.points')}"><b>${t.points}</b></td>`:''}
-								<td data-label="${this._t('th.categories')}">${(()=>{ const ids=Array.isArray(t.categories)? t.categories:[]; const names=this._orderedCategoryNames(ids); return names.length? names.map(n=> html`<span class='chip'>${n}</span>`): html`—`; })()}</td>
-								<td data-label="${this._t('th.status')}">${this._renderStatusBadge(t)}</td>
-								<td data-label="${this._t('th.completed')}">${(()=>{ const ts=this._displayedTsFor(t); if(!ts) return html`—`; const dt=this._fmtDateTime(ts); return html`${dt.formatted}`; })()}</td>
-								<td data-label="${this._t('th.assign')}">${t.assigned_to_name || this._t('status.unassigned')}</td>
-								<td data-label="${this._t('th.actions')}">
-									${t.status==="assigned" ? html`${this._canManualReassign(t) ? html`<button class="btn-ghost" @click=${()=>this._manualReassign(t)}>${this._t('btn.back')}</button>`:''}<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>`
-										: t.status==="in_progress" ? html`
-											<button class="btn-ghost" @click=${()=>this._setStatus(t.id,'awaiting_approval')}>${this._t('btn.awaiting')}</button>
-											<button class="btn-ghost" @click=${()=>this._setStatus(t.id,'assigned')}>${this._t('btn.back')}</button>
-											<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>`
-										: t.status==="awaiting_approval" ? html`
-											${this._renderAwaitingActions(t)}`
-										: html`${this._renderBonusApproveBtn(t)}${this._canManualReassign(t) ? html`<button class="btn-ghost" @click=${()=>this._manualReassign(t)}>${this._t('btn.back')}</button>`:''}<button class="btn-danger" @click=${()=>this._deleteTask(t.id)}>${this._t('btn.delete')}</button>`}
+						<div class="table-wrap chore-layout" data-columns=${S(this.hass).chore_columns||"auto"}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
+							<thead><tr><th>${this._t("ph.title")}</th>${t?n`<th>${this._t("ph.points")}</th>`:""}<th>${this._t("th.categories")}</th><th>${this._t("th.status")}</th><th>${this._t("th.completed")}</th><th>${this._t("th.assign")}</th><th>${this._t("th.actions")}</th></tr></thead>
+						<tbody>${(()=>{let e=(this._store.allTasks||[]).filter(a=>!!a.assigned_to&&!["approved","awaiting_approval","taken"].includes(this._effectiveStatus(a))),i=a=>{try{return a?new Date(a).getTime():0}catch{return 0}};return this._sortTasks(e,!0).map(a=>n`<tr>
+								<td data-label="${this._t("ph.title")}">${a.title}${String(a?.bonus_title||"").trim()?` \u2022 ${this._t("lbl.bonus")}: ${String(a?.bonus_title||"").trim()}`:""}${E(a.icon,"inline-ico")}${a.due_time?this._renderDeadline(a):""}</td>
+								${t?n`<td data-label="${this._t("ph.points")}"><b>${a.points}</b></td>`:""}
+								<td data-label="${this._t("th.categories")}">${(()=>{let r=Array.isArray(a.categories)?a.categories:[],p=this._orderedCategoryNames(r);return p.length?p.map(o=>n`<span class='chip'>${o}</span>`):n`—`})()}</td>
+								<td data-label="${this._t("th.status")}">${this._renderStatusBadge(a)}</td>
+								<td data-label="${this._t("th.completed")}">${(()=>{let r=this._displayedTsFor(a);if(!r)return n`—`;let p=this._fmtDateTime(r);return n`${p.formatted}`})()}</td>
+								<td data-label="${this._t("th.assign")}">${a.assigned_to_name||this._t("status.unassigned")}</td>
+								<td data-label="${this._t("th.actions")}">
+									${a.status==="assigned"?n`${this._canManualReassign(a)?n`<button class="btn-ghost" @click=${()=>this._manualReassign(a)}>${this._t("btn.back")}</button>`:""}<button class="btn-danger" @click=${()=>this._deleteTask(a.id)}>${this._t("btn.delete")}</button>`:a.status==="in_progress"?n`
+											<button class="btn-ghost" @click=${()=>this._setStatus(a.id,"awaiting_approval")}>${this._t("btn.awaiting")}</button>
+											<button class="btn-ghost" @click=${()=>this._setStatus(a.id,"assigned")}>${this._t("btn.back")}</button>
+											<button class="btn-danger" @click=${()=>this._deleteTask(a.id)}>${this._t("btn.delete")}</button>`:a.status==="awaiting_approval"?n`
+											${this._renderAwaitingActions(a)}`:n`${this._renderBonusApproveBtn(a)}${this._canManualReassign(a)?n`<button class="btn-ghost" @click=${()=>this._manualReassign(a)}>${this._t("btn.back")}</button>`:""}<button class="btn-danger" @click=${()=>this._deleteTask(a.id)}>${this._t("btn.delete")}</button>`}
 								</td>
-							</tr>`);
-						})()}</tbody>
+							</tr>`)})()}</tbody>
 					</table></div>
 				</div>
-				<div class="row" style="justify-content:flex-end; margin-top:8px;"><button class="btn-ghost" @click=${()=>this._tasksModalOpen=false}>${this._t('form.cancel')}</button></div>
-			</div>`: ''}
-		</div>`;
-	}
-
-		_renderAssignedFinishedColgroup(){
-			const pointsEnabled = this._pointsEnabled();
-			// Keep Assigned/Finished tables aligned by forcing identical column widths.
-			// Uses percentages so it scales with the available width.
-			return pointsEnabled ? html`<colgroup>
+				<div class="row" style="justify-content:flex-end; margin-top:8px;"><button class="btn-ghost" @click=${()=>this._tasksModalOpen=!1}>${this._t("form.cancel")}</button></div>
+			</div>`:""}
+		</div>`}_renderAssignedFinishedColgroup(){return this._pointsEnabled()?n`<colgroup>
 				<col style="width:22%;" />
 				<col style="width:8%;" />
 				<col style="width:16%;" />
@@ -3303,111 +880,61 @@ class Chores4KidsDevCard extends LitElement {
 				<col style="width:22%;" />
 				<col style="width:10%;" />
 				<col style="width:10%;" />
-			</colgroup>` : html`<colgroup>
+			</colgroup>`:n`<colgroup>
 				<col style="width:24%;" />
 				<col style="width:18%;" />
 				<col style="width:12%;" />
 				<col style="width:24%;" />
 				<col style="width:12%;" />
 				<col style="width:10%;" />
-			</colgroup>`;
-		}
-	_renderShopModal(){
-		if (!this._pointsEnabled()) return '';
-		return html`<div class="overlay shop-admin-overlay ${this._shopModalOpen?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) this._shopModalOpen=false; }}>
-			<div class="modal shop-modal shop-admin-modal" @click=${e=>e.stopPropagation()}>
+			</colgroup>`}_renderShopModal(){return this._pointsEnabled()?n`<div class="overlay shop-admin-overlay ${this._shopModalOpen?"open":""}" @click=${t=>{t.target.classList.contains("overlay")&&(this._shopModalOpen=!1)}}>
+			<div class="modal shop-modal shop-admin-modal" @click=${t=>t.stopPropagation()}>
 				${this._renderAdminShop()}
-				<div class="row" style="justify-content:flex-end; margin-top:8px;"><button class="btn-ghost" @click=${()=>this._shopModalOpen=false}>${this._t('form.close')}</button></div>
+				<div class="row" style="justify-content:flex-end; margin-top:8px;"><button class="btn-ghost" @click=${()=>this._shopModalOpen=!1}>${this._t("form.close")}</button></div>
 			</div>
-		</div>`;
-	}
-	_shopAudience(item){
-		const key = item?.id || 'new';
-		const drafts = this._shopAudienceDrafts || {};
-		const selected = drafts[key] ?? item?.child_ids ?? [];
-		const children = this._store.children;
-		const visible = children.filter(child => selected.includes(child.id));
-		const summary = selected.length ? visible.map(child=>child.name).join(', ') || '—' : this._t('shop.all_children');
-		const change = ids => { this._shopAudienceDrafts = {...this._shopAudienceDrafts, [key]:ids}; };
-		return html`<details class="shop-audience"><summary>${this._t('shop.visible_to')} · ${summary}</summary>
-			<label><input type="checkbox" .checked=${!selected.length} @change=${e=>{
-				change([]); e.target.checked=true;
-			}}> ${this._t('shop.all_children')}</label>
-			${children.map(child=>html`<label><input type="checkbox" .checked=${selected.includes(child.id)}
-				@change=${e=>change([...visible.filter(c=>c.id!==child.id).map(c=>c.id), ...(e.target.checked ? [child.id] : [])])}> ${child.name}</label>`)}
-			${item && drafts[key] ? html`<button class="btn-primary" @click=${async ()=>{
-				await this.hass.callService('chores4kids','update_shop_item',{item_id:item.id,child_ids:selected});
-				if (this._shopAudienceDrafts[key]===selected) this._clearShopAudience(key);
-			}}>${this._t('form.save')}</button>` : ''}
-		</details>`;
-	}
-	_clearShopAudience(key){
-		const drafts = {...this._shopAudienceDrafts};
-		delete drafts[key];
-		this._shopAudienceDrafts = drafts;
-	}
-	_deliveryToggle(item){
-		return html`<label><input type="checkbox" .checked=${!!item.requires_delivery} @change=${async e=>{
-			const input=e.target;
-			input.disabled=true;
-			try {
-				await this.hass.callService('chores4kids','update_shop_item',{item_id:item.id, requires_delivery:input.checked});
-			} catch(error) {
-				input.checked=!!item.requires_delivery;
-				throw error;
-			} finally { input.disabled=false; }
-		}}> ${this._t('delivery.required')}</label>`;
-	}
-	_deliveryStatus(p){
-		if (!p.requires_delivery) return '';
-		if (!p.delivered_at) return this._t('delivery.pending');
-		const {date,time}=this._fmtDateTime(p.delivered_at);
-		return `${this._t('delivery.done')} · ${date} ${time}`;
-	}
-	_renderDeliveries(alwaysShow){
-		const pending=this._store.purchases.filter(p=>p.requires_delivery && !p.delivered_at);
-		if (!pending.length && !alwaysShow) return '';
-		return html`<section><h3>${this._t('delivery.pending')} (${pending.length})</h3>
-			${pending.map(p=>html`<div class="row"><b>${p.child_name||p.child_id}</b><span>${p.title} · ${p.price} ${this._t('lbl.points')}</span>
-				<button class="btn-primary" @click=${()=>this.hass.callService('chores4kids','mark_purchase_delivered',{purchase_id:p.id})}>${this._t('delivery.mark')}</button></div>`)}
-		</section>`;
-	}
-	_renderAdminShop(){
-		return html`
-                <h3>${this._t('shop.title')}</h3>
+		</div>`:""}_shopAudience(t){let e=t?.id||"new",i=this._shopAudienceDrafts||{},s=i[e]??t?.child_ids??[],a=this._store.children,r=a.filter(c=>s.includes(c.id)),p=s.length?r.map(c=>c.name).join(", ")||"\u2014":this._t("shop.all_children"),o=c=>{this._shopAudienceDrafts={...this._shopAudienceDrafts,[e]:c}};return n`<details class="shop-audience"><summary>${this._t("shop.visible_to")} · ${p}</summary>
+			<label><input type="checkbox" .checked=${!s.length} @change=${c=>{o([]),c.target.checked=!0}}> ${this._t("shop.all_children")}</label>
+			${a.map(c=>n`<label><input type="checkbox" .checked=${s.includes(c.id)}
+				@change=${u=>o([...r.filter(l=>l.id!==c.id).map(l=>l.id),...u.target.checked?[c.id]:[]])}> ${c.name}</label>`)}
+			${t&&i[e]?n`<button class="btn-primary" @click=${async()=>{await this.hass.callService("chores4kids","update_shop_item",{item_id:t.id,child_ids:s}),this._shopAudienceDrafts[e]===s&&this._clearShopAudience(e)}}>${this._t("form.save")}</button>`:""}
+		</details>`}_clearShopAudience(t){let e={...this._shopAudienceDrafts};delete e[t],this._shopAudienceDrafts=e}_deliveryToggle(t){return n`<label><input type="checkbox" .checked=${!!t.requires_delivery} @change=${async e=>{let i=e.target;i.disabled=!0;try{await this.hass.callService("chores4kids","update_shop_item",{item_id:t.id,requires_delivery:i.checked})}catch(s){throw i.checked=!!t.requires_delivery,s}finally{i.disabled=!1}}}> ${this._t("delivery.required")}</label>`}_deliveryStatus(t){if(!t.requires_delivery)return"";if(!t.delivered_at)return this._t("delivery.pending");let{date:e,time:i}=this._fmtDateTime(t.delivered_at);return`${this._t("delivery.done")} \xB7 ${e} ${i}`}_renderDeliveries(t){let e=this._store.purchases.filter(i=>i.requires_delivery&&!i.delivered_at);return!e.length&&!t?"":n`<section><h3>${this._t("delivery.pending")} (${e.length})</h3>
+			${e.map(i=>n`<div class="row"><b>${i.child_name||i.child_id}</b><span>${i.title} · ${i.price} ${this._t("lbl.points")}</span>
+				<button class="btn-primary" @click=${()=>this.hass.callService("chores4kids","mark_purchase_delivered",{purchase_id:i.id})}>${this._t("delivery.mark")}</button></div>`)}
+		</section>`}_renderAdminShop(){return n`
+                <h3>${this._t("shop.title")}</h3>
 				<div class="row fields">
-					<div class="form-field title"><input placeholder="${this._t('shop.item')}" .value=${this._shopTitle||''} @input=${e=>this._shopTitle=e.target.value} /></div>
-					<div class="form-field points"><input type="number" placeholder="${this._t('shop.price')}" .value=${this._shopPrice||''} @input=${e=>this._shopPrice=e.target.value} /></div>
+					<div class="form-field title"><input placeholder="${this._t("shop.item")}" .value=${this._shopTitle||""} @input=${t=>this._shopTitle=t.target.value} /></div>
+					<div class="form-field points"><input type="number" placeholder="${this._t("shop.price")}" .value=${this._shopPrice||""} @input=${t=>this._shopPrice=t.target.value} /></div>
 				</div>
-				<label><input type="checkbox" .checked=${!!this._shopRequiresDelivery} @change=${e=>this._shopRequiresDelivery=e.target.checked}> ${this._t('delivery.required')}</label>
+				<label><input type="checkbox" .checked=${!!this._shopRequiresDelivery} @change=${t=>this._shopRequiresDelivery=t.target.checked}> ${this._t("delivery.required")}</label>
 				${this._shopAudience(null)}
 				<div class="shop-add-row">
 					<div class="shop-add-left">
-						${this._shopImage ? html`<img class="img-preview" src="${this._resolveUrl(this._shopImage)}" alt="preview" loading="lazy" decoding="async"/>` : html`<div class="img-preview" style="display:grid;place-items:center;color:var(--secondary-text-color);">${this._t('shop.image')}</div>`}
+						${this._shopImage?n`<img class="img-preview" src="${this._resolveUrl(this._shopImage)}" alt="preview" loading="lazy" decoding="async"/>`:n`<div class="img-preview" style="display:grid;place-items:center;color:var(--secondary-text-color);">${this._t("shop.image")}</div>`}
 						<input id="c4k-shop-file" class="file-hidden" type="file" accept="image/*" @change=${this._onPickImage} />
-						<button class="btn-ghost" @click=${()=> this.shadowRoot.getElementById('c4k-shop-file')?.click()}>${this._t('shop.upload')}</button>
+						<button class="btn-ghost" @click=${()=>this.shadowRoot.getElementById("c4k-shop-file")?.click()}>${this._t("shop.upload")}</button>
 					</div>
-					<button class="btn-primary" style="flex:0 0 auto;" @click=${this._addShopItem}>${this._t('shop.add_item')}</button>
+					<button class="btn-primary" style="flex:0 0 auto;" @click=${this._addShopItem}>${this._t("shop.add_item")}</button>
 				</div>
 								<div class="table-wrap desktop-only"><table class="table-center">
-					<thead><tr><th>${this._t('shop.item')}</th><th>${this._t('shop.price')}</th><th>${this._t('shop.active')}</th><th>${this._t('delivery.required')}</th><th>${this._t('th.actions')}</th></tr></thead>
+					<thead><tr><th>${this._t("shop.item")}</th><th>${this._t("shop.price")}</th><th>${this._t("shop.active")}</th><th>${this._t("delivery.required")}</th><th>${this._t("th.actions")}</th></tr></thead>
 					<tbody>
-						${this._store.items.map(i=> html`
-							${this._editItem && this._editItem.id===i.id ? html`
+						${this._store.items.map(t=>n`
+							${this._editItem&&this._editItem.id===t.id?n`
 								<tr>
-									<td data-label="${this._t('shop.item')}"><div style="display:flex; align-items:center; gap:8px;">${this._editItem.image? html`<img class="img-preview" style="width:36px;height:36px;" src="${this._resolveUrl(this._editItem.image)}" loading="lazy" decoding="async">`:''}<input style="max-width:220px;" .value=${this._editItem.title||''} @input=${e=> this._editItem={...this._editItem, title:e.target.value}} /><input type="file" accept="image/*" @change=${this._onPickEditImage} /></div>${this._shopAudience(i)}</td>
-									<td data-label="${this._t('shop.price')}"><input type="number" style="max-width:120px;" .value=${this._editItem.price||0} @input=${e=> this._editItem={...this._editItem, price:Number(e.target.value||0)}} /></td>
-									<td data-label="${this._t('shop.active')}"><input type="checkbox" .checked=${this._editItem.active!==false} @change=${e=> this._editItem={...this._editItem, active: e.target.checked}} /></td>
-									<td>${this._deliveryToggle(i)}</td>
-									<td data-label="${this._t('th.actions')}"><button class="btn-primary" @click=${this._saveEditItem}>${this._t('form.save')}</button><button class="btn-ghost" @click=${()=>{this._editItem=null; this.requestUpdate();}}>${this._t('form.cancel')}</button></td>
+									<td data-label="${this._t("shop.item")}"><div style="display:flex; align-items:center; gap:8px;">${this._editItem.image?n`<img class="img-preview" style="width:36px;height:36px;" src="${this._resolveUrl(this._editItem.image)}" loading="lazy" decoding="async">`:""}<input style="max-width:220px;" .value=${this._editItem.title||""} @input=${e=>this._editItem={...this._editItem,title:e.target.value}} /><input type="file" accept="image/*" @change=${this._onPickEditImage} /></div>${this._shopAudience(t)}</td>
+									<td data-label="${this._t("shop.price")}"><input type="number" style="max-width:120px;" .value=${this._editItem.price||0} @input=${e=>this._editItem={...this._editItem,price:Number(e.target.value||0)}} /></td>
+									<td data-label="${this._t("shop.active")}"><input type="checkbox" .checked=${this._editItem.active!==!1} @change=${e=>this._editItem={...this._editItem,active:e.target.checked}} /></td>
+									<td>${this._deliveryToggle(t)}</td>
+									<td data-label="${this._t("th.actions")}"><button class="btn-primary" @click=${this._saveEditItem}>${this._t("form.save")}</button><button class="btn-ghost" @click=${()=>{this._editItem=null,this.requestUpdate()}}>${this._t("form.cancel")}</button></td>
 								</tr>
-							`: html`
+							`:n`
 								<tr>
-									<td data-label="${this._t('shop.item')}">${i.image? html`<img class="img-preview" style="width:36px;height:36px;margin-right:6px;vertical-align:middle;" src="${this._resolveUrl(i.image)}" loading="lazy" decoding="async">`:''}${i.title}${this._shopAudience(i)}</td>
-									<td data-label="${this._t('shop.price')}"><b>${i.price} ${this._t('lbl.points')}</b></td>
-									<td data-label="${this._t('shop.active')}"><input type="checkbox" .checked=${i.active!==false} @change=${e=> this._toggleItemActive(i,e)} /></td>
-									<td>${this._deliveryToggle(i)}</td>
-									<td data-label="${this._t('th.actions')}"><button class="btn-ghost" @click=${()=> this._startEditItem(i)}>${this._t('btn.edit')}</button><button class="btn-ghost" @click=${()=> this._openAdvanced(i)}>${this._t('shop.advanced')}</button><button class="btn-danger" @click=${()=>this._deleteShopItem(i.id)}>${this._t('btn.delete')}</button></td>
+									<td data-label="${this._t("shop.item")}">${t.image?n`<img class="img-preview" style="width:36px;height:36px;margin-right:6px;vertical-align:middle;" src="${this._resolveUrl(t.image)}" loading="lazy" decoding="async">`:""}${t.title}${this._shopAudience(t)}</td>
+									<td data-label="${this._t("shop.price")}"><b>${t.price} ${this._t("lbl.points")}</b></td>
+									<td data-label="${this._t("shop.active")}"><input type="checkbox" .checked=${t.active!==!1} @change=${e=>this._toggleItemActive(t,e)} /></td>
+									<td>${this._deliveryToggle(t)}</td>
+									<td data-label="${this._t("th.actions")}"><button class="btn-ghost" @click=${()=>this._startEditItem(t)}>${this._t("btn.edit")}</button><button class="btn-ghost" @click=${()=>this._openAdvanced(t)}>${this._t("shop.advanced")}</button><button class="btn-danger" @click=${()=>this._deleteShopItem(t.id)}>${this._t("btn.delete")}</button></td>
 								</tr>
 							`}
 						`)}
@@ -3415,201 +942,146 @@ class Chores4KidsDevCard extends LitElement {
 				</table></div>
 								<!-- Mobile cards for items -->
 								<div class="mobile-only mobile-only-grid">
-									${this._store.items.map(i=> html`
+									${this._store.items.map(t=>n`
 										<div class="shop-admin-card">
 											<div class="shop-admin-head">
-												${i.image? html`<img src="${this._resolveUrl(i.image)}" alt="${i.title}" loading="lazy" decoding="async">` : html`<div class="img-preview" style="width:44px;height:44px;display:grid;place-items:center;">?</div>`}
+												${t.image?n`<img src="${this._resolveUrl(t.image)}" alt="${t.title}" loading="lazy" decoding="async">`:n`<div class="img-preview" style="width:44px;height:44px;display:grid;place-items:center;">?</div>`}
 												<div class="shop-admin-meta">
-													<div class="shop-admin-title">${i.title}</div>
-													<div class="shop-admin-price">${i.price} ${this._t('lbl.points')}</div>
+													<div class="shop-admin-title">${t.title}</div>
+													<div class="shop-admin-price">${t.price} ${this._t("lbl.points")}</div>
 												</div>
 																								<label class="shop-admin-toggle">
-																									<span>${this._t('shop.active')}</span>
-																									<ha-switch .checked=${i.active!==false} @change=${e=> this._toggleItemActive(i,e)}></ha-switch>
+																									<span>${this._t("shop.active")}</span>
+																									<ha-switch .checked=${t.active!==!1} @change=${e=>this._toggleItemActive(t,e)}></ha-switch>
 																								</label>
 											</div>
-											${this._deliveryToggle(i)} ${this._shopAudience(i)}
+											${this._deliveryToggle(t)} ${this._shopAudience(t)}
 											<div class="shop-admin-actions">
-												<button class="btn-ghost" @click=${()=> this._startEditItem(i)}>${this._t('btn.edit')}</button>
-												<button class="btn-ghost" @click=${()=> this._openAdvanced(i)}>${this._t('shop.advanced')}</button>
-												<button class="btn-danger" @click=${()=> this._deleteShopItem(i.id)}>${this._t('btn.delete')}</button>
+												<button class="btn-ghost" @click=${()=>this._startEditItem(t)}>${this._t("btn.edit")}</button>
+												<button class="btn-ghost" @click=${()=>this._openAdvanced(t)}>${this._t("shop.advanced")}</button>
+												<button class="btn-danger" @click=${()=>this._deleteShopItem(t.id)}>${this._t("btn.delete")}</button>
 											</div>
 										</div>
 									`)}
 								</div>
 				<div class="row" style="align-items:center; justify-content:space-between; margin-top:12px;">
-					<h3 style="margin:0;">${this._t('shop.history')}</h3>
-					${(this._store.purchases||[]).length ? html`<button class="btn-danger" @click=${this._clearShopHistory}>${this._t('shop.clear_history')}</button>`:''}
+					<h3 style="margin:0;">${this._t("shop.history")}</h3>
+					${(this._store.purchases||[]).length?n`<button class="btn-danger" @click=${this._clearShopHistory}>${this._t("shop.clear_history")}</button>`:""}
 				</div>
 								<div class="table-wrap desktop-only"><table class="table-center">
-					<thead><tr><th>${this._t('shop.date')}</th><th>${this._t('shop.time')}</th><th>${this._t('shop.child')}</th><th>${this._t('shop.item')}</th><th>${this._t('shop.price')}</th></tr></thead>
+					<thead><tr><th>${this._t("shop.date")}</th><th>${this._t("shop.time")}</th><th>${this._t("shop.child")}</th><th>${this._t("shop.item")}</th><th>${this._t("shop.price")}</th></tr></thead>
 					<tbody>
-						${[...(this._store.purchases||[])].slice().reverse().map(p=> { const dt=this._fmtDateTime(p.ts); return html`<tr>
-							<td data-label="${this._t('shop.date')}">${dt.date}</td>
-							<td data-label="${this._t('shop.time')}">${dt.time}</td>
-							<td data-label="${this._t('shop.child')}">${p.child_name||p.child_id}</td>
-							<td data-label="${this._t('shop.item')}">${p.title}<div>${this._deliveryStatus(p)}</div></td>
-							<td data-label="${this._t('shop.price')}"><b>${p.price} ${this._t('lbl.points')}</b></td>
-						</tr>`; })}
+						${[...this._store.purchases||[]].slice().reverse().map(t=>{let e=this._fmtDateTime(t.ts);return n`<tr>
+							<td data-label="${this._t("shop.date")}">${e.date}</td>
+							<td data-label="${this._t("shop.time")}">${e.time}</td>
+							<td data-label="${this._t("shop.child")}">${t.child_name||t.child_id}</td>
+							<td data-label="${this._t("shop.item")}">${t.title}<div>${this._deliveryStatus(t)}</div></td>
+							<td data-label="${this._t("shop.price")}"><b>${t.price} ${this._t("lbl.points")}</b></td>
+						</tr>`})}
 					</tbody>
 				</table></div>
 								<!-- Mobile cards for purchases -->
 								<div class="mobile-only mobile-only-grid">
-									${[...(this._store.purchases||[])].slice().reverse().map(p=> { const dt=this._fmtDateTime(p.ts); return html`
+									${[...this._store.purchases||[]].slice().reverse().map(t=>{let e=this._fmtDateTime(t.ts);return n`
 										<div class="purchase-card">
-											<div class="kv"><b>${this._t('shop.date')}</b><span>${dt.date}</span></div>
-											<div class="kv"><b>${this._t('shop.time')}</b><span>${dt.time}</span></div>
-											<div class="kv"><b>${this._t('shop.child')}</b><span>${p.child_name||p.child_id}</span></div>
-											<div class="kv"><b>${this._t('shop.item')}</b><span>${p.title}<br>${this._deliveryStatus(p)}</span></div>
-											<div class="kv"><b>${this._t('shop.price')}</b><b>${p.price} ${this._t('lbl.points')}</b></div>
-										</div>`; })}
+											<div class="kv"><b>${this._t("shop.date")}</b><span>${e.date}</span></div>
+											<div class="kv"><b>${this._t("shop.time")}</b><span>${e.time}</span></div>
+											<div class="kv"><b>${this._t("shop.child")}</b><span>${t.child_name||t.child_id}</span></div>
+											<div class="kv"><b>${this._t("shop.item")}</b><span>${t.title}<br>${this._deliveryStatus(t)}</span></div>
+											<div class="kv"><b>${this._t("shop.price")}</b><b>${t.price} ${this._t("lbl.points")}</b></div>
+										</div>`})}
 								</div>
-		`;
-	}
-	_renderAdvancedModal(){
-		return html`<div class="overlay ${this._advItem?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) this._advItem=null; }}>
-			${this._advItem ? html`<div class="modal" style="max-width: 900px; width: min(95vw, 900px);" @click=${e=>e.stopPropagation()}>
-				<h3>${this._t('shop.advanced')} — ${this._advItem.title}</h3>
-				<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:6px;">${this._t('shop.steps')}</div>
-				<div style="display:grid; gap:8px;">${(this._advSteps||[]).map((st,idx)=> html`
+		`}_renderAdvancedModal(){return n`<div class="overlay ${this._advItem?"open":""}" @click=${t=>{t.target.classList.contains("overlay")&&(this._advItem=null)}}>
+			${this._advItem?n`<div class="modal" style="max-width: 900px; width: min(95vw, 900px);" @click=${t=>t.stopPropagation()}>
+				<h3>${this._t("shop.advanced")} — ${this._advItem.title}</h3>
+				<div style="font-size:.9rem; color: var(--secondary-text-color); margin-bottom:6px;">${this._t("shop.steps")}</div>
+				<div style="display:grid; gap:8px;">${(this._advSteps||[]).map((t,e)=>n`
 					<div style="display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; border:1px solid var(--divider-color); padding:8px; border-radius:8px;">
-						${st.type==='delay' ? html`<div style="display:flex; gap:8px; align-items:center;"><b>${this._t('shop.delay')}</b><input type="number" style="width:110px;" .value=${st.seconds||0} @input=${e=>{ st.seconds=Number(e.target.value||0); this.requestUpdate(); }} /><span>${this._t('shop.seconds')}</span></div>` : html`
+						${t.type==="delay"?n`<div style="display:flex; gap:8px; align-items:center;"><b>${this._t("shop.delay")}</b><input type="number" style="width:110px;" .value=${t.seconds||0} @input=${i=>{t.seconds=Number(i.target.value||0),this.requestUpdate()}} /><span>${this._t("shop.seconds")}</span></div>`:n`
 							<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-								<b>${this._t('shop.entity')}</b>
-								<select style="min-width:260px;" .value=${st.entity_id||''} @change=${e=>{ st.entity_id=e.target.value; if(!st.op) st.op = this._defaultOpFor(st.entity_id); this.requestUpdate(); }}>
+								<b>${this._t("shop.entity")}</b>
+								<select style="min-width:260px;" .value=${t.entity_id||""} @change=${i=>{t.entity_id=i.target.value,t.op||(t.op=this._defaultOpFor(t.entity_id)),this.requestUpdate()}}>
 									<option value="">—</option>
-									${(()=>{ const ents=Object.values(this.hass.states); const cur=st.entity_id||''; const exists=cur && ents.some(x=>x.entity_id===cur); return html`${!exists&&cur? html`<option value=${cur} selected>${cur}</option>`:''}${ents.map(s=> html`<option value=${s.entity_id} ?selected=${s.entity_id===cur}>${s.attributes.friendly_name||s.entity_id}</option>`)}`; })()}
+									${(()=>{let i=Object.values(this.hass.states),s=t.entity_id||"",a=s&&i.some(r=>r.entity_id===s);return n`${!a&&s?n`<option value=${s} selected>${s}</option>`:""}${i.map(r=>n`<option value=${r.entity_id} ?selected=${r.entity_id===s}>${r.attributes.friendly_name||r.entity_id}</option>`)}`})()}
 								</select>
-								<b>${this._t('shop.operation')}</b>
-								<select .value=${st.op||(st.entity_id?this._defaultOpFor(st.entity_id):'')} @change=${e=>{ st.op=e.target.value; this.requestUpdate(); }}>
-									${this._opsForDomain((st.entity_id||'').split('.')[0]).map(op=> html`<option value=${op} ?selected=${op===st.op}>${op}</option>`)}</select>
+								<b>${this._t("shop.operation")}</b>
+								<select .value=${t.op||(t.entity_id?this._defaultOpFor(t.entity_id):"")} @change=${i=>{t.op=i.target.value,this.requestUpdate()}}>
+									${this._opsForDomain((t.entity_id||"").split(".")[0]).map(i=>n`<option value=${i} ?selected=${i===t.op}>${i}</option>`)}</select>
 							</div>`}
-						<button class="btn-danger" @click=${()=>{ this._advSteps.splice(idx,1); this.requestUpdate(); }}>${this._t('btn.delete')}</button>
+						<button class="btn-danger" @click=${()=>{this._advSteps.splice(e,1),this.requestUpdate()}}>${this._t("btn.delete")}</button>
 					</div>`)}
 				</div>
 				<div class="row" style="gap:8px; margin-top:10px;">
-					<button class="btn-ghost" @click=${()=>{ this._advSteps.push({ type:'entity_service', entity_id:'', op:'turn_on' }); this.requestUpdate(); }}>${this._t('shop.add_action')}</button>
-					<button class="btn-ghost" @click=${()=>{ this._advSteps.push({ type:'delay', seconds:60 }); this.requestUpdate(); }}>${this._t('shop.add_delay')}</button>
+					<button class="btn-ghost" @click=${()=>{this._advSteps.push({type:"entity_service",entity_id:"",op:"turn_on"}),this.requestUpdate()}}>${this._t("shop.add_action")}</button>
+					<button class="btn-ghost" @click=${()=>{this._advSteps.push({type:"delay",seconds:60}),this.requestUpdate()}}>${this._t("shop.add_delay")}</button>
 				</div>
 				<div class="row" style="justify-content:flex-end; gap:8px; margin-top:10px;">
-					<button class="btn-ghost" @click=${()=>{ this._advItem=null; }}>${this._t('form.cancel')}</button>
-					<button class="btn-primary" @click=${this._saveAdvanced}>${this._t('form.save')}</button>
+					<button class="btn-ghost" @click=${()=>{this._advItem=null}}>${this._t("form.cancel")}</button>
+					<button class="btn-primary" @click=${this._saveAdvanced}>${this._t("form.save")}</button>
 				</div>
-			</div>`: ''}
-		</div>`;
-	}
-	_renderIconModal(){
-		return html`<div class="overlay ${this._iconModalOpen?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) this._iconModalOpen=false; }}>
-			<div class="modal" style="max-width: 560px; width: min(95vw, 560px);" @click=${e=>e.stopPropagation()}>
-				<h3>${this._t('icon.choose')}</h3>
+			</div>`:""}
+		</div>`}_renderIconModal(){return n`<div class="overlay ${this._iconModalOpen?"open":""}" @click=${t=>{t.target.classList.contains("overlay")&&(this._iconModalOpen=!1)}}>
+			<div class="modal" style="max-width: 560px; width: min(95vw, 560px);" @click=${t=>t.stopPropagation()}>
+				<h3>${this._t("icon.choose")}</h3>
 				<div class="row" style="gap:8px; align-items:center;">
-					<input style="flex:1" placeholder="${this._t('icon.search')} (custom:braces)" .value=${this._iconSearch||''} @input=${e=>{ this._iconSearch=e.target.value; this.requestUpdate(); }} />
-					${this._taskIcon ? html`<button class="btn-ghost" @click=${()=>{ this._taskIcon=''; this.requestUpdate(); }}>${this._t('icon.clear')}</button>`: ''}
+					<input style="flex:1" placeholder="${this._t("icon.search")} (custom:braces)" .value=${this._iconSearch||""} @input=${t=>{this._iconSearch=t.target.value,this.requestUpdate()}} />
+					${this._taskIcon?n`<button class="btn-ghost" @click=${()=>{this._taskIcon="",this.requestUpdate()}}>${this._t("icon.clear")}</button>`:""}
 				</div>
-				${(()=>{ 
-					const iconId=String(this._iconSearch||'').trim();
-					const q=iconId.toLowerCase();
-					const filter=(arr)=> arr.filter(i=> i.id.toLowerCase().includes(q) || (i.label||'').toLowerCase().includes(q)); 
-					const customIcons = (this._customIcons||[]).map(c=> ({id:c.id, label:c.label}));
-					const uploaded = Object.entries(this._getBackendUiColors().task_icons || {}).map(([id, label])=>({id, label}));
-					const allIcons = [...uploaded, ...customIcons, ...C4K_ICON_SET];
-					const recent=filter((this._iconRecents||[]).map(id=> {const found = allIcons.find(x=>x.id===id); return {id, label: found?.label || id};})).slice(0,12); 
-					const base=filter(C4K_ICON_SET);
-					const custom=filter(customIcons);
-					const tile=(i)=> html`<button class="btn-ghost" style="display:flex;align-items:center;gap:8px;border:1px solid var(--divider-color);border-radius:8px;padding:8px;" @click=${()=> this._pickIcon(i.id)}>${c4kTaskIcon(i.id)}<small>${i.label||i.id}</small></button>`;
-					const customTile = html`<button class="btn-primary" style="display:flex;align-items:center;gap:8px;border:1px solid var(--divider-color);border-radius:8px;padding:8px;" @click=${()=> this._openCustomIconModal()}><ha-icon icon="mdi:plus-circle"></ha-icon><small>Custom</small></button>`;
-					return html`
-						${/^[a-z][a-z0-9_-]*:[a-z0-9][a-z0-9_.-]*$/i.test(iconId) && !allIcons.some(i=>i.id===iconId) ? tile({id:iconId}) : ''}
-						${filter(uploaded).length ? html`<h4>${this._t('icon.library')}</h4><div class="row">${filter(uploaded).map(tile)}</div>` : ''}
-						${recent.length? html`<div style="font-size:.9rem;color:var(--secondary-text-color);margin:6px 0;">Recent</div>`:''}${recent.length? html`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${recent.map(tile)}</div>`:''}
-						${custom.length? html`<div style="font-size:.9rem;color:var(--secondary-text-color);margin:6px 0;">Custom</div>`:''}
-						${custom.length? html`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${custom.map(tile)}</div>`:''}
+				${(()=>{let t=String(this._iconSearch||"").trim(),e=t.toLowerCase(),i=d=>d.filter(m=>m.id.toLowerCase().includes(e)||(m.label||"").toLowerCase().includes(e)),s=(this._customIcons||[]).map(d=>({id:d.id,label:d.label})),a=Object.entries(this._getBackendUiColors().task_icons||{}).map(([d,m])=>({id:d,label:m})),r=[...a,...s,...Ht],p=i((this._iconRecents||[]).map(d=>{let m=r.find(g=>g.id===d);return{id:d,label:m?.label||d}})).slice(0,12),o=i(Ht),c=i(s),u=d=>n`<button class="btn-ghost" style="display:flex;align-items:center;gap:8px;border:1px solid var(--divider-color);border-radius:8px;padding:8px;" @click=${()=>this._pickIcon(d.id)}>${E(d.id)}<small>${d.label||d.id}</small></button>`,l=n`<button class="btn-primary" style="display:flex;align-items:center;gap:8px;border:1px solid var(--divider-color);border-radius:8px;padding:8px;" @click=${()=>this._openCustomIconModal()}><ha-icon icon="mdi:plus-circle"></ha-icon><small>Custom</small></button>`;return n`
+						${/^[a-z][a-z0-9_-]*:[a-z0-9][a-z0-9_.-]*$/i.test(t)&&!r.some(d=>d.id===t)?u({id:t}):""}
+						${i(a).length?n`<h4>${this._t("icon.library")}</h4><div class="row">${i(a).map(u)}</div>`:""}
+						${p.length?n`<div style="font-size:.9rem;color:var(--secondary-text-color);margin:6px 0;">Recent</div>`:""}${p.length?n`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${p.map(u)}</div>`:""}
+						${c.length?n`<div style="font-size:.9rem;color:var(--secondary-text-color);margin:6px 0;">Custom</div>`:""}
+						${c.length?n`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${c.map(u)}</div>`:""}
 						<div style="font-size:.9rem;color:var(--secondary-text-color);margin:6px 0;">All</div>
-						<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${customTile}${base.map(tile)}</div>
-					`; 
-				})()}
-				<div class="row" style="justify-content:flex-end; margin-top:10px;"><button class="btn-ghost" @click=${()=> this._iconModalOpen=false}>${this._t('form.cancel')}</button></div>
+						<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${l}${o.map(u)}</div>
+					`})()}
+				<div class="row" style="justify-content:flex-end; margin-top:10px;"><button class="btn-ghost" @click=${()=>this._iconModalOpen=!1}>${this._t("form.cancel")}</button></div>
 			</div>
-		</div>`;
-	}
-
-	_renderCustomIconModal(){
-		return html`<div class="overlay ${this._customIconModalOpen?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) this._closeCustomIconModal(); }}>
-			<div class="modal" style="max-width: 800px; width: min(95vw, 800px); max-height: 85vh; display:flex; flex-direction:column;" @click=${e=>e.stopPropagation()}>
+		</div>`}_renderCustomIconModal(){return n`<div class="overlay ${this._customIconModalOpen?"open":""}" @click=${t=>{t.target.classList.contains("overlay")&&this._closeCustomIconModal()}}>
+			<div class="modal" style="max-width: 800px; width: min(95vw, 800px); max-height: 85vh; display:flex; flex-direction:column;" @click=${t=>t.stopPropagation()}>
 				<h3>Vælg Custom Icon</h3>
 				<div class="row" style="gap:8px; align-items:center; margin-bottom:8px;">
-					<input style="flex:1" placeholder="Søg efter ikon (f.eks. home, car, star, heart...)" .value=${this._customIconSearch||''} @input=${e=>{ this._customIconSearch=e.target.value; this._iconDisplayLimit = 200; this.requestUpdate(); }} />
-					${this._customIconSearch ? html`<button class="btn-ghost" @click=${()=>{ this._customIconSearch=''; this._iconDisplayLimit = 200; this.requestUpdate(); }}>Ryd</button>` : ''}
+					<input style="flex:1" placeholder="Søg efter ikon (f.eks. home, car, star, heart...)" .value=${this._customIconSearch||""} @input=${t=>{this._customIconSearch=t.target.value,this._iconDisplayLimit=200,this.requestUpdate()}} />
+					${this._customIconSearch?n`<button class="btn-ghost" @click=${()=>{this._customIconSearch="",this._iconDisplayLimit=200,this.requestUpdate()}}>Ryd</button>`:""}
 				</div>
 				<div 
 					style="flex:1; overflow-y:auto; border:1px solid var(--divider-color); border-radius:8px; padding:12px; margin:8px 0; background:var(--card-background-color);"
-					@scroll=${(e) => {
-						const el = e.target;
-						const scrolledToBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 100;
-						if (scrolledToBottom && this._iconDisplayLimit < (this._availableIcons?.length || 0)) {
-							this._iconDisplayLimit += 200;
-							this.requestUpdate();
-						}
-					}}
+					@scroll=${t=>{let e=t.target;e.scrollHeight-e.scrollTop<=e.clientHeight+100&&this._iconDisplayLimit<(this._availableIcons?.length||0)&&(this._iconDisplayLimit+=200,this.requestUpdate())}}
 				>
-					${(()=>{
-						const q = String(this._customIconSearch||'').toLowerCase().trim();
-						// Hvis der ikke er ikoner endnu, vis loading
-						if(!this._availableIcons || !this._availableIcons.length) {
-							return html`<div style="text-align:center; padding:40px; color:var(--secondary-text-color);">
+					${(()=>{let t=String(this._customIconSearch||"").toLowerCase().trim();if(!this._availableIcons||!this._availableIcons.length)return n`<div style="text-align:center; padding:40px; color:var(--secondary-text-color);">
 								<ha-icon icon="mdi:loading" style="--mdc-icon-size:48px; animation: spin 1s linear infinite;"></ha-icon>
 								<div style="margin-top:12px;">Henter ikoner...</div>
-							</div>`;
-						}
-						// Filter baseret på søgning - både med og uden "mdi:" prefix
-						const filtered = q 
-							? this._availableIcons.filter(i=> {
-								const iconName = i.toLowerCase();
-								const searchTerm = q.startsWith('mdi:') ? q : q;
-								return iconName.includes(searchTerm) || iconName.replace('mdi:','').includes(searchTerm);
-							  })
-							: this._availableIcons;
-						
-						if(!filtered.length) {
-							return html`<div style="text-align:center; padding:40px; color:var(--secondary-text-color);">
+							</div>`;let e=t?this._availableIcons.filter(r=>{let p=r.toLowerCase(),o=(t.startsWith("mdi:"),t);return p.includes(o)||p.replace("mdi:","").includes(o)}):this._availableIcons;if(!e.length)return n`<div style="text-align:center; padding:40px; color:var(--secondary-text-color);">
 								<ha-icon icon="mdi:magnify-close" style="--mdc-icon-size:48px;"></ha-icon>
 								<div style="margin-top:12px;">Ingen ikoner fundet for "${this._customIconSearch}"</div>
 								<div style="margin-top:8px; font-size:0.85rem;">Prøv f.eks: home, car, star, heart, light, door</div>
-							</div>`;
-						}
-						
-						// Begræns til displayLimit for performance
-						const displayLimit = this._iconDisplayLimit || 200;
-						const toShow = filtered.slice(0, displayLimit);
-						const hasMore = filtered.length > displayLimit;
-						
-						return html`
+							</div>`;let i=this._iconDisplayLimit||200,s=e.slice(0,i),a=e.length>i;return n`
 							<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(85px,1fr)); gap:8px;">
-								${toShow.map(icon=> html`
+								${s.map(r=>n`
 									<button 
-										class="btn-ghost ${this._customIconPreview===icon?'btn-primary':''}" 
-										style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px solid var(--divider-color);border-radius:10px;padding:12px 6px;min-height:90px;transition:all 0.2s ease;${this._customIconPreview===icon?'transform:scale(1.05);box-shadow:0 4px 12px rgba(var(--rgb-primary-color),0.3);border-color:var(--primary-color);':''}" 
-										@click=${()=>{ this._customIconPreview=icon; this._customIconLabel = icon.replace('mdi:','').split('-').map(w=> w.charAt(0).toUpperCase()+w.slice(1)).join(' '); this.requestUpdate(); }}
-										title="${icon}"
+										class="btn-ghost ${this._customIconPreview===r?"btn-primary":""}" 
+										style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px solid var(--divider-color);border-radius:10px;padding:12px 6px;min-height:90px;transition:all 0.2s ease;${this._customIconPreview===r?"transform:scale(1.05);box-shadow:0 4px 12px rgba(var(--rgb-primary-color),0.3);border-color:var(--primary-color);":""}" 
+										@click=${()=>{this._customIconPreview=r,this._customIconLabel=r.replace("mdi:","").split("-").map(p=>p.charAt(0).toUpperCase()+p.slice(1)).join(" "),this.requestUpdate()}}
+										title="${r}"
 									>
-										<ha-icon icon="${icon}" style="--mdc-icon-size:36px;"></ha-icon>
-										<small style="font-size:9px;text-align:center;word-break:break-word;line-height:1.3;max-width:100%;opacity:0.8;">${icon.replace('mdi:','').replace(/-/g,' ')}</small>
+										<ha-icon icon="${r}" style="--mdc-icon-size:36px;"></ha-icon>
+										<small style="font-size:9px;text-align:center;word-break:break-word;line-height:1.3;max-width:100%;opacity:0.8;">${r.replace("mdi:","").replace(/-/g," ")}</small>
 									</button>
 								`)}
 							</div>
-							${hasMore ? html`
+							${a?n`
 								<div style="text-align:center; margin-top:16px; padding:12px; color:var(--secondary-text-color); font-size:0.9rem; background:color-mix(in srgb, var(--primary-color) 6%, transparent); border-radius:8px;">
 									<ha-icon icon="mdi:arrow-down" style="--mdc-icon-size:24px;"></ha-icon>
 									<div style="margin-top:6px;">Scroll ned for at se flere...</div>
 								</div>
-							` : ''}
+							`:""}
 							<div style="text-align:center; margin-top:12px; padding:8px; color:var(--secondary-text-color); font-size:0.85rem;">
-								${q ? html`Viser <b>${toShow.length}</b> af <b>${filtered.length}</b> matchende ikoner` : html`Viser <b>${toShow.length}</b> af <b>${filtered.length}</b> ikoner`}
+								${t?n`Viser <b>${s.length}</b> af <b>${e.length}</b> matchende ikoner`:n`Viser <b>${s.length}</b> af <b>${e.length}</b> ikoner`}
 							</div>
-						`;
-					})()}
+						`})()}
 				</div>
-				${this._customIconPreview ? html`
+				${this._customIconPreview?n`
 					<div style="border:1px solid var(--primary-color); border-radius:12px; padding:16px; margin-bottom:8px; background:color-mix(in srgb, var(--primary-color) 4%, transparent);">
 						<div style="font-size:.9rem; font-weight:600; color:var(--primary-text-color); margin-bottom:10px;">Valgt ikon:</div>
 						<div style="display:flex; align-items:center; gap:16px;">
@@ -3623,182 +1095,71 @@ class Chores4KidsDevCard extends LitElement {
 								<div style="font-size:.85rem; color:var(--secondary-text-color); margin-bottom:6px;">Navngiv dit custom ikon:</div>
 								<input 
 									placeholder="F.eks. Mit Hjem, Min Favorit Stjerne, etc." 
-									.value=${this._customIconLabel||''} 
-									@input=${e=>{ this._customIconLabel=e.target.value; this.requestUpdate(); }}
+									.value=${this._customIconLabel||""} 
+									@input=${t=>{this._customIconLabel=t.target.value,this.requestUpdate()}}
 									style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--divider-color);" 
 								/>
 							</div>
 						</div>
 					</div>
-				` : ''}
-				${(this._customIcons||[]).length ? html`
+				`:""}
+				${(this._customIcons||[]).length?n`
 					<div style="border:1px solid var(--divider-color); border-radius:12px; padding:12px; margin-bottom:8px; background:color-mix(in srgb, var(--success-color,#43a047) 4%, transparent);">
 						<div style="font-size:.9rem; font-weight:600; color:var(--primary-text-color); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
 							<ha-icon icon="mdi:star-circle" style="--mdc-icon-size:20px; color:var(--success-color,#43a047);"></ha-icon>
 							Gemte Custom Ikoner (${(this._customIcons||[]).length})
 						</div>
 						<div style="display:grid; gap:6px;">
-							${(this._customIcons||[]).map(c=> html`
+							${(this._customIcons||[]).map(t=>n`
 								<div style="display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:8px; background:var(--card-background-color); border:1px solid var(--divider-color);">
-									<ha-icon icon="${c.id}" style="--mdc-icon-size:28px;"></ha-icon>
-									<span style="flex:1; font-weight:500;">${c.label}</span>
-									<small style="color:var(--secondary-text-color); font-size:10px;">${c.id}</small>
-									<button class="btn-danger icon-btn" @click=${()=> this._deleteCustomIcon(c.id)} title="Slet">
+									<ha-icon icon="${t.id}" style="--mdc-icon-size:28px;"></ha-icon>
+									<span style="flex:1; font-weight:500;">${t.label}</span>
+									<small style="color:var(--secondary-text-color); font-size:10px;">${t.id}</small>
+									<button class="btn-danger icon-btn" @click=${()=>this._deleteCustomIcon(t.id)} title="Slet">
 										<ha-icon icon="mdi:delete"></ha-icon>
 									</button>
 								</div>
 							`)}
 						</div>
 					</div>
-				` : ''}
+				`:""}
 				<div class="row" style="justify-content:flex-end; gap:8px; margin-top:8px;">
-					<button class="btn-ghost" @click=${()=> this._closeCustomIconModal()}>${this._t('form.cancel')}</button>
-					<button class="btn-primary" ?disabled=${!this._customIconPreview || !this._customIconLabel} @click=${()=> this._saveCustomIcon()}>${this._t('form.save')}</button>
+					<button class="btn-ghost" @click=${()=>this._closeCustomIconModal()}>${this._t("form.cancel")}</button>
+					<button class="btn-primary" ?disabled=${!this._customIconPreview||!this._customIconLabel} @click=${()=>this._saveCustomIcon()}>${this._t("form.save")}</button>
 				</div>
 			</div>
-		</div>`;
-	}
-	_renderSortModal(){
-		const cats = (this._store.categories||[]);
-		const NONE = '__none__';
-		// Working (draft) order while the modal is open: start from the
-		// resolved (backend-driven) order, or a locally-dragged-but-not-yet-
-		// saved draft if one exists from earlier in this same modal session.
-		let order = Array.isArray(this._catOrderDraft)? [...this._catOrderDraft] : this._catOrderResolved();
-		order = order.filter(id => id===NONE || cats.some(c=> c.id===id));
-		for (const c of cats){ if (!order.includes(c.id)) order.push(c.id); }
-		if (!order.includes(NONE)) order.push(NONE);
-		const labelFor = (id)=> id===NONE ? this._t('sort.none') : (cats.find(c=>c.id===id)?.name || id);
-		const onDragStart = (e, idx)=>{ e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', String(idx)); };
-		const onDragOver = (e)=>{ e.preventDefault(); e.currentTarget.classList.add('dragover'); };
-		const onDragLeave = (e)=>{ e.currentTarget.classList.remove('dragover'); };
-		const onDrop = (e, toIdx)=>{
-			e.preventDefault(); e.currentTarget.classList.remove('dragover');
-			const fromIdx = Number(e.dataTransfer.getData('text/plain'));
-			if (!Number.isFinite(fromIdx)) return;
-			const arr = [...order];
-			const [it] = arr.splice(fromIdx,1);
-			arr.splice(toIdx,0,it);
-			this._catOrderDraft = arr; this.requestUpdate();
-		};
-		const save = async ()=>{
-			try{ await this.hass.callService('chores4kids','reorder_categories',{ order: order.filter(id=> id!==NONE) }); }catch{}
-			this._catOrderDraft = null;
-			this._sortModalOpen=false; this.requestUpdate();
-		};
-		const reset = ()=>{ const arr = cats.map(c=> c.id); arr.push(NONE); this._catOrderDraft = arr; this.requestUpdate(); };
-		return html`<div class="overlay ${this._sortModalOpen?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) { this._sortModalOpen=false; this._catOrderDraft=null; } }}>
-			${this._sortModalOpen ? html`<div class="modal" style="max-width: 560px; width: min(95vw, 560px);" @click=${e=>e.stopPropagation()}>
-				<h3>${this._t('sort.title')}</h3>
-				<div style="font-size:.9rem; color: var(--secondary-text-color);">${this._t('sort.categories_order')}</div>
+		</div>`}_renderSortModal(){let t=this._store.categories||[],e="__none__",i=Array.isArray(this._catOrderDraft)?[...this._catOrderDraft]:this._catOrderResolved();i=i.filter(l=>l===e||t.some(d=>d.id===l));for(let l of t)i.includes(l.id)||i.push(l.id);i.includes(e)||i.push(e);let s=l=>l===e?this._t("sort.none"):t.find(d=>d.id===l)?.name||l,a=(l,d)=>{l.dataTransfer.effectAllowed="move",l.dataTransfer.setData("text/plain",String(d))},r=l=>{l.preventDefault(),l.currentTarget.classList.add("dragover")},p=l=>{l.currentTarget.classList.remove("dragover")},o=(l,d)=>{l.preventDefault(),l.currentTarget.classList.remove("dragover");let m=Number(l.dataTransfer.getData("text/plain"));if(!Number.isFinite(m))return;let g=[...i],[_]=g.splice(m,1);g.splice(d,0,_),this._catOrderDraft=g,this.requestUpdate()},c=async()=>{try{await this.hass.callService("chores4kids","reorder_categories",{order:i.filter(l=>l!==e)})}catch{}this._catOrderDraft=null,this._sortModalOpen=!1,this.requestUpdate()},u=()=>{let l=t.map(d=>d.id);l.push(e),this._catOrderDraft=l,this.requestUpdate()};return n`<div class="overlay ${this._sortModalOpen?"open":""}" @click=${l=>{l.target.classList.contains("overlay")&&(this._sortModalOpen=!1,this._catOrderDraft=null)}}>
+			${this._sortModalOpen?n`<div class="modal" style="max-width: 560px; width: min(95vw, 560px);" @click=${l=>l.stopPropagation()}>
+				<h3>${this._t("sort.title")}</h3>
+				<div style="font-size:.9rem; color: var(--secondary-text-color);">${this._t("sort.categories_order")}</div>
 				<ul class="sort-list">
-					${order.map((id, idx)=> html`
-						<li class="sort-item" draggable="true" @dragstart=${e=> onDragStart(e, idx)} @dragover=${onDragOver} @dragleave=${onDragLeave} @drop=${e=> onDrop(e, idx)}>
+					${i.map((l,d)=>n`
+						<li class="sort-item" draggable="true" @dragstart=${m=>a(m,d)} @dragover=${r} @dragleave=${p} @drop=${m=>o(m,d)}>
 							<span class="sort-handle">⋮⋮</span>
-							<span style="flex:1;">${labelFor(id)}</span>
+							<span style="flex:1;">${s(l)}</span>
 						</li>
 					`)}
 				</ul>
 				<div class="row" style="justify-content:flex-end; gap:8px;">
-					<button class="btn-ghost" @click=${reset}>${this._t('sort.reset')}</button>
-					<button class="btn-primary" @click=${save}>${this._t('sort.save')}</button>
+					<button class="btn-ghost" @click=${u}>${this._t("sort.reset")}</button>
+					<button class="btn-primary" @click=${c}>${this._t("sort.save")}</button>
 				</div>
-			</div>`: ''}
-		</div>`;
-	}
-	
-	_renderReassignModal(){
-		const task = this._reassignTask;
-		if (!task) return '';
-		
-		const approveOnly = async () => {
-			await this.hass.callService('chores4kids','approve_task',{ task_id: task.id });
-			this._reassignTask = null;
-			this.requestUpdate();
-		};
-		
-		const approveAndReassign = async () => {
-			// First approve
-			await this.hass.callService('chores4kids','approve_task',{ task_id: task.id });
-			
-			// Then assign today's version to same child(ren)
-			const targetIds = Array.isArray(task.repeat_child_ids) && task.repeat_child_ids.length 
-				? task.repeat_child_ids 
-				: (task.repeat_child_id ? [task.repeat_child_id] : [task.assigned_to]);
-			
-			for (const childId of targetIds) {
-				try {
-					// Find the unassigned template task
-					const templates = this._store.allTasks.filter(t => 
-						!t.assigned_to && 
-						t.title === task.title && 
-						Number(t.points) === Number(task.points)
-					);
-					
-					if (templates.length > 0) {
-						await this.hass.callService('chores4kids','assign_task',{ 
-							task_id: templates[0].id, 
-							child_id: childId 
-						});
-						this._setBonusVisualState(templates[0].id, 'assigned');
-					}
-				} catch(e) {
-					console.error('Failed to reassign task:', e);
-				}
-			}
-			
-			this._reassignTask = null;
-			this.requestUpdate();
-		};
-		
-		return html`<div class="overlay ${task?'open':''}" @click=${e=>{ if (e.target.classList.contains('overlay')) { this._reassignTask=null; this.requestUpdate(); } }}>
-			<div class="modal" style="max-width: 560px; width: min(95vw, 560px);" @click=${e=>e.stopPropagation()}>
-				<h3>${this._t('overdue.reassign_prompt')}</h3>
+			</div>`:""}
+		</div>`}_renderReassignModal(){let t=this._reassignTask;if(!t)return"";let e=async()=>{await this.hass.callService("chores4kids","approve_task",{task_id:t.id}),this._reassignTask=null,this.requestUpdate()},i=async()=>{await this.hass.callService("chores4kids","approve_task",{task_id:t.id});let s=Array.isArray(t.repeat_child_ids)&&t.repeat_child_ids.length?t.repeat_child_ids:t.repeat_child_id?[t.repeat_child_id]:[t.assigned_to];for(let a of s)try{let r=this._store.allTasks.filter(p=>!p.assigned_to&&p.title===t.title&&Number(p.points)===Number(t.points));r.length>0&&(await this.hass.callService("chores4kids","assign_task",{task_id:r[0].id,child_id:a}),this._setBonusVisualState(r[0].id,"assigned"))}catch(r){console.error("Failed to reassign task:",r)}this._reassignTask=null,this.requestUpdate()};return n`<div class="overlay ${t?"open":""}" @click=${s=>{s.target.classList.contains("overlay")&&(this._reassignTask=null,this.requestUpdate())}}>
+			<div class="modal" style="max-width: 560px; width: min(95vw, 560px);" @click=${s=>s.stopPropagation()}>
+				<h3>${this._t("overdue.reassign_prompt")}</h3>
 				<div style="padding: 16px 0; color: var(--secondary-text-color);">
-					<div><strong>${task.title}</strong></div>
-					<div style="margin-top:8px; font-size:0.9rem;">${task.assigned_to_name || task.assigned_to}</div>
+					<div><strong>${t.title}</strong></div>
+					<div style="margin-top:8px; font-size:0.9rem;">${t.assigned_to_name||t.assigned_to}</div>
 				</div>
 				<div class="row" style="justify-content:flex-end; gap:8px;">
-					<button class="btn-ghost" @click=${approveOnly}>${this._t('overdue.no')}</button>
-					<button class="btn-primary" @click=${approveAndReassign}>${this._t('overdue.yes')}</button>
+					<button class="btn-ghost" @click=${e}>${this._t("overdue.no")}</button>
+					<button class="btn-primary" @click=${i}>${this._t("overdue.yes")}</button>
 				</div>
 			</div>
-		</div>`;
-	}
-
-	_openTaskDescription(task, e) {
-		try{
-			const path = e.composedPath();
-			if (path.some(el => {
-				if (!el || !el.tagName) return false;
-				const tag = el.tagName;
-				return tag === 'BUTTON' || tag === 'HA-ICON-BUTTON' || el.classList?.contains?.('btn') || el.classList?.contains?.('btn-primary') || el.classList?.contains?.('btn-ghost') || el.classList?.contains?.('btn-danger');
-			})) {
-				return;
-			}
-		}catch(err){}
-
-		// Ensure we have description (rendered tasks should be enriched, but fallback just in case)
-		let desc = task.description;
-		if (!desc && task.id && this._store?.allTasks) {
-			const full = this._store.allTasks.find(t=> t.id===task.id);
-			if (full) desc = full.description;
-		}
-
-		if (desc) {
-			this._viewingTaskDesc = desc === task.description ? task : { ...task, description: desc };
-			this.requestUpdate();
-		}
-	}
-	_closeTaskDescription() {
-		this._viewingTaskDesc = null;
-		this.requestUpdate();
-	}
-	_renderDescriptionModal() {
-		if (!this._viewingTaskDesc) return '';
-		return html`
+		</div>`}_openTaskDescription(t,e){try{if(e.composedPath().some(a=>{if(!a||!a.tagName)return!1;let r=a.tagName;return r==="BUTTON"||r==="HA-ICON-BUTTON"||a.classList?.contains?.("btn")||a.classList?.contains?.("btn-primary")||a.classList?.contains?.("btn-ghost")||a.classList?.contains?.("btn-danger")}))return}catch{}let i=t.description;if(!i&&t.id&&this._store?.allTasks){let s=this._store.allTasks.find(a=>a.id===t.id);s&&(i=s.description)}i&&(this._viewingTaskDesc=i===t.description?t:{...t,description:i},this.requestUpdate())}_closeTaskDescription(){this._viewingTaskDesc=null,this.requestUpdate()}_renderDescriptionModal(){return this._viewingTaskDesc?n`
 			<div class="overlay open" @click=${()=>this._closeTaskDescription()}>
-				<div class="modal" style="max-width: 500px;" @click=${e=>e.stopPropagation()}>
+				<div class="modal" style="max-width: 500px;" @click=${t=>t.stopPropagation()}>
 					<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 12px;">
 						<h3 style="margin:0; padding-right: 16px;">${this._viewingTaskDesc.title}</h3>
 						<ha-icon icon="mdi:close" style="cursor:pointer;" @click=${()=>this._closeTaskDescription()}></ha-icon>
@@ -3806,1521 +1167,361 @@ class Chores4KidsDevCard extends LitElement {
 					<div style="white-space: pre-wrap;">${this._viewingTaskDesc.description}</div>
 				</div>
 			</div>
-		`;
-	}
-
-	// ------- CHILD VIEW -------
-	_findChildSensor(){
-		const childName = this._childName || this.config.child;
-		if (!childName) return null;
-		const slug = (v)=> (v||"")
-			.normalize('NFKD')
-			.replace(/[̀-ͯ]/g, '')
-			.replace(/[^a-zA-Z0-9]+/g, '_')
-			.replace(/^_+|_+$/g, '')
-			.toLowerCase() || 'child';
-		const targetSlug = slug(childName);
-		if (this._idChild && this.hass.states[this._idChild]){
-			const s = this.hass.states[this._idChild];
-			if (s?.attributes?.child_id) return s;
-		}
-		const sensors = Object.values(this.hass.states).filter(s=> s.entity_id?.startsWith("sensor.") && s.attributes?.child_id);
-		const found = sensors.find(s=> (s.attributes?.name||"").toLowerCase() === String(childName).toLowerCase() || (s.attributes?.slug||"") === targetSlug);
-		if (found?.entity_id) this._idChild = found.entity_id; return found;
-	}
-	_renderChild(){
-		const pointsEnabled = this._pointsEnabled();
-		const s = this._findChildSensor();
-		if (!s){ return html`<ha-card header="${this._t('card.child_title_fallback',{name: this._childName||this.config.child||''})}"><div class="card-content">${this._t('msg.child_not_found')}</div></ha-card>`; }
-
-		// Fetch store once
-		const store = this._store;
-		const allTasksMap = new Map((store.allTasks||[]).map(t=>[t.id, t]));
-		const templateCandidatesBySignature = new Map();
-		for (const t of (store.allTasks||[]).filter(task=> !task?.assigned_to)){
-			const sig = `${String(t?.title||'').trim().toLowerCase()}|${Number(t?.points||0)}`;
-			const arr = templateCandidatesBySignature.get(sig) || [];
-			arr.push(t);
-			templateCandidatesBySignature.set(sig, arr);
-		}
-
-		const myChildId = s?.attributes?.child_id;
-
-		// Enrich tasks with description from master list if missing
-		const rawTasks = (s.attributes.tasks||[]).filter(t=> ['assigned','in_progress','awaiting_approval','approved'].includes(t.status));
-		const tasks = rawTasks.map(t => {
-			const full = allTasksMap.get(t.id) || null;
-			const sig = `${String(t?.title||'').trim().toLowerCase()}|${Number(t?.points||0)}`;
-			const tplCandidates = templateCandidatesBySignature.get(sig) || [];
-			const tpl = tplCandidates.find(x=> !!x?.bonus_enabled || !!String(x?.bonus_title||'').trim() || Number(x?.bonus_points||0)>0)
-				|| tplCandidates[0]
-				|| null;
-			const merged = { ...(full||{}), ...t };
-			const description = String(merged?.description||'').trim() || String(full?.description||'').trim() || '';
-			const bonusTitle = String(merged?.bonus_title||'').trim() || String(tpl?.bonus_title||'').trim();
-			const bonusPointsRaw = (merged?.bonus_points != null) ? merged.bonus_points : tpl?.bonus_points;
-			const bonusPoints = Number(bonusPointsRaw||0);
-			const bonusEnabled = (merged?.bonus_enabled != null)
-				? !!merged.bonus_enabled
-				: (!!tpl?.bonus_enabled || !!bonusTitle || bonusPoints > 0);
-			return {
-				...merged,
-				description,
-				bonus_enabled: bonusEnabled,
-				bonus_title: bonusTitle,
-				bonus_points: bonusPoints,
-			};
-		});
-
-		const dailyTasks = tasks.filter(t=> !t?.due);
-		const weeklyTasks = tasks.filter(t=> !!t?.due);
-
-		// shop items
-		let shopSensor = this._idShop && this.hass.states[this._idShop];
-		if (!shopSensor){ shopSensor = Object.values(this.hass.states).find(st=> st?.entity_id?.includes('chores4kids_shop')); if (shopSensor?.entity_id) this._idShop = shopSensor.entity_id; }
-		const items = (pointsEnabled && this._shopOpen) ? (shopSensor?.attributes?.items||[]).filter(i=>i.active!==false && (!i.child_ids?.length || i.child_ids.includes(s.attributes.child_id))) : [];
-
-		const deliveries = this._shopOpen ? (shopSensor?.attributes?.purchases || []).filter(p=>p.child_id===s.attributes.child_id && p.requires_delivery).reverse() : [];
-		const renderTaskGroups = (taskList)=>{
-			if (taskList.length===0) return html`<i>${this._t('msg.no_tasks')}</i>`;
-			const taskStatusOrder = (task)=>{
-				const st = String(task?.status||'');
-				const hasBonus = this._hasBonusTask(task);
-				const bonusDoneOrApproved = !!task?.bonus_approved || this._getBonusVisualState(task)==='done';
-				if ((st === 'awaiting_approval' || st === 'approved') && hasBonus && !bonusDoneOrApproved) return 0;
-				if (st === 'assigned' || st === 'in_progress') return 0;
-				if (st === 'awaiting_approval') return 1;
-				if (st === 'approved') return 2;
-				return 3;
-			};
-			const NONE='__none__';
-			const order = this._catOrderResolved();
-			const cats = store.categories||[]; // Use captured store
-			const catFor=(id)=> (id && id!==NONE) ? (cats.find(c=> c.id===id) || null) : null;
-			const nameFor=(id)=> id===NONE? this._t('sort.none') : (catFor(id)?.name || id);
-			const colorFor=(id)=>{ try{ return id===NONE? '' : this._normalizeHexColor(catFor(id)?.color); }catch{ return ''; } };
-			// group tasks by primary category (based on order)
-			const groups = new Map();
-			for (const t of taskList){
-				const ids = Array.isArray(t.categories)? t.categories:[];
-				let pid = NONE;
-				for (const cid of order){ if (cid!==NONE && ids.includes(cid)){ pid=cid; break; } }
-				if (!groups.has(pid)) groups.set(pid, []);
-				groups.get(pid).push(t);
-			}
-			const catIdsToShow = order.filter(id=> groups.has(id));
-			return catIdsToShow.map(cid=> html`
-				<div class="cat-section chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}>
-					<div class="cat-title">${nameFor(cid)}</div>
+		`:""}_findChildSensor(){let t=this._childName||this.config.child;if(!t)return null;let i=(r=>(r||"").normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/[^a-zA-Z0-9]+/g,"_").replace(/^_+|_+$/g,"").toLowerCase()||"child")(t);if(this._idChild&&this.hass.states[this._idChild]){let r=this.hass.states[this._idChild];if(r?.attributes?.child_id)return r}let a=Object.values(this.hass.states).filter(r=>r.entity_id?.startsWith("sensor.")&&r.attributes?.child_id).find(r=>(r.attributes?.name||"").toLowerCase()===String(t).toLowerCase()||(r.attributes?.slug||"")===i);return a?.entity_id&&(this._idChild=a.entity_id),a}_renderChild(){let t=this._pointsEnabled(),e=this._findChildSensor();if(!e)return n`<ha-card header="${this._t("card.child_title_fallback",{name:this._childName||this.config.child||""})}"><div class="card-content">${this._t("msg.child_not_found")}</div></ha-card>`;let i=this._store,s=new Map((i.allTasks||[]).map(_=>[_.id,_])),a=new Map;for(let _ of(i.allTasks||[]).filter(f=>!f?.assigned_to)){let f=`${String(_?.title||"").trim().toLowerCase()}|${Number(_?.points||0)}`,y=a.get(f)||[];y.push(_),a.set(f,y)}let r=e?.attributes?.child_id,o=(e.attributes.tasks||[]).filter(_=>["assigned","in_progress","awaiting_approval","approved"].includes(_.status)).map(_=>{let f=s.get(_.id)||null,y=`${String(_?.title||"").trim().toLowerCase()}|${Number(_?.points||0)}`,D=a.get(y)||[],N=D.find(b=>!!b?.bonus_enabled||!!String(b?.bonus_title||"").trim()||Number(b?.bonus_points||0)>0)||D[0]||null,w={...f||{},..._},O=String(w?.description||"").trim()||String(f?.description||"").trim()||"",j=String(w?.bonus_title||"").trim()||String(N?.bonus_title||"").trim(),A=w?.bonus_points!=null?w.bonus_points:N?.bonus_points,$=Number(A||0),v=w?.bonus_enabled!=null?!!w.bonus_enabled:!!N?.bonus_enabled||!!j||$>0;return{...w,description:O,bonus_enabled:v,bonus_title:j,bonus_points:$}}),c=o.filter(_=>!_?.due),u=o.filter(_=>!!_?.due),l=this._idShop&&this.hass.states[this._idShop];l||(l=Object.values(this.hass.states).find(_=>_?.entity_id?.includes("chores4kids_shop")),l?.entity_id&&(this._idShop=l.entity_id));let d=t&&this._shopOpen?(l?.attributes?.items||[]).filter(_=>_.active!==!1&&(!_.child_ids?.length||_.child_ids.includes(e.attributes.child_id))):[],m=this._shopOpen?(l?.attributes?.purchases||[]).filter(_=>_.child_id===e.attributes.child_id&&_.requires_delivery).reverse():[],g=_=>{if(_.length===0)return n`<i>${this._t("msg.no_tasks")}</i>`;let f=v=>{let b=String(v?.status||""),x=this._hasBonusTask(v),I=!!v?.bonus_approved||this._getBonusVisualState(v)==="done";return(b==="awaiting_approval"||b==="approved")&&x&&!I||b==="assigned"||b==="in_progress"?0:b==="awaiting_approval"?1:b==="approved"?2:3},y="__none__",D=this._catOrderResolved(),N=i.categories||[],w=v=>v&&v!==y&&N.find(b=>b.id===v)||null,O=v=>v===y?this._t("sort.none"):w(v)?.name||v,j=v=>{try{return v===y?"":this._normalizeHexColor(w(v)?.color)}catch{return""}},A=new Map;for(let v of _){let b=Array.isArray(v.categories)?v.categories:[],x=y;for(let I of D)if(I!==y&&b.includes(I)){x=I;break}A.has(x)||A.set(x,[]),A.get(x).push(v)}return D.filter(v=>A.has(v)).map(v=>n`
+				<div class="cat-section chore-layout" data-columns=${S(this.hass).chore_columns||"auto"}>
+					<div class="cat-title">${O(v)}</div>
 					<div class="chore-grid">
-					${[...(groups.get(cid)||[])].sort((a,b)=> taskStatusOrder(a) - taskStatusOrder(b)).map(t=>{
-						const groupColor = colorFor(cid);
-						const bonusInfo = this._bonusByDateInfo(t);
-						const bonusBy = bonusInfo?.dateStr;
-						const bonusClass = bonusInfo?.expired ? 'chip chip-bonus chip-bonus-expired' : 'chip chip-bonus';
-						const bonusTitle = String(t?.bonus_title||'').trim();
-						const bonusPoints = Number(t?.bonus_points||0);
-						const hasBonusTask = !!t?.bonus_enabled || !!bonusTitle || bonusPoints > 0;
-						const bonusTaskLabel = bonusTitle ? `${this._t('lbl.bonus')}: ${bonusTitle}` : this._t('lbl.bonus');
-						const bonusApproved = !!t?.bonus_approved;
-						const bonusCompleted = !!t?.bonus_completed_ts;
-						const bonusVisual = this._getBonusVisualState(t);
-						const bonusMainDone = (t?.status === 'awaiting_approval' || t?.status === 'approved');
-						const claimedById = t?.fastest_wins_claimed_by_child_id;
-						const claimedByName = t?.fastest_wins_claimed_by_child_name || claimedById;
-						const isTakenByOther = !!t?.fastest_wins && !!claimedById && !!myChildId && claimedById !== myChildId;
-						const isOverdue = this._isTaskOverdue(t);
-						const rowStyle = (!isOverdue && groupColor)
-							? `background: color-mix(in srgb, ${groupColor} 10%, var(--card-background-color)); box-shadow: inset 6px 0 0 ${groupColor};`
-							: '';
-						const hasTaskIcon = !!t?.icon;
-						return html`<div class="chore-occurrence">
-							<div class="task ${isOverdue?'task-overdue':''} ${hasTaskIcon?'has-icon':'no-icon'}" style="${rowStyle} cursor:${t.description?'pointer':'default'};" @click=${(e)=>this._openTaskDescription(t,e)}>
-								<div class="task-icon">${c4kTaskIcon(t.icon)}</div>
+					${[...A.get(v)||[]].sort((b,x)=>f(b)-f(x)).map(b=>{let x=j(v),I=this._bonusByDateInfo(b),xt=I?.dateStr,Jt=I?.expired?"chip chip-bonus chip-bonus-expired":"chip chip-bonus",it=String(b?.bonus_title||"").trim(),st=Number(b?.bonus_points||0),Zt=!!b?.bonus_enabled||!!it||st>0,Yt=it?`${this._t("lbl.bonus")}: ${it}`:this._t("lbl.bonus"),Qt=!!b?.bonus_approved,be=!!b?.bonus_completed_ts,wt=this._getBonusVisualState(b),St=b?.status==="awaiting_approval"||b?.status==="approved",at=b?.fastest_wins_claimed_by_child_id,Xt=b?.fastest_wins_claimed_by_child_name||at,te=!!b?.fastest_wins&&!!at&&!!r&&at!==r,At=this._isTaskOverdue(b),ee=!At&&x?`background: color-mix(in srgb, ${x} 10%, var(--card-background-color)); box-shadow: inset 6px 0 0 ${x};`:"",ie=!!b?.icon;return n`<div class="chore-occurrence">
+							<div class="task ${At?"task-overdue":""} ${ie?"has-icon":"no-icon"}" style="${ee} cursor:${b.description?"pointer":"default"};" @click=${se=>this._openTaskDescription(b,se)}>
+								<div class="task-icon">${E(b.icon)}</div>
 								<div>
-									<div class="title ${t.status==='approved' ? 'completed' : ''}">${t.title}</div>
+									<div class="title ${b.status==="approved"?"completed":""}">${b.title}</div>
 									<div class="meta">
-										${pointsEnabled ? html`<span class="chip chip-points">${t.points} ${this._t('lbl.points')}</span>`:''}
-										${pointsEnabled && t.penalty_deadline && ['assigned','in_progress'].includes(this._effectiveStatus(t)) ? html`<span class="chip">${this._t('ph.due')} · ${new Intl.DateTimeFormat(c4kCardLocale(this.config?.language, this.hass), {dateStyle:'short',timeStyle:'short',timeZone:this.hass.config?.time_zone}).format(t.penalty_deadline)} · −${t.penalty_points} ${this._t('lbl.points')}</span>` : ''}
-										${this._renderDeadline(t)}
-										${(pointsEnabled && bonusBy) ? html`<span class="${bonusClass}">${this._t('lbl.early_bonus_by',{ points: Number(t.early_bonus_points||0), date: bonusBy })}</span>` : ''}
-										${(pointsEnabled && !!t?.time_bonus_enabled	&& String(t?.time_bonus_before||'').trim() && Number(t?.time_bonus_points||0) > 0 && !t?.carried_over) ? html`<span class="chip chip-bonus">+${Number(t.time_bonus_points)} ${this._t('lbl.points')} if before ${String(t.time_bonus_before).trim()}</span>` : ''}
-										${this._isTaskOverdue(t)? html` <span class="chip status-overdue">${this._t('status.overdue')}</span>`:''}
+										${t?n`<span class="chip chip-points">${b.points} ${this._t("lbl.points")}</span>`:""}
+										${t&&b.penalty_deadline&&["assigned","in_progress"].includes(this._effectiveStatus(b))?n`<span class="chip">${this._t("ph.due")} · ${new Intl.DateTimeFormat(et(this.config?.language,this.hass),{dateStyle:"short",timeStyle:"short",timeZone:this.hass.config?.time_zone}).format(b.penalty_deadline)} · −${b.penalty_points} ${this._t("lbl.points")}</span>`:""}
+										${this._renderDeadline(b)}
+										${t&&xt?n`<span class="${Jt}">${this._t("lbl.early_bonus_by",{points:Number(b.early_bonus_points||0),date:xt})}</span>`:""}
+										${t&&b?.time_bonus_enabled&&String(b?.time_bonus_before||"").trim()&&Number(b?.time_bonus_points||0)>0&&!b?.carried_over?n`<span class="chip chip-bonus">+${Number(b.time_bonus_points)} ${this._t("lbl.points")} if before ${String(b.time_bonus_before).trim()}</span>`:""}
+										${this._isTaskOverdue(b)?n` <span class="chip status-overdue">${this._t("status.overdue")}</span>`:""}
 									</div>
 								</div>
 								<div class="actions" style="display:flex; flex-direction:column; gap:6px;">
-									${isTakenByOther ? html`<span class="chip status-taken">${this._t('lbl.taken_by',{name: claimedByName||'—'})}</span>`
-										: t.status==="assigned" ? (t.quick_complete ? html`<button class="btn-primary task-done" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._completeNow(t)}>${this._t('btn.task_done')}</button>` : html`<button class="btn-primary start-task" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._advance(t)}>${this._t('btn.start_task')}</button>`)
-										: t.status==="in_progress" ? html`<button class="btn-primary complete-task" ?disabled=${this._isTaskBusy(t.id)} @click=${()=>this._advance(t)}>${this._t('btn.complete_task')}</button>`
-										: t.status==="awaiting_approval" ? html`<span class="chip status-awaiting_approval">${this._t('lbl.awaiting')}</span>`
-										: html`<span class="chip status-approved">✓ ${this._t('btn.done')}</span>`}
-									${this.config?.debug_mode && !this._isTaskOverdue(t) && t.status!=="approved" ? html`
-										<button class="btn-ghost" style="font-size:0.75rem; padding:4px 8px;" @click=${()=>this._debugMarkOverdue(t)}>${this._t('debug.mark_overdue')}</button>
-									` : ''}
+									${te?n`<span class="chip status-taken">${this._t("lbl.taken_by",{name:Xt||"\u2014"})}</span>`:b.status==="assigned"?b.quick_complete?n`<button class="btn-primary task-done" ?disabled=${this._isTaskBusy(b.id)} @click=${()=>this._completeNow(b)}>${this._t("btn.task_done")}</button>`:n`<button class="btn-primary start-task" ?disabled=${this._isTaskBusy(b.id)} @click=${()=>this._advance(b)}>${this._t("btn.start_task")}</button>`:b.status==="in_progress"?n`<button class="btn-primary complete-task" ?disabled=${this._isTaskBusy(b.id)} @click=${()=>this._advance(b)}>${this._t("btn.complete_task")}</button>`:b.status==="awaiting_approval"?n`<span class="chip status-awaiting_approval">${this._t("lbl.awaiting")}</span>`:n`<span class="chip status-approved">✓ ${this._t("btn.done")}</span>`}
+									${this.config?.debug_mode&&!this._isTaskOverdue(b)&&b.status!=="approved"?n`
+										<button class="btn-ghost" style="font-size:0.75rem; padding:4px 8px;" @click=${()=>this._debugMarkOverdue(b)}>${this._t("debug.mark_overdue")}</button>
+									`:""}
 								</div>
 							</div>
-							${(pointsEnabled && hasBonusTask) ? html`
+							${t&&Zt?n`
 								<div class="bonus-wrap">
 									<div class="bonus-link" aria-hidden="true"></div>
 									<div class="bonus-subtask">
-										<div class="bonus-subtask-title">${bonusTaskLabel}</div>
+										<div class="bonus-subtask-title">${Yt}</div>
 										<div class="bonus-subtask-meta">
-											${bonusPoints>0 ? html`<span class="chip chip-points">+${bonusPoints} ${this._t('lbl.points')}</span>` : ''}
+											${st>0?n`<span class="chip chip-points">+${st} ${this._t("lbl.points")}</span>`:""}
 										</div>
 										<div class="bonus-subtask-actions">
-											${bonusApproved ? html`<span class="chip status-approved">✓ ${this._t('btn.done')}</span>` : (bonusVisual==='done') ? html`<span class="chip status-awaiting_approval">${this._t('lbl.awaiting')}</span>` : bonusVisual==='in_progress' ? html`<button class="btn-primary complete-task" ?disabled=${!bonusMainDone} @click=${()=>this._onChildBonusVisualClick(t)}>${this._t('btn.complete_bonus')}</button>` : html`<button class="btn-primary start-task" ?disabled=${!bonusMainDone} @click=${()=>this._onChildBonusVisualClick(t)}>${this._t('btn.start_task')}</button>`}
+											${Qt?n`<span class="chip status-approved">✓ ${this._t("btn.done")}</span>`:wt==="done"?n`<span class="chip status-awaiting_approval">${this._t("lbl.awaiting")}</span>`:wt==="in_progress"?n`<button class="btn-primary complete-task" ?disabled=${!St} @click=${()=>this._onChildBonusVisualClick(b)}>${this._t("btn.complete_bonus")}</button>`:n`<button class="btn-primary start-task" ?disabled=${!St} @click=${()=>this._onChildBonusVisualClick(b)}>${this._t("btn.start_task")}</button>`}
 										</div>
 									</div>
 								</div>
-							` : ''}
-						</div>`;
-					})}
+							`:""}
+						</div>`})}
 					</div>
 				</div>
-			`);
-		};
-		return html`
-			<ha-card header="${s.attributes.name}">
+			`)};return n`
+			<ha-card header="${e.attributes.name}">
 				<div class="card-content">
 					<div class="header-row">
-						${pointsEnabled ? html`<span class="header-points">${s.state} ${this._t('lbl.points')}</span>`:''}
-						${pointsEnabled ? html`<button class="btn-primary" @click=${()=>{ this._shopOpen = true; this.requestUpdate(); }}>${this._t('shop.title')}</button>`:''}
+						${t?n`<span class="header-points">${e.state} ${this._t("lbl.points")}</span>`:""}
+						${t?n`<button class="btn-primary" @click=${()=>{this._shopOpen=!0,this.requestUpdate()}}>${this._t("shop.title")}</button>`:""}
 					</div>
 					<div class="tasks child-tasks-scroll">
-						${dailyTasks.length ? html`<div class="section"><h3 style="margin:0 0 8px;">${this._t('section.daily_tasks')}</h3>${renderTaskGroups(dailyTasks)}</div>` : ''}
-						${weeklyTasks.length ? html`<div class="section"><h3 style="margin:0 0 8px;">${this._t('section.weekly_tasks')}</h3>${renderTaskGroups(weeklyTasks)}</div>` : (dailyTasks.length? '' : html`<i>${this._t('msg.no_tasks')}</i>`)}
+						${c.length?n`<div class="section"><h3 style="margin:0 0 8px;">${this._t("section.daily_tasks")}</h3>${g(c)}</div>`:""}
+						${u.length?n`<div class="section"><h3 style="margin:0 0 8px;">${this._t("section.weekly_tasks")}</h3>${g(u)}</div>`:c.length?"":n`<i>${this._t("msg.no_tasks")}</i>`}
 					</div>
-					${pointsEnabled ? html`<div class="overlay shop-child-overlay ${this._shopOpen?'open':''}" @click=${e=>{ if(e.target.classList.contains('overlay')) this._shopOpen=false; }}>
-						<div class="modal shop-child-modal" @click=${e=>e.stopPropagation()}>
-							<h3 style="margin:0 0 8px;">${this._t('shop.title')}</h3>
+					${t?n`<div class="overlay shop-child-overlay ${this._shopOpen?"open":""}" @click=${_=>{_.target.classList.contains("overlay")&&(this._shopOpen=!1)}}>
+						<div class="modal shop-child-modal" @click=${_=>_.stopPropagation()}>
+							<h3 style="margin:0 0 8px;">${this._t("shop.title")}</h3>
 							<div class="shop-grid">
-								${items.map(i=> html`
-									<div class="shop-item ${this._buyingItemId===i.id ? 'is-buying' : ''} ${this._buySuccessItemId===i.id ? 'is-bought' : ''}">
-										${i.image ? html`<div class="img-wrap"><img src="${this._resolveUrl(i.image)}" alt="${i.title}" loading="lazy" decoding="async"></div>` : html`<div class="img-wrap" style="display:grid;place-items:center;opacity:.7;">${i.icon? html`<ha-icon icon="${i.icon}" style="--mdc-icon-size:48px"></ha-icon>`:'?'}</div>`}
+								${d.map(_=>n`
+									<div class="shop-item ${this._buyingItemId===_.id?"is-buying":""} ${this._buySuccessItemId===_.id?"is-bought":""}">
+										${_.image?n`<div class="img-wrap"><img src="${this._resolveUrl(_.image)}" alt="${_.title}" loading="lazy" decoding="async"></div>`:n`<div class="img-wrap" style="display:grid;place-items:center;opacity:.7;">${_.icon?n`<ha-icon icon="${_.icon}" style="--mdc-icon-size:48px"></ha-icon>`:"?"}</div>`}
 										<div class="body">
-											<div class="title">${i.title}</div>
-											<div class="meta"><span class="chip chip-points">${i.price} ${this._t('lbl.points')}</span></div>
-											<button class="btn-primary" ?disabled=${Number(s.state)<Number(i.price) || this._buyingItemId===i.id} @click=${()=>this._buy(i, s.attributes.child_id)}>${this._buySuccessItemId===i.id ? this._t('shop.bought') : this._t('shop.buy')}</button>
+											<div class="title">${_.title}</div>
+											<div class="meta"><span class="chip chip-points">${_.price} ${this._t("lbl.points")}</span></div>
+											<button class="btn-primary" ?disabled=${Number(e.state)<Number(_.price)||this._buyingItemId===_.id} @click=${()=>this._buy(_,e.attributes.child_id)}>${this._buySuccessItemId===_.id?this._t("shop.bought"):this._t("shop.buy")}</button>
 										</div>
 									</div>
 								`)}
 							</div>
-							${deliveries.length ? html`<h3>${this._t('shop.history')}</h3>${deliveries.map(p=>html`<p><b>${p.title}</b> · ${this._deliveryStatus(p)}</p>`)}` : ''}
+							${m.length?n`<h3>${this._t("shop.history")}</h3>${m.map(_=>n`<p><b>${_.title}</b> · ${this._deliveryStatus(_)}</p>`)}`:""}
 							<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">
-								<button class="btn-ghost" @click=${()=>this._shopOpen=false}>${this._t('form.cancel')}</button>
+								<button class="btn-ghost" @click=${()=>this._shopOpen=!1}>${this._t("form.cancel")}</button>
 							</div>
 						</div>
-					</div>` : ''}
+					</div>`:""}
 				</div>
 			</ha-card>
 			${this._renderDescriptionModal()}
-		`;
-	}
-
-	// ===== Actions (admin + child) =====
-	async _addChild(){ if(!this._name) return; await this.hass.callService('chores4kids','add_child',{ name: this._name }); this._name=''; }
-	async _removeChild(c){ if(!confirm(this._t('confirm.delete_child',{name:c.name}))) return; await this.hass.callService('chores4kids','remove_child',{ child_id: c.id }); }
-	_openPoints(c){ if(!this._pointsEnabled()) return; this._pointsChild=c; this._pointsValue=5; this.requestUpdate(); }
-	_closePoints=()=>{ this._pointsChild=null; this.requestUpdate(); }
-	async _addPointsQuick(n){ if(!this._pointsEnabled()) return; if(!this._pointsChild) return; const pts=Number(n||0); if(!Number.isFinite(pts)||pts===0) return; await this.hass.callService('chores4kids','add_points',{ child_id: this._pointsChild.id, points: pts }); this._closePoints(); }
-	async _resetPoints(c){ if(!this._pointsEnabled()) return; if(!confirm(this._t('btn.reset_points')+'?')) return; await this.hass.callService('chores4kids','reset_points',{ child_id: c.id }); }
-	async _promptRename(c){ const nn=prompt(this._t('btn.rename'), c.name); if(!nn || nn===c.name) return; await this.hass.callService('chores4kids','rename_child',{ child_id:c.id, new_name: nn }); }
-	get _showTitleError(){ return (this._touchedTitle && !(String(this._taskTitle||'').trim().length>0)); }
-	get _pointsErrorKey(){ if(!this._pointsEnabled()) return null; if(!this._touchedPoints) return null; const raw=String(this._taskPoints??'').trim(); if(raw==='') return 'err.points_required'; const n=Number(raw); if(!Number.isFinite(n)) return 'err.points_number'; if(n<0) return 'err.points_positive'; return null; }
-	get _showPointsError(){ return !!this._pointsErrorKey; }
-	get _hasFormErrors(){ return this._showTitleError || (this._pointsEnabled() && (this._showPointsError || (this._penaltyEnabled && !(Number.isInteger(Number(this._penaltyAmount ?? 1)) && Number(this._penaltyAmount ?? 1)>0)))); }
-	_pickIcon(id){ this._taskIcon=id; try{ const arr=Array.isArray(this._iconRecents)? [...this._iconRecents]:[]; const next=[id,...arr.filter(x=>x!==id)].slice(0,12); this._iconRecents=next; localStorage.setItem('c4k_icn_recent', JSON.stringify(next)); }catch{} this._iconModalOpen=false; this.requestUpdate(); }
-	_openCustomIconModal(){ this._customIconModalOpen = true; this._customIconSearch = ''; this._customIconPreview = ''; this._customIconLabel = ''; this._iconDisplayLimit = 200; this._iconModalOpen = false; if(!this._availableIcons || !this._availableIcons.length) this._fetchAvailableIcons(); this.requestUpdate(); }
-	_closeCustomIconModal(){ this._customIconModalOpen = false; this._customIconSearch = ''; this._customIconPreview = ''; this._customIconLabel = ''; this._iconDisplayLimit = 200; this.requestUpdate(); }
-	async _fetchAvailableIcons(){ 
-		try{ 
-			// Hent ALLE MDI ikoner direkte fra CDN metadata
-			console.log('Fetching all MDI icons from CDN...');
-			const response = await fetch('https://cdn.jsdelivr.net/npm/@mdi/svg@latest/meta.json');
-			const data = await response.json();
-			
-			if (data && Array.isArray(data)) {
-				this._availableIcons = data.map(icon => `mdi:${icon.name}`).sort();
-				console.log('Successfully loaded ALL MDI icons:', this._availableIcons.length);
-				this.requestUpdate();
-				return;
-			}
-		} catch(e) {
-			console.warn('Could not fetch from MDI CDN:', e);
-		}
-		
-		// Fallback: Prøv Home Assistant's API
-		try{ 
-			const result = await this.hass.callWS({ type: 'frontend/get_icons', category: 'mdi' }); 
-			const icons = result?.resources?.mdi || {}; 
-			this._availableIcons = Object.keys(icons).map(k=> `mdi:${k}`).sort(); 
-			console.log('Loaded icons via HA WebSocket:', this._availableIcons.length);
-			this.requestUpdate(); 
-		}catch(e){ 
-			console.error('Could not fetch icons, using fallback list:', e); 
-			// Sidste fallback: Generate common icons
-			this._availableIcons = this._generateFallbackIcons();
-			console.log('Using fallback icons:', this._availableIcons.length);
-			this.requestUpdate();
-		} 
-	}
-	_generateFallbackIcons(){
-		// Fallback list med de mest almindelige ikoner
-		const common = ['home','car','star','heart','phone','email','calendar','clock','bell','light','fan','door','window','lock','key','trash','recycle','book','pen','pencil','brush','palette','music','headphones','speaker','microphone','camera','video','television','monitor','laptop','keyboard','mouse','gamepad','gift','shopping','cart','bag','wallet','credit-card','money','piggy-bank','food','pizza','coffee','beer','wine','leaf','flower','tree','sun','moon','cloud','umbrella','snowflake','fire','water','lightning','weather','thermometer','gauge','speedometer','wrench','hammer','screwdriver','tools','cog','settings','account','face','people','run','walk','bike','bus','train','airplane','rocket','boat','castle','office','store','hospital','school','bank','factory','warehouse','package','truck','van','ambulance','police','shield','alert','information','help','check','close','plus','minus','arrow','chevron','menu','dots','grid','list','chart','graph','table','download','upload','share','link','tag','label','bookmark','flag','pin','map','navigation','compass','target','crosshairs','eye','hide','lock-open','volume','brightness','wifi','bluetooth','battery','power','plug','usb','sd-card','memory','cpu','chip','server','cloud-outline','cloud-download','cloud-upload','folder','file','document','image','picture','note','text','format','undo','redo','save','print','scan','fax','timer','stopwatch','alarm','weather-cloudy','weather-rainy','weather-snowy','weather-windy','dog','cat','paw','fish','bug','bee','butterfly','baseball','basketball','football','soccer','tennis','golf','cards','dice','puzzle','robot','alien','ghost','skull','pizza-outline','hamburger','ice-cream','cake','cupcake','candy','apple','orange','banana','grapes','carrot','corn','bread','cheese','egg','cookie','donut','hot-dog','popcorn','soda','cup','glass','bottle','plate','silverware','pot','kettle','microwave','oven','fridge','dishwasher','washing-machine','tumble-dryer','iron','vacuum','broom','bucket','spray-bottle','mop','brush-variant','sponge','soap','towel','toilet','shower','bathtub','sink','mirror','toothbrush','razor','hair-dryer','perfume','ring','diamond','crown','medal','trophy','ticket','balloon','confetti','firework','party-popper','candle','lamp','lightbulb','desk-lamp','ceiling-light','chandelier','spotlight','led-strip','necklace','bracelet','watch','glasses','sunglasses','hat','shirt','tie','shoe','boot','sock','glove','jacket','umbrella-outline','backpack','briefcase','purse','luggage'];
-		return common.map(name=> `mdi:${name}`).sort();
-	}
-	_saveCustomIcon(){ const icon = String(this._customIconPreview||'').trim(); const label = String(this._customIconLabel||'').trim(); if(!icon || !label) return; const customs = Array.isArray(this._customIcons)? [...this._customIcons]:[]; const exists = customs.find(c=> c.id === icon); if(!exists){ customs.push({ id: icon, label }); try{ localStorage.setItem('c4k_custom_icons', JSON.stringify(customs)); }catch{} this._customIcons = customs; } this._pickIcon(icon); this._closeCustomIconModal(); }
-	_deleteCustomIcon(iconId){ const customs = Array.isArray(this._customIcons)? [...this._customIcons]:[]; const filtered = customs.filter(c=> c.id !== iconId); try{ localStorage.setItem('c4k_custom_icons', JSON.stringify(filtered)); }catch{} this._customIcons = filtered; this.requestUpdate(); }
-	async _waitForNewTemplateTask(beforeUnassignedIds, sig, timeoutMs=6000){
-		const start = Date.now();
-		const sleep = (ms)=> new Promise(r=> setTimeout(r, ms));
-		const wantTitle = String(sig?.title||'').trim();
-		const wantPoints = Number(sig?.points||0);
-		while ((Date.now() - start) < (Number(timeoutMs)||6000)){
-			try{
-				const candidates = (this._store.allTasks||[])
-					.filter(t=> !t.assigned_to && !(beforeUnassignedIds?.has?.(t.id)))
-					.filter(t=> String(t.title||'').trim()===wantTitle && Number(t.points||0)===wantPoints);
-				if (candidates.length){
-					// Prefer the most recently created
-					candidates.sort((a,b)=>{ try{ return new Date(b.created).getTime() - new Date(a.created).getTime(); }catch{ return 0; } });
-					return candidates[0];
-				}
-			}catch{ /* ignore */ }
-			await sleep(150);
-		}
-		return null;
-	}
-	async _createTask(){
-		const pointsEnabled = this._pointsEnabled();
-		this._touchedTitle=true;
-		this._touchedPoints = pointsEnabled;
-		if(this._hasFormErrors) return;
-		const beforeUnassignedIds = new Set((this._store.allTasks||[]).filter(t=>!t.assigned_to).map(t=>t.id));
-		const scheduleMode = this._weeklyEnabled ? 'weekly' : (this._monthlyEnabled ? 'monthly' : (this._repeatEnabled ? 'repeat' : ''));
-		const repeatOn = (scheduleMode === 'repeat');
-		const bonusOn = pointsEnabled ? !!this._taskEarlyBonusEnabled : false;
-		const dueVal = (bonusOn && (scheduleMode==='repeat' || scheduleMode==='weekly' || scheduleMode==='monthly')) ? undefined : (String(this._taskDue||'').trim() || undefined);
-		const _days = repeatOn ? Array.from(this._repeatDays||[]) : [];
-		const _ids = repeatOn ? Array.from(this._repeatAssign||[]) : [];
-		const _cats = Array.from(this._taskCategories||[]);
-		const _persist = (scheduleMode==='weekly' || scheduleMode==='monthly') ? false : !!this._persistUntilDone;
-		const _quick = !!this._quickComplete;
-		const _skip = !!this._skipApproval;
-		const _fastest = !!this._fastestWins;
-		const _bonusEnabled = pointsEnabled ? !!this._taskBonusEnabled : false;
-		const _bonusTitle = _bonusEnabled ? String(this._taskBonusTitle||'').trim() : '';
-		const _bonusPoints = _bonusEnabled ? Number(this._taskBonusPoints||0) : 0;
-		const _autoAssignIds = (scheduleMode ? Array.from(this._repeatAssign||[]) : []);
-		
-		// Check if today matches schedule - if so, auto-assign immediately
-		const now = new Date();
-		const jsDay = now.getDay(); // 0=Sun
-		const weekdayMap = [6, 0, 1, 2, 3, 4, 5]; // Convert JS day (0=Sun) to backend format (0=Mon)
-		const todayBackend = weekdayMap[jsDay];
-		const assignToday = (
-			scheduleMode==='weekly' ? (todayBackend===0) :
-			scheduleMode==='monthly' ? (now.getDate()===1) :
-			repeatOn ? (_days.includes(todayBackend) || _days.includes(['mon','tue','wed','thu','fri','sat','sun'][todayBackend])) :
-			false
-		);
-		
-		// Always create a reusable unassigned template task.
-		// If today is included in repeat_days, we then assign today's copies from the template
-		// so the task stays editable under "Tasks" and assigned tasks remain linked.
-		const taskData = {
-			title:this._taskTitle,
-			points: pointsEnabled ? Number(this._taskPoints) : 0,
-			description:this._taskDesc||'',
-			due: dueVal,
-			schedule_mode: scheduleMode || undefined,
-			time_bonus_enabled: (pointsEnabled ? !!this._taskTimeBonusEnabled : false),
-			time_bonus_before: (pointsEnabled && this._taskTimeBonusEnabled) ? String(this._taskTimeBonusBefore||'').trim() : '',
-			time_bonus_points: (pointsEnabled && this._taskTimeBonusEnabled) ? Number(this._taskTimeBonusPoints||0) : 0,
-			early_bonus_enabled: bonusOn,
-			early_bonus_days: (bonusOn && this._taskEarlyBonusDays!=='' && this._taskEarlyBonusDays!=null) ? Number(this._taskEarlyBonusDays) : undefined,
-			early_bonus_points: (bonusOn && this._taskEarlyBonusPoints!=='' && this._taskEarlyBonusPoints!=null) ? Number(this._taskEarlyBonusPoints) : undefined,
-			bonus_enabled: _bonusEnabled,
-			icon:this._taskIcon||undefined,
-			multiple_per_day: !!this._multiplePerDay,
-			quick_complete: _quick,
-			skip_approval: _skip,
-			fastest_wins: _fastest,
-			bonus_title: _bonusTitle,
-			bonus_points: Number.isFinite(_bonusPoints) ? _bonusPoints : 0,
-			repeat_days:_days,
-			repeat_child_id: scheduleMode ? (((_autoAssignIds[0]||'') || undefined)) : undefined,
-			repeat_child_ids: scheduleMode ? (_autoAssignIds.length ? _autoAssignIds : undefined) : undefined,
-			persist_until_completed: _persist,
-			penalty_points: pointsEnabled && this._penaltyEnabled ? Number(this._penaltyAmount ?? 1) : 0,
-			due_time: this._taskDueTime || '',
-			penalty_time: this._penaltyTime || '',
-			mark_overdue: _persist ? !!this._markOverdue : true,
-			categories: _cats
-		};
-		await this.hass.callService('chores4kids','add_task', taskData);
-
-		if (assignToday && _autoAssignIds.length){
-			const tpl = await this._waitForNewTemplateTask(beforeUnassignedIds, { title: this._taskTitle, points: pointsEnabled ? Number(this._taskPoints) : 0 });
-			if (tpl?.id){
-				for (const cid of _autoAssignIds){
-					if(!cid) continue;
-					await this.hass.callService('chores4kids','assign_task', { task_id: tpl.id, child_id: cid });
-				}
-			}
-		}
-
-		// Ensure Tasks section is visible after creating a task
-		try{
-			if (this._collapsed?.tasks){
-				const next = { ...(this._collapsed||{}) };
-				next.tasks = false;
-				this._collapsed = next;
-				localStorage.setItem('c4k_admin_collapsed', JSON.stringify(next));
-			}
-		}catch{}
-		// Clear form and reset validation state so inputs don't show errors
-		this._taskTitle=this._taskPoints=this._taskDesc=this._taskIcon='';
-		this._taskDue=''; this._taskDueTime=''; this._penaltyEnabled=false; this._penaltyAmount=1; this._penaltyTime='';
-		this._taskTimeBonusEnabled = false;
-		this._taskTimeBonusBefore = '';
-		this._taskTimeBonusPoints = '';
-		this._taskEarlyBonusDays='';
-		this._taskEarlyBonusPoints='';
-		this._taskEarlyBonusEnabled=false;
-		this._taskBonusEnabled=false;
-		this._taskBonusTitle='';
-		this._taskBonusPoints='';
-		this._repeatDays=new Set();
-		this._repeatAssign=new Set();
-		this._repeatEnabled=false;
-		this._weeklyEnabled=false;
-		this._monthlyEnabled=false;
-		this._taskCategories=new Set();
-		this._markOverdue=true;
-		this._persistUntilDone=false;
-		this._multiplePerDay = false;
-		this._quickComplete = false;
-		this._skipApproval=false;
-		this._fastestWins=false;
-		this._touchedTitle=false; this._touchedPoints=false;
-	}
-	async _setStatus(taskId,status){
-		try{
-			await this.hass.callService('chores4kids','set_task_status',{ task_id: taskId, status });
-		} finally {
-			if (status!=='awaiting_approval'){
-				this._clearCompleted(taskId);
-			}
-			if (status==='assigned'){
-				this._setBonusVisualState(taskId, 'assigned');
-			}
-		}
-	}
-	_canManualReassign(task){
-		try{
-			// Only show when it matches the same scenario as the approval popup:
-			// the (carry-over) task repeats today, but today's copy is missing.
-			if(!(!!task?.skip_approval && !!task?.persist_until_completed && task?.status === 'approved')) return false;
-			const isCarry = this._isTaskOverdue(task) || this._isFromBeforeToday(task);
-			if(!isCarry) return false;
-			if(!this._autoAssignActive(task)) return false;
-			if(!this._isScheduledToday(task)) return false;
-			const targetIds = Array.isArray(task.repeat_child_ids) && task.repeat_child_ids.length
-				? task.repeat_child_ids
-				: (task.repeat_child_id ? [task.repeat_child_id] : [task.assigned_to]);
-			// Show button if at least one target child is missing today's copy
-			for (const childId of targetIds) {
-				if(!childId) continue;
-				const alreadyHasTodays = (this._store.allTasks||[]).some(t =>
-					!!t.assigned_to &&
-					t.assigned_to === childId &&
-					t.title === task.title &&
-					Number(t.points) === Number(task.points) &&
-					!t.carried_over &&
-					['assigned','in_progress','awaiting_approval'].includes(t.status)
-				);
-				if(!alreadyHasTodays) return true;
-			}
-			return false;
-		}catch{ return false; }
-	}
-	async _manualReassign(task){
-		try{
-			if(!task) return;
-			// Only applicable when the task is a carry-over situation AND repeats today.
-			// Note: backend clears carried_over when approving, so also infer carry-over by created < today.
-			const isCarry = this._isTaskOverdue(task) || this._isFromBeforeToday(task);
-			if(!isCarry || !this._autoAssignActive(task)) return;
-			if(!this._isScheduledToday(task)) return;
-
-			// Assign today's version to same child(ren)
-			const targetIds = Array.isArray(task.repeat_child_ids) && task.repeat_child_ids.length
-				? task.repeat_child_ids
-				: (task.repeat_child_id ? [task.repeat_child_id] : [task.assigned_to]);
-
-			// Find the unassigned template task once (preferred)
-			const template = (this._store.allTasks||[]).find(t =>
-				!t.assigned_to &&
-				t.title === task.title &&
-				Number(t.points) === Number(task.points)
-			);
-
-			for (const childId of targetIds) {
-				try{
-					if(!childId) continue;
-					// Avoid creating duplicates if today's copy already exists
-					const alreadyHasTodays = (this._store.allTasks||[]).some(t =>
-						!!t.assigned_to &&
-						t.assigned_to === childId &&
-						t.title === task.title &&
-						Number(t.points) === Number(task.points) &&
-						!t.carried_over &&
-						['assigned','in_progress','awaiting_approval'].includes(t.status)
-					);
-					if(alreadyHasTodays) continue;
-
-					if(template?.id){
-						await this.hass.callService('chores4kids','assign_task',{
-							task_id: template.id,
-							child_id: childId
-						});
-						this._setBonusVisualState(template.id, 'assigned');
-					}else{
-						// Fallback: if there's no template (e.g. task was created as assigned), create an assigned copy.
-						const mode = String(task?.schedule_mode||'').toLowerCase();
-						await this.hass.callService('chores4kids','add_task',{
-							title: task.title,
-							points: Number(task.points),
-							description: task.description || '',
-							icon: task.icon || undefined,
-							multiple_per_day: !!task.multiple_per_day,
-							quick_complete: !!task.quick_complete,
-							skip_approval: !!task.skip_approval,
-							persist_until_completed: !!task.persist_until_completed,
-							categories: Array.isArray(task.categories) ? task.categories : [],
-							schedule_mode: (mode==='weekly' || mode==='monthly' || mode==='repeat') ? mode : undefined,
-							repeat_days: (mode==='repeat' || !mode) ? (Array.isArray(task.repeat_days) ? task.repeat_days : []) : [],
-							repeat_child_id: task.repeat_child_id || undefined,
-							child_id: childId,
-						});
-					}
-				}catch(e){
-					console.error('Failed to manually reassign task:', e);
-				}
-			}
-			// Best-effort: ensure assigned copies inherit categories
-			try{ if(template?.id) this._ensureAssignedHasCategories(template, targetIds); }catch{}
-			this.requestUpdate();
-		}catch(e){
-			console.error('Failed to manually reassign task:', e);
-		}
-	}
-	async _approve(task, busyAlreadyHeld=false){
-		if (!task?.id) return false;
-		if (!busyAlreadyHeld && this._isTaskBusy(task.id)) return false;
-		if (!busyAlreadyHeld) this._setTaskBusy(task.id, true);
-		try{
-		// Check if task is overdue and has auto-assign for today
-		if (this._isTaskOverdue(task) && this._autoAssignActive(task)) {
-			if (this._isScheduledToday(task)) {
-				// Show re-assign prompt
-				this._reassignTask = task;
-				this.requestUpdate();
-				return false;
-			}
-		}
-		
-		// Normal approve (timestamp remains in backend for historical view)
-		await this.hass.callService('chores4kids','approve_task',{ task_id: task.id });
-		return true;
-		}catch(err){
-			console.error('Failed to approve task:', err);
-			const msg = String(err?.message || err || 'Unknown error');
-			alert(`Kunne ikke godkende opgaven: ${msg}`);
-			return false;
-		} finally {
-			if (!busyAlreadyHeld) this._setTaskBusy(task.id, false);
-		}
-	}
-	async _assignTask(task, childId){ if(!childId){ alert(this._t('alert.choose_child_first')); return; } await this.hass.callService('chores4kids','assign_task',{ task_id: task.id, child_id: childId }); this._setBonusVisualState(task.id, 'assigned'); task._assignTo=''; this.requestUpdate(); }
-	async _assignTaskMulti(task, childIds){
-		const ids = Array.isArray(childIds) ? childIds.filter(Boolean) : [];
-		if (!ids.length){ alert(this._t('alert.choose_child_first')); return; }
-		for (const id of ids){
-			try{ await this.hass.callService('chores4kids','assign_task',{ task_id: task.id, child_id: id }); this._setBonusVisualState(task.id, 'assigned'); }
-			catch(e){ /* continue to next */ }
-		}
-		// Best-effort: ensure new assigned copies inherit categories from template
-		try{ this._ensureAssignedHasCategories(task, ids); }catch{}
-		// clear selections
-		try{
-			const row = this.shadowRoot.querySelector(`tr[data-task="${task.id}"]`);
-			row?.querySelectorAll('.c4k-assign')?.forEach(i=> i.checked = false);
-			const val = row?.querySelector('.multi-dd-value'); if (val) val.textContent = this._t('select.assign_child'); val?.classList.add('placeholder');
-		}catch{}
-		this._openAssignMenuFor = null;
-		this.requestUpdate();
-	}
-
-	_ensureAssignedHasCategories(templateTask, childIds){
-		const cats = Array.isArray(templateTask?.categories)? templateTask.categories : [];
-		if (!cats.length) return;
-		// defer to allow state to update
-		setTimeout(()=>{
-			try{
-				const all = (this._store.allTasks||[]).filter(t=> !!t.assigned_to && t.title===templateTask.title && Number(t.points)===Number(templateTask.points));
-				const now = Date.now();
-				for (const cid of childIds){
-					const candidates = all.filter(t=> t.assigned_to===cid);
-					// pick latest created
-					let chosen = null; let best = -Infinity;
-					for (const t of candidates){
-						let ts = 0; try{ ts = new Date(t.created).getTime(); }catch{}
-						if (ts>best) { best=ts; chosen=t; }
-					}
-					if (chosen && (!Array.isArray(chosen.categories) || chosen.categories.length===0)){
-						this.hass.callService('chores4kids','update_task',{ task_id: chosen.id, categories: cats });
-					}
-				}
-			}catch{}
-		}, 500);
-	}
-
-	// Category management
-	async _addCategory(){
-		const n=String(this._newCategoryName||'').trim();
-		if(!n) return;
-		const color=this._normalizeHexColor(this._newCategoryColor);
-		const payload = color ? { name:n, color } : { name:n };
-		await this.hass.callService('chores4kids','add_category', payload);
-		this._newCategoryName='';
-		this._newCategoryColor='';
-	}
-	async _setCategoryColor(cat, e){
-		try{
-			if (!cat?.id) return;
-			const color = String(e?.target?.value || '').trim();
-			await this.hass.callService('chores4kids','set_category_color',{ category_id: cat.id, color });
-		}catch(err){
-			console.error('Failed to set category color:', err);
-		}
-	}
-	async _promptRenameCategory(cat){ const nn=prompt(this._t('btn.rename'), cat.name); if(!nn || nn===cat.name) return; await this.hass.callService('chores4kids','rename_category',{ category_id: cat.id, new_name: nn }); }
-	async _deleteCategory(cat){ if(!confirm(this._t('btn.delete')+'?')) return; await this.hass.callService('chores4kids','delete_category',{ category_id: cat.id }); }
-
-	_updateAssignSummary(taskId, taskRef){
-		try{
-			const row = this.shadowRoot.querySelector(`tr[data-task="${taskId}"]`);
-			const boxes = Array.from(row?.querySelectorAll('.c4k-assign:checked')||[]);
-			const ids = boxes.map(i=> i.value);
-			const names = boxes.map(i=> i.parentElement?.querySelector('span')?.textContent?.trim()).filter(Boolean);
-			if (taskRef) taskRef._assignToMulti = ids;
-			const val = row?.querySelector('.multi-dd-value');
-			if (val){
-				if (names.length===0){ val.textContent = this._t('select.assign_child'); val.classList.add('placeholder'); }
-				else {
-					val.textContent = names.slice(0,2).join(', ') + (names.length>2? ` +${names.length-2}` : '');
-					val.classList.remove('placeholder');
-				}
-			}
-		}catch{}
-	}
-	_editTask(t){ this._editingTask=t; this._taskDueTime=t.due_time || ''; this._taskTitle=t.title; this._taskPoints=String(t.points); this._penaltyEnabled=Number(t.penalty_points)>0; this._penaltyAmount=t.penalty_points||1; this._penaltyTime=t.penalty_time||''; this._taskDesc=t.description||''; this._taskIcon=t.icon||''; this._taskDue = (()=>{ const d=this._parseDueToDate(t?.due); return d? this._formatDateISO(d) : ''; })(); this._taskEarlyBonusDays = (t?.early_bonus_days!=null && Number(t.early_bonus_days)>0)? String(t.early_bonus_days) : ''; this._taskEarlyBonusPoints = (t?.early_bonus_points!=null && Number(t.early_bonus_points)>0)? String(t.early_bonus_points) : ''; this._taskEarlyBonusEnabled = (()=>{ const v=t?.early_bonus_enabled; if (v===true) return true; if (v===false) return false; return (Number(t?.early_bonus_days||0)>0 && Number(t?.early_bonus_points||0)>0); })(); this._taskBonusTitle = String(t?.bonus_title||''); this._taskBonusPoints = (t?.bonus_points!=null && Number(t.bonus_points)>0)? String(t.bonus_points) : ''; this._taskBonusEnabled = !!(String(t?.bonus_title||'').trim() || Number(t?.bonus_points||0)>0); const mode = String(t?.schedule_mode||'').toLowerCase(); this._weeklyEnabled = (mode==='weekly'); this._monthlyEnabled = (mode==='monthly'); const map=["mon","tue","wed","thu","fri","sat","sun"]; const fromAttr=Array.isArray(t.repeat_days)? t.repeat_days.map(d=> typeof d==='number'? map[d] : String(d).slice(0,3)) : []; this._repeatDays=new Set(fromAttr); const kids = Array.isArray(t.repeat_child_ids)? t.repeat_child_ids : (t.repeat_child_id? [t.repeat_child_id]:[]); this._repeatAssign=new Set(kids); this._repeatEnabled = (!this._weeklyEnabled && !this._monthlyEnabled) && !!(fromAttr.length || kids.length || mode==='repeat'); this._persistUntilDone = !!t.persist_until_completed; this._markOverdue = t.mark_overdue !== false; this._multiplePerDay = !!t.multiple_per_day; this._quickComplete = !!t.quick_complete; this._skipApproval = !!t.skip_approval; this._fastestWins = !!t.fastest_wins; const cats = Array.isArray(t.categories)? t.categories : []; this._taskCategories = new Set(cats); if (this._weeklyEnabled || this._monthlyEnabled){ this._persistUntilDone = false; this._markOverdue = true; } this._taskTimeBonusEnabled = !!(t?.time_bonus_enabled || (String(t?.time_bonus_before||'').trim() && Number(t?.time_bonus_points||0) > 0)); this._taskTimeBonusBefore = String(t?.time_bonus_before || ''); this._taskTimeBonusPoints = (t?.time_bonus_points != null && Number(t.time_bonus_points) > 0) ? String(t.time_bonus_points) : '';}
-	async _saveEditedTask(){
-		if(!this._editingTask) return;
-		// validate like create
-		const pointsEnabled = this._pointsEnabled();
-		this._touchedTitle = true; this._touchedPoints = pointsEnabled; this.requestUpdate();
-		if (this._hasFormErrors) return;
-		try{
-			const bonusOn = pointsEnabled ? !!this._taskEarlyBonusEnabled : false;
-			const scheduleMode = this._weeklyEnabled ? 'weekly' : (this._monthlyEnabled ? 'monthly' : (this._repeatEnabled ? 'repeat' : ''));
-			const repeatOn = (scheduleMode === 'repeat');
-			const dueVal = (bonusOn && (scheduleMode==='repeat' || scheduleMode==='weekly' || scheduleMode==='monthly')) ? undefined : (String(this._taskDue||'').trim() || undefined);
-			// Try to set multi-children (backend may ignore list if unsupported). Fallback: set first only.
-			const _ids = scheduleMode ? Array.from(this._repeatAssign||[]) : [];
-			const _days = repeatOn ? Array.from(this._repeatDays||[]) : [];
-			await this.hass.callService('chores4kids','set_task_repeat',{
-				task_id: this._editingTask.id,
-				repeat_days: _days,
-				repeat_child_id: _ids[0]||undefined,
-				repeat_child_ids: _ids,
-				schedule_mode: scheduleMode || undefined,
-			});
-			await this.hass.callService('chores4kids','update_task',{
-				task_id: this._editingTask.id,
-				title: this._taskTitle,
-				points: pointsEnabled ? Number(this._taskPoints) : 0,
-				description: this._taskDesc||'',
-				due: dueVal ?? (this._editingTask?.due ? '' : undefined),
-				time_bonus_enabled: (pointsEnabled ? !!this._taskTimeBonusEnabled : false),
-				time_bonus_before: (pointsEnabled && this._taskTimeBonusEnabled) ? String(this._taskTimeBonusBefore||'').trim() : '',
-				time_bonus_points: (pointsEnabled && this._taskTimeBonusEnabled) ? Number(this._taskTimeBonusPoints||0) : 0,
-				early_bonus_enabled: bonusOn,
-				early_bonus_days: (bonusOn && this._taskEarlyBonusDays!=='' && this._taskEarlyBonusDays!=null) ? Number(this._taskEarlyBonusDays) : undefined,
-				early_bonus_points: (bonusOn && this._taskEarlyBonusPoints!=='' && this._taskEarlyBonusPoints!=null) ? Number(this._taskEarlyBonusPoints) : undefined,
-				bonus_enabled: (pointsEnabled && this._taskBonusEnabled),
-				bonus_title: (pointsEnabled && this._taskBonusEnabled) ? String(this._taskBonusTitle||'').trim() : '',
-				bonus_points: (pointsEnabled && this._taskBonusEnabled) ? Number(this._taskBonusPoints||0) : 0,
-				icon: this._taskIcon||'',
-				persist_until_completed: (scheduleMode==='weekly' || scheduleMode==='monthly') ? false : !!this._persistUntilDone,
-				penalty_points: pointsEnabled && this._penaltyEnabled ? Number(this._penaltyAmount ?? 1) : 0,
-				due_time: this._taskDueTime || '',
-				penalty_time: this._penaltyTime || '',
-				mark_overdue: ((scheduleMode==='weekly' || scheduleMode==='monthly') ? false : !!this._persistUntilDone) ? !!this._markOverdue : true,
-				multiple_per_day: !!this._multiplePerDay,
-				quick_complete: !!this._quickComplete,
-				skip_approval: !!this._skipApproval,
-				fastest_wins: !!this._fastestWins,
-				categories: Array.from(this._taskCategories||[])
-			});
-
-			
-			// Check if today is in repeat days and task is unassigned template - if so, auto-assign now
-			if (!this._editingTask.assigned_to && scheduleMode && _ids.length > 0) {
-				const now = new Date();
-				const jsDay = now.getDay();
-				const weekdayMap = [6, 0, 1, 2, 3, 4, 5];
-				const todayBackend = weekdayMap[jsDay];
-				const assignToday = (
-					scheduleMode==='weekly' ? (todayBackend===0) :
-					scheduleMode==='monthly' ? (now.getDate()===1) :
-					repeatOn ? (_days.includes(todayBackend) || _days.includes(['mon','tue','wed','thu','fri','sat','sun'][todayBackend])) :
-					false
-				);
-				
-				if (assignToday) {
-					// Assign only for children missing a today's active instance (avoid duplicates)
-					for (const cid of _ids) {
-						try {
-							if(!cid) continue;
-							const alreadyHasTodays = (this._store.allTasks||[]).some(t =>
-								!!t.assigned_to &&
-								t.assigned_to === cid &&
-								String(t.repeat_template_id||'') === String(this._editingTask.id||'') &&
-								['assigned','in_progress','awaiting_approval'].includes(String(t.status||'')) &&
-								!this._isFromBeforeToday(t)
-							);
-							if (alreadyHasTodays) continue;
-							await this.hass.callService('chores4kids','assign_task',{ 
-								task_id: this._editingTask.id, 
-								child_id: cid 
-							});
-							this._setBonusVisualState(this._editingTask.id, 'assigned');
-						} catch(e) {
-							// Best-effort: ignore assign errors (e.g. backend rejects invalid child)
-						}
-					}
-				}
-			}
-		} finally {
-			this._editingTask=null;
-			this._taskTitle=this._taskPoints=this._taskDesc=this._taskIcon='';
-			this._taskDue=''; this._taskDueTime=''; this._penaltyEnabled=false; this._penaltyAmount=1; this._penaltyTime='';
-			this._taskTimeBonusEnabled = false;
-			this._taskTimeBonusBefore = '';
-			this._taskTimeBonusPoints = '';
-			this._taskEarlyBonusDays='';
-			this._taskEarlyBonusPoints='';
-			this._taskEarlyBonusEnabled=false;
-			this._taskBonusEnabled=false;
-			this._taskBonusTitle='';
-			this._taskBonusPoints='';
-			this._repeatDays=new Set(); this._repeatAssign=new Set();
-			this._repeatEnabled=false;
-			this._weeklyEnabled=false;
-			this._monthlyEnabled=false;
-			this._taskCategories=new Set();
-			this._markOverdue=true;
-			this._multiplePerDay = false;
-			this._quickComplete = false;
-			this._skipApproval=false;
-			this._touchedTitle=false; this._touchedPoints=false;
-		}
-	}
-	async _deleteTask(taskId){
-		if(!confirm(this._t('confirm.delete_task'))) return;
-		await this.hass.callService('chores4kids','delete_task',{ task_id: taskId });
-		this._clearCompleted(taskId);
-		this._setBonusVisualState(taskId, 'assigned');
-	}
-	async _addShopItem(){ if(!this._pointsEnabled()) return; const title=String(this._shopTitle||'').trim(); const price=Number(this._shopPrice||0); if(!title || !Number.isFinite(price)) return; await this.hass.callService('chores4kids','add_shop_item',{ title, price, child_ids: this._shopAudienceDrafts?.new || [], requires_delivery: !!this._shopRequiresDelivery, image: this._shopImage||undefined }); this._clearShopAudience('new'); this._shopRequiresDelivery=false; this._shopTitle=this._shopPrice=this._shopImage=''; try{ const el=this.shadowRoot.getElementById('c4k-shop-file'); if(el) el.value=''; }catch{} }
-	async _deleteShopItem(id){ if(!this._pointsEnabled()) return; if(!id) return; await this.hass.callService('chores4kids','delete_shop_item',{ item_id: id }); }
-	async _clearShopHistory(){
-		if(!this._pointsEnabled()) return;
-		if(!confirm(this._t('confirm.clear_history'))) return;
-		try{
-			await this.hass.callService('chores4kids','clear_shop_history',{});
-		}catch(err){
-			try{
-				await this.hass.callService('chores4kids','reset_shop_history',{});
-			}catch(err2){
-				alert('Service chores4kids.clear_shop_history not available');
-			}
-		}
-	}
-	async _onPickImage(e){ if(!this._pointsEnabled()) return; const f=e.target?.files?.[0]; if(!f) return; const reader=new FileReader(); reader.onload= async ()=>{ try{ const dataUrl=reader.result; const ext=(f.name.split('.').pop()||'jpg').toLowerCase(); const name=`c4k_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`; await this.hass.callService('chores4kids','upload_shop_image',{ filename:name, data:String(dataUrl) }); this._shopImage=`/local/chores4kids/${name}`; } finally { this.requestUpdate(); } }; reader.readAsDataURL(f); }
-	_startEditItem(i){ this._editItem={ id:i.id, title:i.title, price:i.price, image:i.image||'', active:i.active!==false }; this.requestUpdate(); }
-	async _onPickEditImage(e){ if(!this._pointsEnabled()) return; const f=e.target?.files?.[0]; if(!f) return; const reader=new FileReader(); reader.onload= async ()=>{ const dataUrl=reader.result; const ext=(f.name.split('.').pop()||'jpg').toLowerCase(); const name=`c4k_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`; await this.hass.callService('chores4kids','upload_shop_image',{ filename:name, data:String(dataUrl) }); this._editItem={ ...this._editItem, image:`/local/chores4kids/${name}` }; this.requestUpdate(); }; reader.readAsDataURL(f); }
-	async _saveEditItem(){ if(!this._pointsEnabled()) return; const it=this._editItem; if(!it) return; await this.hass.callService('chores4kids','update_shop_item',{ item_id: it.id, title:String(it.title||'').trim(), price:Number(it.price||0), image: it.image||'', active: !!it.active }); this._editItem=null; this.requestUpdate(); }
-	async _toggleItemActive(i,e){ if(!this._pointsEnabled()) return; const active=!!e.target.checked; await this.hass.callService('chores4kids','update_shop_item',{ item_id: i.id, active }); }
-	_openAdvanced(i){ if(!this._pointsEnabled()) return; try{ const shop=Object.values(this.hass.states).find(s=> s?.entity_id?.includes('chores4kids_shop')); const latest=shop?.attributes?.items?.find?.((x)=> x.id===i.id); this._advItem=latest||i; }catch{ this._advItem=i; } const steps=Array.isArray(this._advItem.actions)? JSON.parse(JSON.stringify(this._advItem.actions)) : []; this._advSteps=steps.map(st=>{ const t=String(st?.type||'').toLowerCase(); if(t==='service'){ const ent=st.entity_id || st.data?.entity_id || ''; const op=st.service || st.op; return { type:'entity_service', entity_id: ent, op }; } if(t==='entity_service'){ return { type:'entity_service', entity_id: st.entity_id||'', op: st.op||st.service }; } if(t==='delay'){ return { type:'delay', seconds: Number(st.seconds||st.secs||0) }; } return st; }); this.requestUpdate(); }
-	_defaultOpFor(entity_id){ const dom=(entity_id||'').split('.')[0]; const ops=this._opsForDomain(dom); return ops[0]||'turn_on'; }
-	_opsForDomain(dom){ switch(dom){ case 'switch': case 'light': case 'fan': case 'input_boolean': return ['turn_on','turn_off','toggle']; case 'media_player': return ['turn_on','turn_off','media_play','media_pause','toggle']; case 'lock': return ['lock','unlock']; default: return ['turn_on','turn_off']; } }
-	async _saveAdvanced(){ if(!this._pointsEnabled()) return; if(!this._advItem) return; const actions=(this._advSteps||[]).map(st=> st.type==='delay'? { type:'delay', seconds: Number(st.seconds||0) } : { type:'entity_service', entity_id: st.entity_id, op: st.op||'turn_on' }); await this.hass.callService('chores4kids','update_shop_item',{ item_id: this._advItem.id, actions }); this._advItem=null; this._advSteps=[]; this.requestUpdate(); }
-	async _completeNow(task){
-		return this._changeChildTaskStatus(task, 'awaiting_approval');
-	}
-	async _advance(task){
-		return this._changeChildTaskStatus(task, task?.status === 'assigned' ? 'in_progress' : 'awaiting_approval');
-	}
-	async _changeChildTaskStatus(task, status){
-		if (!task?.id || this._isTaskBusy(task.id)) return;
-		this._setTaskBusy(task.id, true);
-		try {
-			const payload = {task_id: task.id, status};
-			if (status === 'awaiting_approval') payload.completed_ts = Date.now();
-			await this.hass.callService('chores4kids', 'set_task_status', payload);
-			if (status === 'awaiting_approval') {
-				this._recordCompleted(task.id, payload.completed_ts);
-				this._playCompletionSound();
-				if (this._confettiEnabled()) this._triggerConfetti();
-				this.requestUpdate();
-			}
-		} finally {
-			this._setTaskBusy(task.id, false);
-		}
-	}
-	_triggerConfetti() {
-		if (!this._confettiEnabled()) return;
-		console.log('_triggerConfetti called!');
-		const container = document.createElement('div');
-		container.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99999; overflow: hidden;';
-		
-		// Inject keyframes directly
-		const style = document.createElement('style');
-		style.textContent = `
+		`}async _addChild(){this._name&&(await this.hass.callService("chores4kids","add_child",{name:this._name}),this._name="")}async _removeChild(t){confirm(this._t("confirm.delete_child",{name:t.name}))&&await this.hass.callService("chores4kids","remove_child",{child_id:t.id})}_openPoints(t){this._pointsEnabled()&&(this._pointsChild=t,this._pointsValue=5,this.requestUpdate())}_closePoints=()=>{this._pointsChild=null,this.requestUpdate()};async _addPointsQuick(t){if(!this._pointsEnabled()||!this._pointsChild)return;let e=Number(t||0);!Number.isFinite(e)||e===0||(await this.hass.callService("chores4kids","add_points",{child_id:this._pointsChild.id,points:e}),this._closePoints())}async _resetPoints(t){this._pointsEnabled()&&confirm(this._t("btn.reset_points")+"?")&&await this.hass.callService("chores4kids","reset_points",{child_id:t.id})}async _promptRename(t){let e=prompt(this._t("btn.rename"),t.name);!e||e===t.name||await this.hass.callService("chores4kids","rename_child",{child_id:t.id,new_name:e})}get _showTitleError(){return this._touchedTitle&&!(String(this._taskTitle||"").trim().length>0)}get _pointsErrorKey(){if(!this._pointsEnabled()||!this._touchedPoints)return null;let t=String(this._taskPoints??"").trim();if(t==="")return"err.points_required";let e=Number(t);return Number.isFinite(e)?e<0?"err.points_positive":null:"err.points_number"}get _showPointsError(){return!!this._pointsErrorKey}get _hasFormErrors(){return this._showTitleError||this._pointsEnabled()&&(this._showPointsError||this._penaltyEnabled&&!(Number.isInteger(Number(this._penaltyAmount??1))&&Number(this._penaltyAmount??1)>0))}_pickIcon(t){this._taskIcon=t;try{let e=Array.isArray(this._iconRecents)?[...this._iconRecents]:[],i=[t,...e.filter(s=>s!==t)].slice(0,12);this._iconRecents=i,localStorage.setItem("c4k_icn_recent",JSON.stringify(i))}catch{}this._iconModalOpen=!1,this.requestUpdate()}_openCustomIconModal(){this._customIconModalOpen=!0,this._customIconSearch="",this._customIconPreview="",this._customIconLabel="",this._iconDisplayLimit=200,this._iconModalOpen=!1,(!this._availableIcons||!this._availableIcons.length)&&(this._availableIcons="ab-testing abacus abjad-arabic abjad-hebrew abugida-devanagari abugida-thai access-point access-point-check access-point-minus access-point-network access-point-network-off access-point-off access-point-plus access-point-remove account account-alert account-alert-outline account-arrow-down account-arrow-down-outline account-arrow-left account-arrow-left-outline account-arrow-right account-arrow-right-outline account-arrow-up account-arrow-up-outline account-badge account-badge-outline account-box account-box-edit-outline account-box-minus-outline account-box-multiple account-box-multiple-outline account-box-outline account-box-plus-outline account-cancel account-cancel-outline account-card account-card-outline account-cash account-cash-outline account-check account-check-outline account-child account-child-circle account-child-outline account-circle account-circle-outline account-clock account-clock-outline account-cog account-cog-outline account-convert account-convert-outline account-cowboy-hat account-cowboy-hat-outline account-credit-card account-credit-card-outline account-details account-details-outline account-edit account-edit-outline account-eye account-eye-outline account-file account-file-outline account-file-text account-file-text-outline account-filter account-filter-outline account-group account-group-outline account-hard-hat account-hard-hat-outline account-heart account-heart-outline account-injury account-injury-outline account-key account-key-outline account-lock account-lock-open account-lock-open-outline account-lock-outline account-minus account-minus-outline account-multiple account-multiple-check account-multiple-check-outline account-multiple-minus account-multiple-minus-outline account-multiple-outline account-multiple-plus account-multiple-plus-outline account-multiple-remove account-multiple-remove-outline account-music account-music-outline account-network account-network-off account-network-off-outline account-network-outline account-off account-off-outline account-outline account-plus account-plus-outline account-question account-question-outline account-reactivate account-reactivate-outline account-remove account-remove-outline account-school account-school-outline account-search account-search-outline account-settings account-settings-outline account-star account-star-outline account-supervisor account-supervisor-circle account-supervisor-circle-outline account-supervisor-outline account-switch account-switch-outline account-sync account-sync-outline account-tag account-tag-outline account-tie account-tie-hat account-tie-hat-outline account-tie-outline account-tie-voice account-tie-voice-off account-tie-voice-off-outline account-tie-voice-outline account-tie-woman account-voice account-voice-off account-wrench account-wrench-outline adjust advertisements advertisements-off air-conditioner air-filter air-horn air-humidifier air-humidifier-off air-purifier air-purifier-off airbag airballoon airballoon-outline airplane airplane-alert airplane-check airplane-clock airplane-cog airplane-edit airplane-landing airplane-marker airplane-minus airplane-off airplane-plus airplane-remove airplane-search airplane-settings airplane-takeoff airport alarm alarm-bell alarm-check alarm-light alarm-light-off alarm-light-off-outline alarm-light-outline alarm-multiple alarm-note alarm-note-off alarm-off alarm-panel alarm-panel-outline alarm-plus alarm-snooze album alert alert-box alert-box-outline alert-circle alert-circle-check alert-circle-check-outline alert-circle-outline alert-decagram alert-decagram-outline alert-minus alert-minus-outline alert-octagon alert-octagon-outline alert-octagram alert-octagram-outline alert-outline alert-plus alert-plus-outline alert-remove alert-remove-outline alert-rhombus alert-rhombus-outline alien alien-outline align-horizontal-center align-horizontal-distribute align-horizontal-left align-horizontal-right align-vertical-bottom align-vertical-center align-vertical-distribute align-vertical-top all-inclusive all-inclusive-box all-inclusive-box-outline allergy alpha alpha-a alpha-a-box alpha-a-box-outline alpha-a-circle alpha-a-circle-outline alpha-b alpha-b-box alpha-b-box-outline alpha-b-circle alpha-b-circle-outline alpha-c alpha-c-box alpha-c-box-outline alpha-c-circle alpha-c-circle-outline alpha-d alpha-d-box alpha-d-box-outline alpha-d-circle alpha-d-circle-outline alpha-e alpha-e-box alpha-e-box-outline alpha-e-circle alpha-e-circle-outline alpha-f alpha-f-box alpha-f-box-outline alpha-f-circle alpha-f-circle-outline alpha-g alpha-g-box alpha-g-box-outline alpha-g-circle alpha-g-circle-outline alpha-h alpha-h-box alpha-h-box-outline alpha-h-circle alpha-h-circle-outline alpha-i alpha-i-box alpha-i-box-outline alpha-i-circle alpha-i-circle-outline alpha-j alpha-j-box alpha-j-box-outline alpha-j-circle alpha-j-circle-outline alpha-k alpha-k-box alpha-k-box-outline alpha-k-circle alpha-k-circle-outline alpha-l alpha-l-box alpha-l-box-outline alpha-l-circle alpha-l-circle-outline alpha-m alpha-m-box alpha-m-box-outline alpha-m-circle alpha-m-circle-outline alpha-n alpha-n-box alpha-n-box-outline alpha-n-circle alpha-n-circle-outline alpha-o alpha-o-box alpha-o-box-outline alpha-o-circle alpha-o-circle-outline alpha-p alpha-p-box alpha-p-box-outline alpha-p-circle alpha-p-circle-outline alpha-q alpha-q-box alpha-q-box-outline alpha-q-circle alpha-q-circle-outline alpha-r alpha-r-box alpha-r-box-outline alpha-r-circle alpha-r-circle-outline alpha-s alpha-s-box alpha-s-box-outline alpha-s-circle alpha-s-circle-outline alpha-t alpha-t-box alpha-t-box-outline alpha-t-circle alpha-t-circle-outline alpha-u alpha-u-box alpha-u-box-outline alpha-u-circle alpha-u-circle-outline alpha-v alpha-v-box alpha-v-box-outline alpha-v-circle alpha-v-circle-outline alpha-w alpha-w-box alpha-w-box-outline alpha-w-circle alpha-w-circle-outline alpha-x alpha-x-box alpha-x-box-outline alpha-x-circle alpha-x-circle-outline alpha-y alpha-y-box alpha-y-box-outline alpha-y-circle alpha-y-circle-outline alpha-z alpha-z-box alpha-z-box-outline alpha-z-circle alpha-z-circle-outline alphabet-aurebesh alphabet-cyrillic alphabet-greek alphabet-latin alphabet-piqad alphabet-tengwar alphabetical alphabetical-off alphabetical-variant alphabetical-variant-off altimeter ambulance ammunition ampersand amplifier amplifier-off anchor android android-studio angle-acute angle-obtuse angle-right angular angularjs animation animation-outline animation-play animation-play-outline ansible antenna anvil apache-kafka api api-off apple apple-finder apple-icloud apple-ios apple-keyboard-caps apple-keyboard-command apple-keyboard-control apple-keyboard-option apple-keyboard-shift apple-safari application application-array application-array-outline application-braces application-braces-outline application-brackets application-brackets-outline application-cog application-cog-outline application-edit application-edit-outline application-export application-import application-outline application-parentheses application-parentheses-outline application-settings application-settings-outline application-variable application-variable-outline approximately-equal approximately-equal-box apps apps-box arch archive archive-alert archive-alert-outline archive-arrow-down archive-arrow-down-outline archive-arrow-up archive-arrow-up-outline archive-cancel archive-cancel-outline archive-check archive-check-outline archive-clock archive-clock-outline archive-cog archive-cog-outline archive-edit archive-edit-outline archive-eye archive-eye-outline archive-lock archive-lock-open archive-lock-open-outline archive-lock-outline archive-marker archive-marker-outline archive-minus archive-minus-outline archive-music archive-music-outline archive-off archive-off-outline archive-outline archive-plus archive-plus-outline archive-refresh archive-refresh-outline archive-remove archive-remove-outline archive-search archive-search-outline archive-settings archive-settings-outline archive-star archive-star-outline archive-sync archive-sync-outline arm-flex arm-flex-outline arrange-bring-forward arrange-bring-to-front arrange-send-backward arrange-send-to-back arrow-all arrow-bottom-left arrow-bottom-left-bold-box arrow-bottom-left-bold-box-outline arrow-bottom-left-bold-outline arrow-bottom-left-thick arrow-bottom-left-thin arrow-bottom-left-thin-circle-outline arrow-bottom-right arrow-bottom-right-bold-box arrow-bottom-right-bold-box-outline arrow-bottom-right-bold-outline arrow-bottom-right-thick arrow-bottom-right-thin arrow-bottom-right-thin-circle-outline arrow-collapse arrow-collapse-all arrow-collapse-down arrow-collapse-horizontal arrow-collapse-left arrow-collapse-right arrow-collapse-up arrow-collapse-vertical arrow-decision arrow-decision-auto arrow-decision-auto-outline arrow-decision-outline arrow-down arrow-down-bold arrow-down-bold-box arrow-down-bold-box-outline arrow-down-bold-circle arrow-down-bold-circle-outline arrow-down-bold-hexagon-outline arrow-down-bold-outline arrow-down-box arrow-down-circle arrow-down-circle-outline arrow-down-drop-circle arrow-down-drop-circle-outline arrow-down-left arrow-down-left-bold arrow-down-right arrow-down-right-bold arrow-down-thick arrow-down-thin arrow-down-thin-circle-outline arrow-expand arrow-expand-all arrow-expand-down arrow-expand-horizontal arrow-expand-left arrow-expand-right arrow-expand-up arrow-expand-vertical arrow-horizontal-lock arrow-left arrow-left-bold arrow-left-bold-box arrow-left-bold-box-outline arrow-left-bold-circle arrow-left-bold-circle-outline arrow-left-bold-hexagon-outline arrow-left-bold-outline arrow-left-bottom arrow-left-bottom-bold arrow-left-box arrow-left-circle arrow-left-circle-outline arrow-left-drop-circle arrow-left-drop-circle-outline arrow-left-right arrow-left-right-bold arrow-left-right-bold-outline arrow-left-thick arrow-left-thin arrow-left-thin-circle-outline arrow-left-top arrow-left-top-bold arrow-oscillating arrow-oscillating-off arrow-projectile arrow-projectile-multiple arrow-right arrow-right-bold arrow-right-bold-box arrow-right-bold-box-outline arrow-right-bold-circle arrow-right-bold-circle-outline arrow-right-bold-hexagon-outline arrow-right-bold-outline arrow-right-bottom arrow-right-bottom-bold arrow-right-box arrow-right-circle arrow-right-circle-outline arrow-right-drop-circle arrow-right-drop-circle-outline arrow-right-thick arrow-right-thin arrow-right-thin-circle-outline arrow-right-top arrow-right-top-bold arrow-split-horizontal arrow-split-vertical arrow-top-left arrow-top-left-bold-box arrow-top-left-bold-box-outline arrow-top-left-bold-outline arrow-top-left-bottom-right arrow-top-left-bottom-right-bold arrow-top-left-thick arrow-top-left-thin arrow-top-left-thin-circle-outline arrow-top-right arrow-top-right-bold-box arrow-top-right-bold-box-outline arrow-top-right-bold-outline arrow-top-right-bottom-left arrow-top-right-bottom-left-bold arrow-top-right-thick arrow-top-right-thin arrow-top-right-thin-circle-outline arrow-u-down-left arrow-u-down-left-bold arrow-u-down-right arrow-u-down-right-bold arrow-u-left-bottom arrow-u-left-bottom-bold arrow-u-left-top arrow-u-left-top-bold arrow-u-right-bottom arrow-u-right-bottom-bold arrow-u-right-top arrow-u-right-top-bold arrow-u-up-left arrow-u-up-left-bold arrow-u-up-right arrow-u-up-right-bold arrow-up arrow-up-bold arrow-up-bold-box arrow-up-bold-box-outline arrow-up-bold-circle arrow-up-bold-circle-outline arrow-up-bold-hexagon-outline arrow-up-bold-outline arrow-up-box arrow-up-circle arrow-up-circle-outline arrow-up-down arrow-up-down-bold arrow-up-down-bold-outline arrow-up-drop-circle arrow-up-drop-circle-outline arrow-up-left arrow-up-left-bold arrow-up-right arrow-up-right-bold arrow-up-thick arrow-up-thin arrow-up-thin-circle-outline arrow-vertical-lock artboard artstation aspect-ratio assistant asterisk asterisk-circle-outline at atlassian atm atom atom-variant attachment attachment-check attachment-lock attachment-minus attachment-off attachment-plus attachment-remove atv audio-input-rca audio-input-stereo-minijack audio-input-xlr audio-video audio-video-off augmented-reality aurora auto-download auto-fix auto-mode auto-upload autorenew autorenew-off av-timer awning awning-outline aws axe axe-battle axis axis-arrow axis-arrow-info axis-arrow-lock axis-lock axis-x-arrow axis-x-arrow-lock axis-x-rotate-clockwise axis-x-rotate-counterclockwise axis-x-y-arrow-lock axis-y-arrow axis-y-arrow-lock axis-y-rotate-clockwise axis-y-rotate-counterclockwise axis-z-arrow axis-z-arrow-lock axis-z-rotate-clockwise axis-z-rotate-counterclockwise babel baby baby-bottle baby-bottle-outline baby-buggy baby-buggy-off baby-carriage baby-carriage-off baby-face baby-face-outline backburger backspace backspace-outline backspace-reverse backspace-reverse-outline backup-restore bacteria bacteria-outline badge-account badge-account-alert badge-account-alert-outline badge-account-horizontal badge-account-horizontal-outline badge-account-outline badminton bag-carry-on bag-carry-on-check bag-carry-on-off bag-checked bag-personal bag-personal-off bag-personal-off-outline bag-personal-outline bag-personal-plus bag-personal-plus-outline bag-personal-tag bag-personal-tag-outline bag-suitcase bag-suitcase-off bag-suitcase-off-outline bag-suitcase-outline baguette balcony balloon ballot ballot-outline ballot-recount ballot-recount-outline bandage bank bank-check bank-circle bank-circle-outline bank-minus bank-off bank-off-outline bank-outline bank-plus bank-remove bank-transfer bank-transfer-in bank-transfer-out barcode barcode-off barcode-scan barley barley-off barn barrel barrel-outline baseball baseball-bat baseball-diamond baseball-diamond-outline baseball-outline bash basket basket-check basket-check-outline basket-fill basket-minus basket-minus-outline basket-off basket-off-outline basket-outline basket-plus basket-plus-outline basket-remove basket-remove-outline basket-unfill basketball basketball-hoop basketball-hoop-outline bat bathtub bathtub-outline battery battery-10 battery-10-bluetooth battery-20 battery-20-bluetooth battery-30 battery-30-bluetooth battery-40 battery-40-bluetooth battery-50 battery-50-bluetooth battery-60 battery-60-bluetooth battery-70 battery-70-bluetooth battery-80 battery-80-bluetooth battery-90 battery-90-bluetooth battery-alert battery-alert-bluetooth battery-alert-variant battery-alert-variant-outline battery-arrow-down battery-arrow-down-outline battery-arrow-up battery-arrow-up-outline battery-bluetooth battery-bluetooth-variant battery-charging battery-charging-10 battery-charging-100 battery-charging-20 battery-charging-30 battery-charging-40 battery-charging-50 battery-charging-60 battery-charging-70 battery-charging-80 battery-charging-90 battery-charging-high battery-charging-low battery-charging-medium battery-charging-outline battery-charging-wireless battery-charging-wireless-10 battery-charging-wireless-20 battery-charging-wireless-30 battery-charging-wireless-40 battery-charging-wireless-50 battery-charging-wireless-60 battery-charging-wireless-70 battery-charging-wireless-80 battery-charging-wireless-90 battery-charging-wireless-alert battery-charging-wireless-outline battery-check battery-check-outline battery-clock battery-clock-outline battery-heart battery-heart-outline battery-heart-variant battery-high battery-lock battery-lock-open battery-low battery-medium battery-minus battery-minus-outline battery-minus-variant battery-negative battery-off battery-off-outline battery-outline battery-plus battery-plus-outline battery-plus-variant battery-positive battery-remove battery-remove-outline battery-sync battery-sync-outline battery-unknown battery-unknown-bluetooth beach beaker beaker-alert beaker-alert-outline beaker-check beaker-check-outline beaker-minus beaker-minus-outline beaker-outline beaker-plus beaker-plus-outline beaker-question beaker-question-outline beaker-remove beaker-remove-outline bed bed-clock bed-double bed-double-outline bed-empty bed-king bed-king-outline bed-outline bed-queen bed-queen-outline bed-single bed-single-outline bee bee-flower beehive-off-outline beehive-outline beekeeper beer beer-outline bell bell-alert bell-alert-outline bell-badge bell-badge-outline bell-cancel bell-cancel-outline bell-check bell-check-outline bell-circle bell-circle-outline bell-cog bell-cog-outline bell-minus bell-minus-outline bell-off bell-off-outline bell-outline bell-plus bell-plus-outline bell-remove bell-remove-outline bell-ring bell-ring-outline bell-sleep bell-sleep-outline bench bench-back beta betamax biathlon bicycle bicycle-basket bicycle-cargo bicycle-electric bicycle-penny-farthing bike bike-fast bike-pedal bike-pedal-clipless bike-pedal-mountain billboard billiards billiards-rack binoculars bio biohazard bird bitbucket bitcoin black-mesa blender blender-outline blender-software blinds blinds-horizontal blinds-horizontal-closed blinds-open blinds-vertical blinds-vertical-closed block-helper blood-bag bluetooth bluetooth-audio bluetooth-connect bluetooth-off bluetooth-settings bluetooth-transfer blur blur-linear blur-off blur-radial bolt bomb bomb-off bone bone-off book book-account book-account-outline book-alert book-alert-outline book-alphabet book-arrow-down book-arrow-down-outline book-arrow-left book-arrow-left-outline book-arrow-right book-arrow-right-outline book-arrow-up book-arrow-up-outline book-cancel book-cancel-outline book-check book-check-outline book-clock book-clock-outline book-cog book-cog-outline book-cross book-edit book-edit-outline book-education book-education-outline book-heart book-heart-outline book-information-variant book-lock book-lock-open book-lock-open-outline book-lock-outline book-marker book-marker-outline book-minus book-minus-multiple book-minus-multiple-outline book-minus-outline book-multiple book-multiple-outline book-music book-music-outline book-off book-off-outline book-open book-open-blank-variant book-open-blank-variant-outline book-open-outline book-open-page-variant book-open-page-variant-outline book-open-variant book-open-variant-outline book-outline book-play book-play-outline book-plus book-plus-multiple book-plus-multiple-outline book-plus-outline book-refresh book-refresh-outline book-remove book-remove-multiple book-remove-multiple-outline book-remove-outline book-search book-search-outline book-settings book-settings-outline book-sync book-sync-outline book-variant bookmark bookmark-box bookmark-box-multiple bookmark-box-multiple-outline bookmark-box-outline bookmark-check bookmark-check-outline bookmark-minus bookmark-minus-outline bookmark-multiple bookmark-multiple-outline bookmark-music bookmark-music-outline bookmark-off bookmark-off-outline bookmark-outline bookmark-plus bookmark-plus-outline bookmark-remove bookmark-remove-outline bookshelf boom-gate boom-gate-alert boom-gate-alert-outline boom-gate-arrow-down boom-gate-arrow-down-outline boom-gate-arrow-up boom-gate-arrow-up-outline boom-gate-outline boom-gate-up boom-gate-up-outline boombox boomerang bootstrap border-all border-all-variant border-bottom border-bottom-variant border-color border-horizontal border-inside border-left border-left-variant border-none border-none-variant border-outside border-radius border-right border-right-variant border-style border-top border-top-variant border-vertical bottle-soda bottle-soda-classic bottle-soda-classic-outline bottle-soda-outline bottle-tonic bottle-tonic-outline bottle-tonic-plus bottle-tonic-plus-outline bottle-tonic-skull bottle-tonic-skull-outline bottle-wine bottle-wine-outline bow-arrow bow-tie bowl bowl-mix bowl-mix-outline bowl-outline bowling box box-cutter box-cutter-off box-shadow boxing-glove braille brain bread-slice bread-slice-outline bridge briefcase briefcase-account briefcase-account-outline briefcase-arrow-left-right briefcase-arrow-left-right-outline briefcase-arrow-up-down briefcase-arrow-up-down-outline briefcase-check briefcase-check-outline briefcase-clock briefcase-clock-outline briefcase-download briefcase-download-outline briefcase-edit briefcase-edit-outline briefcase-eye briefcase-eye-outline briefcase-minus briefcase-minus-outline briefcase-off briefcase-off-outline briefcase-outline briefcase-plus briefcase-plus-outline briefcase-remove briefcase-remove-outline briefcase-search briefcase-search-outline briefcase-upload briefcase-upload-outline briefcase-variant briefcase-variant-off briefcase-variant-off-outline briefcase-variant-outline brightness-1 brightness-2 brightness-3 brightness-4 brightness-5 brightness-6 brightness-7 brightness-auto brightness-percent broadcast broadcast-off broom brush brush-off brush-outline brush-variant bucket bucket-outline buffet bug bug-check bug-check-outline bug-outline bug-pause bug-pause-outline bug-play bug-play-outline bug-stop bug-stop-outline bugle bulkhead-light bulldozer bullet bulletin-board bullhorn bullhorn-outline bullhorn-variant bullhorn-variant-outline bullseye bullseye-arrow bulma bunk-bed bunk-bed-outline bus bus-alert bus-articulated-end bus-articulated-front bus-clock bus-double-decker bus-electric bus-marker bus-multiple bus-school bus-side bus-sign bus-stop bus-stop-covered bus-stop-uncovered bus-wrench butterfly butterfly-outline button-cursor button-pointer cabin-a-frame cable-data cached cactus cake cake-layered cake-variant cake-variant-outline calculator calculator-variant calculator-variant-outline calendar calendar-account calendar-account-outline calendar-alert calendar-alert-outline calendar-arrow-left calendar-arrow-right calendar-badge calendar-badge-outline calendar-blank calendar-blank-multiple calendar-blank-outline calendar-check calendar-check-outline calendar-clock calendar-clock-outline calendar-collapse-horizontal calendar-collapse-horizontal-outline calendar-cursor calendar-cursor-outline calendar-edit calendar-edit-outline calendar-end calendar-end-outline calendar-expand-horizontal calendar-expand-horizontal-outline calendar-export calendar-export-outline calendar-filter calendar-filter-outline calendar-heart calendar-heart-outline calendar-import calendar-import-outline calendar-lock calendar-lock-open calendar-lock-open-outline calendar-lock-outline calendar-minus calendar-minus-outline calendar-month calendar-month-outline calendar-multiple calendar-multiple-check calendar-multiselect calendar-multiselect-outline calendar-outline calendar-plus calendar-plus-outline calendar-question calendar-question-outline calendar-range calendar-range-outline calendar-refresh calendar-refresh-outline calendar-remove calendar-remove-outline calendar-search calendar-search-outline calendar-star calendar-star-four-points calendar-star-outline calendar-start calendar-start-outline calendar-sync calendar-sync-outline calendar-text calendar-text-outline calendar-today calendar-today-outline calendar-week calendar-week-begin calendar-week-begin-outline calendar-week-outline calendar-weekend calendar-weekend-outline call-made call-merge call-missed call-received call-split camcorder camcorder-off camera camera-account camera-burst camera-control camera-document camera-document-off camera-enhance camera-enhance-outline camera-flip camera-flip-outline camera-front camera-front-variant camera-gopro camera-image camera-iris camera-lock camera-lock-open camera-lock-open-outline camera-lock-outline camera-marker camera-marker-outline camera-metering-center camera-metering-matrix camera-metering-partial camera-metering-spot camera-off camera-off-outline camera-outline camera-party-mode camera-plus camera-plus-outline camera-rear camera-rear-variant camera-retake camera-retake-outline camera-switch camera-switch-outline camera-timer camera-wireless camera-wireless-outline campfire cancel candelabra candelabra-fire candle candy candy-off candy-off-outline candy-outline candycane cannabis cannabis-off caps-lock car car-2-plus car-3-plus car-arrow-left car-arrow-right car-back car-battery car-brake-abs car-brake-alert car-brake-fluid-level car-brake-hold car-brake-low-pressure car-brake-parking car-brake-retarder car-brake-temperature car-brake-worn-linings car-child-seat car-clock car-clutch car-cog car-connected car-convertible car-coolant-level car-cruise-control car-defrost-front car-defrost-rear car-door car-door-lock car-door-lock-open car-electric car-electric-outline car-emergency car-esp car-estate car-hatchback car-info car-key car-lifted-pickup car-light-alert car-light-dimmed car-light-fog car-light-high car-limousine car-multiple car-off car-outline car-parking-lights car-pickup car-search car-search-outline car-seat car-seat-cooler car-seat-heater car-select car-settings car-shift-pattern car-side car-speed-limiter car-sports car-tire-alert car-traction-control car-turbocharger car-wash car-windshield car-windshield-outline car-wireless car-wrench carabiner caravan card card-account-details card-account-details-outline card-account-details-star card-account-details-star-outline card-account-mail card-account-mail-outline card-account-phone card-account-phone-outline card-bulleted card-bulleted-off card-bulleted-off-outline card-bulleted-outline card-bulleted-settings card-bulleted-settings-outline card-minus card-minus-outline card-multiple card-multiple-outline card-off card-off-outline card-outline card-plus card-plus-outline card-remove card-remove-outline card-search card-search-outline card-text card-text-outline cards cards-club cards-club-outline cards-diamond cards-diamond-outline cards-heart cards-heart-outline cards-outline cards-playing cards-playing-club cards-playing-club-multiple cards-playing-club-multiple-outline cards-playing-club-outline cards-playing-diamond cards-playing-diamond-multiple cards-playing-diamond-multiple-outline cards-playing-diamond-outline cards-playing-heart cards-playing-heart-multiple cards-playing-heart-multiple-outline cards-playing-heart-outline cards-playing-outline cards-playing-spade cards-playing-spade-multiple cards-playing-spade-multiple-outline cards-playing-spade-outline cards-spade cards-spade-outline cards-variant carrot cart cart-arrow-down cart-arrow-right cart-arrow-up cart-check cart-heart cart-minus cart-off cart-outline cart-percent cart-plus cart-remove cart-variant case-sensitive-alt cash cash-100 cash-check cash-clock cash-edit cash-fast cash-lock cash-lock-open cash-marker cash-minus cash-multiple cash-off cash-plus cash-refund cash-register cash-remove cash-sync cassette cast cast-audio cast-audio-variant cast-connected cast-education cast-off cast-variant castle cat cctv cctv-off ceiling-fan ceiling-fan-light ceiling-light ceiling-light-multiple ceiling-light-multiple-outline ceiling-light-outline cellphone cellphone-arrow-down cellphone-arrow-down-variant cellphone-basic cellphone-charging cellphone-check cellphone-cog cellphone-dock cellphone-information cellphone-key cellphone-link cellphone-link-off cellphone-lock cellphone-marker cellphone-message cellphone-message-off cellphone-nfc cellphone-nfc-off cellphone-off cellphone-play cellphone-remove cellphone-screenshot cellphone-settings cellphone-sound cellphone-text cellphone-wireless centos certificate certificate-outline chair-rolling chair-school chandelier charity charity-search chart-arc chart-areaspline chart-areaspline-variant chart-bar chart-bar-stacked chart-bell-curve chart-bell-curve-cumulative chart-box chart-box-multiple chart-box-multiple-outline chart-box-outline chart-box-plus-outline chart-bubble chart-donut chart-donut-variant chart-gantt chart-histogram chart-line chart-line-stacked chart-line-variant chart-multiline chart-multiple chart-pie chart-pie-outline chart-ppf chart-sankey chart-sankey-variant chart-scatter-plot chart-scatter-plot-hexbin chart-timeline chart-timeline-variant chart-timeline-variant-shimmer chart-tree chart-waterfall chat chat-alert chat-alert-outline chat-minus chat-minus-outline chat-outline chat-plus chat-plus-outline chat-processing chat-processing-outline chat-question chat-question-outline chat-remove chat-remove-outline chat-sleep chat-sleep-outline check check-all check-bold check-circle check-circle-outline check-decagram check-decagram-outline check-network check-network-outline check-outline check-underline check-underline-circle check-underline-circle-outline checkbook checkbook-arrow-left checkbook-arrow-right checkbox-blank checkbox-blank-badge checkbox-blank-badge-outline checkbox-blank-circle checkbox-blank-circle-outline checkbox-blank-off checkbox-blank-off-outline checkbox-blank-outline checkbox-intermediate checkbox-intermediate-variant checkbox-marked checkbox-marked-circle checkbox-marked-circle-auto-outline checkbox-marked-circle-minus-outline checkbox-marked-circle-outline checkbox-marked-circle-plus-outline checkbox-marked-outline checkbox-multiple-blank checkbox-multiple-blank-circle checkbox-multiple-blank-circle-outline checkbox-multiple-blank-outline checkbox-multiple-marked checkbox-multiple-marked-circle checkbox-multiple-marked-circle-outline checkbox-multiple-marked-outline checkbox-multiple-outline checkbox-outline checkerboard checkerboard-minus checkerboard-plus checkerboard-remove cheese cheese-off chef-hat chemical-weapon chess-bishop chess-king chess-knight chess-pawn chess-queen chess-rook chevron-double-down chevron-double-left chevron-double-right chevron-double-up chevron-down chevron-down-box chevron-down-box-outline chevron-down-circle chevron-down-circle-outline chevron-left chevron-left-box chevron-left-box-outline chevron-left-circle chevron-left-circle-outline chevron-right chevron-right-box chevron-right-box-outline chevron-right-circle chevron-right-circle-outline chevron-triple-down chevron-triple-left chevron-triple-right chevron-triple-up chevron-up chevron-up-box chevron-up-box-outline chevron-up-circle chevron-up-circle-outline chili-alert chili-alert-outline chili-hot chili-hot-outline chili-medium chili-medium-outline chili-mild chili-mild-outline chili-off chili-off-outline chip church church-outline cigar cigar-off circle circle-box circle-box-outline circle-double circle-edit-outline circle-expand circle-half circle-half-full circle-medium circle-multiple circle-multiple-outline circle-off-outline circle-opacity circle-outline circle-slice-1 circle-slice-2 circle-slice-3 circle-slice-4 circle-slice-5 circle-slice-6 circle-slice-7 circle-slice-8 circle-small circular-saw city city-switch city-variant city-variant-outline clipboard clipboard-account clipboard-account-outline clipboard-alert clipboard-alert-outline clipboard-arrow-down clipboard-arrow-down-outline clipboard-arrow-left clipboard-arrow-left-outline clipboard-arrow-right clipboard-arrow-right-outline clipboard-arrow-up clipboard-arrow-up-outline clipboard-check clipboard-check-multiple clipboard-check-multiple-outline clipboard-check-outline clipboard-clock clipboard-clock-outline clipboard-edit clipboard-edit-outline clipboard-file clipboard-file-outline clipboard-flow clipboard-flow-outline clipboard-list clipboard-list-outline clipboard-minus clipboard-minus-outline clipboard-multiple clipboard-multiple-outline clipboard-off clipboard-off-outline clipboard-outline clipboard-play clipboard-play-multiple clipboard-play-multiple-outline clipboard-play-outline clipboard-plus clipboard-plus-outline clipboard-pulse clipboard-pulse-outline clipboard-remove clipboard-remove-outline clipboard-search clipboard-search-outline clipboard-text clipboard-text-clock clipboard-text-clock-outline clipboard-text-multiple clipboard-text-multiple-outline clipboard-text-off clipboard-text-off-outline clipboard-text-outline clipboard-text-play clipboard-text-play-outline clipboard-text-search clipboard-text-search-outline clippy clock clock-alert clock-alert-outline clock-check clock-check-outline clock-digital clock-edit clock-edit-outline clock-end clock-fast clock-in clock-minus clock-minus-outline clock-out clock-outline clock-plus clock-plus-outline clock-remove clock-remove-outline clock-star-four-points clock-star-four-points-outline clock-start clock-time-eight clock-time-eight-outline clock-time-eleven clock-time-eleven-outline clock-time-five clock-time-five-outline clock-time-four clock-time-four-outline clock-time-nine clock-time-nine-outline clock-time-one clock-time-one-outline clock-time-seven clock-time-seven-outline clock-time-six clock-time-six-outline clock-time-ten clock-time-ten-outline clock-time-three clock-time-three-outline clock-time-twelve clock-time-twelve-outline clock-time-two clock-time-two-outline close close-box close-box-multiple close-box-multiple-outline close-box-outline close-circle close-circle-multiple close-circle-multiple-outline close-circle-outline close-network close-network-outline close-octagon close-octagon-outline close-outline close-thick closed-caption closed-caption-outline cloud cloud-alert cloud-alert-outline cloud-arrow-down cloud-arrow-down-outline cloud-arrow-left cloud-arrow-left-outline cloud-arrow-right cloud-arrow-right-outline cloud-arrow-up cloud-arrow-up-outline cloud-braces cloud-cancel cloud-cancel-outline cloud-check cloud-check-outline cloud-check-variant cloud-check-variant-outline cloud-circle cloud-circle-outline cloud-clock cloud-clock-outline cloud-cog cloud-cog-outline cloud-download cloud-download-outline cloud-key cloud-key-outline cloud-lock cloud-lock-open cloud-lock-open-outline cloud-lock-outline cloud-minus cloud-minus-outline cloud-off cloud-off-outline cloud-outline cloud-percent cloud-percent-outline cloud-plus cloud-plus-outline cloud-print cloud-print-outline cloud-question cloud-question-outline cloud-refresh cloud-refresh-outline cloud-refresh-variant cloud-refresh-variant-outline cloud-remove cloud-remove-outline cloud-search cloud-search-outline cloud-sync cloud-sync-outline cloud-tags cloud-upload cloud-upload-outline clouds clover clover-outline coach-lamp coach-lamp-variant coat-rack code-array code-block-braces code-block-brackets code-block-parentheses code-block-tags code-braces code-braces-box code-brackets code-equal code-greater-than code-greater-than-or-equal code-json code-less-than code-less-than-or-equal code-not-equal code-not-equal-variant code-parentheses code-parentheses-box code-string code-tags code-tags-check codepen coffee coffee-maker coffee-maker-check coffee-maker-check-outline coffee-maker-outline coffee-off coffee-off-outline coffee-outline coffee-to-go coffee-to-go-outline coffin cog cog-box cog-clockwise cog-counterclockwise cog-off cog-off-outline cog-outline cog-pause cog-pause-outline cog-play cog-play-outline cog-refresh cog-refresh-outline cog-stop cog-stop-outline cog-sync cog-sync-outline cog-transfer cog-transfer-outline cogs collage collapse-all collapse-all-outline color-helper comma comma-box comma-box-outline comma-circle comma-circle-outline comment comment-account comment-account-outline comment-alert comment-alert-outline comment-arrow-left comment-arrow-left-outline comment-arrow-right comment-arrow-right-outline comment-bookmark comment-bookmark-outline comment-check comment-check-outline comment-edit comment-edit-outline comment-eye comment-eye-outline comment-flash comment-flash-outline comment-minus comment-minus-outline comment-multiple comment-multiple-outline comment-off comment-off-outline comment-outline comment-plus comment-plus-outline comment-processing comment-processing-outline comment-question comment-question-outline comment-quote comment-quote-outline comment-remove comment-remove-outline comment-search comment-search-outline comment-text comment-text-multiple comment-text-multiple-outline comment-text-outline compare compare-horizontal compare-remove compare-vertical compass compass-off compass-off-outline compass-outline compass-rose compost cone cone-off connection console console-line console-network console-network-outline consolidate contactless-payment contactless-payment-circle contactless-payment-circle-outline contacts contacts-outline contain contain-end contain-start content-copy content-cut content-duplicate content-paste content-save content-save-alert content-save-alert-outline content-save-all content-save-all-outline content-save-check content-save-check-outline content-save-cog content-save-cog-outline content-save-edit content-save-edit-outline content-save-minus content-save-minus-outline content-save-move content-save-move-outline content-save-off content-save-off-outline content-save-outline content-save-plus content-save-plus-outline content-save-settings content-save-settings-outline contrast contrast-box contrast-circle controller controller-classic controller-classic-outline controller-off cookie cookie-alert cookie-alert-outline cookie-check cookie-check-outline cookie-clock cookie-clock-outline cookie-cog cookie-cog-outline cookie-edit cookie-edit-outline cookie-lock cookie-lock-outline cookie-minus cookie-minus-outline cookie-off cookie-off-outline cookie-outline cookie-plus cookie-plus-outline cookie-refresh cookie-refresh-outline cookie-remove cookie-remove-outline cookie-settings cookie-settings-outline coolant-temperature copyleft copyright cordova corn corn-off cosine-wave counter countertop countertop-outline cow cow-off cpu-32-bit cpu-64-bit cradle cradle-outline crane creation creation-outline creative-commons credit-card credit-card-check credit-card-check-outline credit-card-chip credit-card-chip-outline credit-card-clock credit-card-clock-outline credit-card-edit credit-card-edit-outline credit-card-fast credit-card-fast-outline credit-card-lock credit-card-lock-outline credit-card-marker credit-card-marker-outline credit-card-minus credit-card-minus-outline credit-card-multiple credit-card-multiple-outline credit-card-off credit-card-off-outline credit-card-outline credit-card-plus credit-card-plus-outline credit-card-refresh credit-card-refresh-outline credit-card-refund credit-card-refund-outline credit-card-remove credit-card-remove-outline credit-card-scan credit-card-scan-outline credit-card-search credit-card-search-outline credit-card-settings credit-card-settings-outline credit-card-sync credit-card-sync-outline credit-card-wireless credit-card-wireless-off credit-card-wireless-off-outline credit-card-wireless-outline cricket crop crop-free crop-landscape crop-portrait crop-rotate crop-square cross cross-bolnisi cross-celtic cross-outline crosshairs crosshairs-gps crosshairs-off crosshairs-question crowd crown crown-circle crown-circle-outline crown-outline cryengine crystal-ball cube cube-off cube-off-outline cube-outline cube-scan cube-send cube-unfolded cup cup-off cup-off-outline cup-outline cup-water cupboard cupboard-outline cupcake curling currency-bdt currency-brl currency-btc currency-cny currency-eth currency-eur currency-eur-off currency-fra currency-gbp currency-ils currency-inr currency-jpy currency-krw currency-kzt currency-mnt currency-ngn currency-php currency-rial currency-rub currency-rupee currency-sign currency-thb currency-try currency-twd currency-uah currency-usd currency-usd-off current-ac current-dc cursor-default cursor-default-click cursor-default-click-outline cursor-default-gesture cursor-default-gesture-outline cursor-default-outline cursor-move cursor-pointer cursor-text curtains curtains-closed cylinder cylinder-off dance-ballroom dance-pole data-matrix data-matrix-edit data-matrix-minus data-matrix-plus data-matrix-remove data-matrix-scan database database-alert database-alert-outline database-arrow-down database-arrow-down-outline database-arrow-left database-arrow-left-outline database-arrow-right database-arrow-right-outline database-arrow-up database-arrow-up-outline database-check database-check-outline database-clock database-clock-outline database-cog database-cog-outline database-edit database-edit-outline database-export database-export-outline database-eye database-eye-off database-eye-off-outline database-eye-outline database-import database-import-outline database-lock database-lock-outline database-marker database-marker-outline database-minus database-minus-outline database-off database-off-outline database-outline database-plus database-plus-outline database-refresh database-refresh-outline database-remove database-remove-outline database-search database-search-outline database-settings database-settings-outline database-sync database-sync-outline death-star death-star-variant deathly-hallows debian debug-step-into debug-step-out debug-step-over decagram decagram-outline decimal decimal-comma decimal-comma-decrease decimal-comma-increase decimal-decrease decimal-increase delete delete-alert delete-alert-outline delete-circle delete-circle-outline delete-clock delete-clock-outline delete-empty delete-empty-outline delete-forever delete-forever-outline delete-off delete-off-outline delete-outline delete-restore delete-sweep delete-sweep-outline delete-variant delta desk desk-lamp desk-lamp-off desk-lamp-on deskphone desktop-classic desktop-tower desktop-tower-monitor details dev-to developer-board deviantart devices dharmachakra diabetes dialpad diameter diameter-outline diameter-variant diamond diamond-outline diamond-stone diaper-outline dice-1 dice-1-outline dice-2 dice-2-outline dice-3 dice-3-outline dice-4 dice-4-outline dice-5 dice-5-outline dice-6 dice-6-outline dice-d10 dice-d10-outline dice-d12 dice-d12-outline dice-d20 dice-d20-outline dice-d4 dice-d4-outline dice-d6 dice-d6-outline dice-d8 dice-d8-outline dice-multiple dice-multiple-outline digital-ocean dip-switch directions directions-fork disc disc-alert disc-player dishwasher dishwasher-alert dishwasher-off disqus distribute-horizontal-center distribute-horizontal-left distribute-horizontal-right distribute-vertical-bottom distribute-vertical-center distribute-vertical-top diversify diving diving-flippers diving-helmet diving-scuba diving-scuba-flag diving-scuba-mask diving-scuba-tank diving-scuba-tank-multiple diving-snorkel division division-box dlna dna dns dns-outline dock-bottom dock-left dock-right dock-top dock-window docker doctor dog dog-service dog-side dog-side-off dolby dolly dolphin domain domain-off domain-plus domain-remove domain-switch dome-light domino-mask donkey door door-closed door-closed-cancel door-closed-lock door-open door-sliding door-sliding-lock door-sliding-open doorbell doorbell-video dot-net dots-circle dots-grid dots-hexagon dots-horizontal dots-horizontal-circle dots-horizontal-circle-outline dots-square dots-triangle dots-vertical dots-vertical-circle dots-vertical-circle-outline download download-box download-box-outline download-circle download-circle-outline download-lock download-lock-outline download-multiple download-multiple-outline download-network download-network-outline download-off download-off-outline download-outline drag drag-horizontal drag-horizontal-variant drag-variant drag-vertical drag-vertical-variant drama-masks draw draw-pen drawing drawing-box dresser dresser-outline drone dropbox drupal duck dumbbell dump-truck ear-hearing ear-hearing-loop ear-hearing-off earbuds earbuds-off earbuds-off-outline earbuds-outline earth earth-arrow-down earth-arrow-left earth-arrow-right earth-arrow-up earth-box earth-box-minus earth-box-off earth-box-plus earth-box-remove earth-minus earth-off earth-plus earth-remove egg egg-easter egg-fried egg-off egg-off-outline egg-outline eiffel-tower eight-track eject eject-circle eject-circle-outline eject-outline electric-switch electric-switch-closed electron-framework elephant elevation-decline elevation-rise elevator elevator-down elevator-passenger elevator-passenger-off elevator-passenger-off-outline elevator-passenger-outline elevator-up ellipse ellipse-outline email email-alert email-alert-outline email-arrow-left email-arrow-left-outline email-arrow-right email-arrow-right-outline email-box email-check email-check-outline email-edit email-edit-outline email-fast email-fast-outline email-heart-outline email-lock email-lock-outline email-mark-as-unread email-minus email-minus-outline email-multiple email-multiple-outline email-newsletter email-off email-off-outline email-open email-open-heart-outline email-open-multiple email-open-multiple-outline email-open-outline email-outline email-plus email-plus-outline email-remove email-remove-outline email-seal email-seal-outline email-search email-search-outline email-sync email-sync-outline email-variant ember emby emoticon emoticon-angry emoticon-angry-outline emoticon-confused emoticon-confused-outline emoticon-cool emoticon-cool-outline emoticon-cry emoticon-cry-outline emoticon-dead emoticon-dead-outline emoticon-devil emoticon-devil-outline emoticon-excited emoticon-excited-outline emoticon-frown emoticon-frown-outline emoticon-happy emoticon-happy-outline emoticon-kiss emoticon-kiss-outline emoticon-lol emoticon-lol-outline emoticon-minus emoticon-minus-outline emoticon-neutral emoticon-neutral-outline emoticon-outline emoticon-plus emoticon-plus-outline emoticon-poop emoticon-poop-outline emoticon-remove emoticon-remove-outline emoticon-sad emoticon-sad-outline emoticon-sick emoticon-sick-outline emoticon-tongue emoticon-tongue-outline emoticon-wink emoticon-wink-outline engine engine-off engine-off-outline engine-outline epsilon equal equal-box equalizer equalizer-outline eraser eraser-variant escalator escalator-box escalator-down escalator-up eslint et ethereum ethernet ethernet-cable ethernet-cable-off ethernet-off ev-plug-ccs1 ev-plug-ccs2 ev-plug-chademo ev-plug-tesla ev-plug-type1 ev-plug-type2 ev-station evernote excavator exclamation exclamation-thick exit-run exit-to-app expand-all expand-all-outline expansion-card expansion-card-variant exponent exponent-box export export-variant eye eye-arrow-left eye-arrow-left-outline eye-arrow-right eye-arrow-right-outline eye-check eye-check-outline eye-circle eye-circle-outline eye-closed eye-lock eye-lock-open eye-lock-open-outline eye-lock-outline eye-minus eye-minus-outline eye-off eye-off-outline eye-outline eye-plus eye-plus-outline eye-refresh eye-refresh-outline eye-remove eye-remove-outline eye-settings eye-settings-outline eyedropper eyedropper-minus eyedropper-off eyedropper-plus eyedropper-remove eyedropper-variant face-agent face-man face-man-outline face-man-profile face-man-shimmer face-man-shimmer-outline face-mask face-mask-outline face-recognition face-woman face-woman-outline face-woman-profile face-woman-shimmer face-woman-shimmer-outline facebook facebook-gaming facebook-messenger facebook-workplace factory family-tree fan fan-alert fan-auto fan-chevron-down fan-chevron-up fan-clock fan-minus fan-off fan-plus fan-remove fan-speed-1 fan-speed-2 fan-speed-3 fast-forward fast-forward-10 fast-forward-15 fast-forward-30 fast-forward-45 fast-forward-5 fast-forward-60 fast-forward-outline faucet faucet-variant fax feather feature-search feature-search-outline fedora fence fence-electric fencing ferris-wheel ferry file file-account file-account-outline file-alert file-alert-outline file-arrow-left-right file-arrow-left-right-outline file-arrow-up-down file-arrow-up-down-outline file-cabinet file-cad file-cad-box file-cancel file-cancel-outline file-certificate file-certificate-outline file-chart file-chart-check file-chart-check-outline file-chart-outline file-check file-check-outline file-clock file-clock-outline file-cloud file-cloud-outline file-code file-code-outline file-cog file-cog-outline file-compare file-delimited file-delimited-outline file-document file-document-alert file-document-alert-outline file-document-arrow-right file-document-arrow-right-outline file-document-check file-document-check-outline file-document-edit file-document-edit-outline file-document-minus file-document-minus-outline file-document-multiple file-document-multiple-outline file-document-outline file-document-plus file-document-plus-outline file-document-refresh file-document-refresh-outline file-document-remove file-document-remove-outline file-download file-download-outline file-edit file-edit-outline file-excel file-excel-box file-excel-box-outline file-excel-outline file-export file-export-outline file-eye file-eye-outline file-find file-find-outline file-gif-box file-hidden file-image file-image-marker file-image-marker-outline file-image-minus file-image-minus-outline file-image-outline file-image-plus file-image-plus-outline file-image-remove file-image-remove-outline file-import file-import-outline file-jpg-box file-key file-key-outline file-link file-link-outline file-lock file-lock-open file-lock-open-outline file-lock-outline file-marker file-marker-outline file-minus file-minus-outline file-move file-move-outline file-multiple file-multiple-outline file-music file-music-outline file-outline file-pdf-box file-percent file-percent-outline file-phone file-phone-outline file-plus file-plus-outline file-png-box file-powerpoint file-powerpoint-box file-powerpoint-box-outline file-powerpoint-outline file-presentation-box file-question file-question-outline file-refresh file-refresh-outline file-remove file-remove-outline file-replace file-replace-outline file-restore file-restore-outline file-rotate-left file-rotate-left-outline file-rotate-right file-rotate-right-outline file-search file-search-outline file-send file-send-outline file-settings file-settings-outline file-sign file-star file-star-four-points file-star-four-points-outline file-star-outline file-swap file-swap-outline file-sync file-sync-outline file-table file-table-box file-table-box-multiple file-table-box-multiple-outline file-table-box-outline file-table-outline file-tree file-tree-outline file-undo file-undo-outline file-upload file-upload-outline file-video file-video-outline file-word file-word-box file-word-box-outline file-word-outline file-xml-box film filmstrip filmstrip-box filmstrip-box-multiple filmstrip-off filter filter-check filter-check-outline filter-cog filter-cog-outline filter-menu filter-menu-outline filter-minus filter-minus-outline filter-multiple filter-multiple-outline filter-off filter-off-outline filter-outline filter-plus filter-plus-outline filter-remove filter-remove-outline filter-settings filter-settings-outline filter-variant filter-variant-minus filter-variant-plus filter-variant-remove finance find-replace fingerprint fingerprint-off fire fire-alert fire-circle fire-extinguisher fire-hydrant fire-hydrant-alert fire-hydrant-off fire-off fire-station fire-truck firebase firefox fireplace fireplace-off firewire firework firework-off fish fish-off fishbowl fishbowl-outline fit-to-page fit-to-page-outline fit-to-screen fit-to-screen-outline flag flag-checkered flag-minus flag-minus-outline flag-off flag-off-outline flag-outline flag-plus flag-plus-outline flag-remove flag-remove-outline flag-triangle flag-variant flag-variant-minus flag-variant-minus-outline flag-variant-off flag-variant-off-outline flag-variant-outline flag-variant-plus flag-variant-plus-outline flag-variant-remove flag-variant-remove-outline flare flash flash-alert flash-alert-outline flash-auto flash-off flash-off-outline flash-outline flash-red-eye flash-triangle flash-triangle-outline flashlight flashlight-off flask flask-empty flask-empty-minus flask-empty-minus-outline flask-empty-off flask-empty-off-outline flask-empty-outline flask-empty-plus flask-empty-plus-outline flask-empty-remove flask-empty-remove-outline flask-minus flask-minus-outline flask-off flask-off-outline flask-outline flask-plus flask-plus-outline flask-remove flask-remove-outline flask-round-bottom flask-round-bottom-empty flask-round-bottom-empty-outline flask-round-bottom-outline fleur-de-lis flip-horizontal flip-to-back flip-to-front flip-vertical floor-lamp floor-lamp-dual floor-lamp-dual-outline floor-lamp-outline floor-lamp-torchiere floor-lamp-torchiere-outline floor-lamp-torchiere-variant floor-lamp-torchiere-variant-outline floor-plan floppy floppy-variant flower flower-outline flower-pollen flower-pollen-outline flower-poppy flower-tulip flower-tulip-outline focus-auto focus-field focus-field-horizontal focus-field-vertical folder folder-account folder-account-outline folder-alert folder-alert-outline folder-arrow-down folder-arrow-down-outline folder-arrow-left folder-arrow-left-outline folder-arrow-left-right folder-arrow-left-right-outline folder-arrow-right folder-arrow-right-outline folder-arrow-up folder-arrow-up-down folder-arrow-up-down-outline folder-arrow-up-outline folder-cancel folder-cancel-outline folder-check folder-check-outline folder-clock folder-clock-outline folder-cog folder-cog-outline folder-download folder-download-outline folder-edit folder-edit-outline folder-eye folder-eye-outline folder-file folder-file-outline folder-google-drive folder-heart folder-heart-outline folder-hidden folder-home folder-home-outline folder-image folder-information folder-information-outline folder-key folder-key-network folder-key-network-outline folder-key-outline folder-lock folder-lock-open folder-lock-open-outline folder-lock-outline folder-marker folder-marker-outline folder-minus folder-minus-outline folder-move folder-move-outline folder-multiple folder-multiple-image folder-multiple-outline folder-multiple-plus folder-multiple-plus-outline folder-music folder-music-outline folder-network folder-network-outline folder-off folder-off-outline folder-open folder-open-outline folder-outline folder-play folder-play-outline folder-plus folder-plus-outline folder-pound folder-pound-outline folder-question folder-question-outline folder-refresh folder-refresh-outline folder-remove folder-remove-outline folder-search folder-search-outline folder-settings folder-settings-outline folder-star folder-star-multiple folder-star-multiple-outline folder-star-outline folder-swap folder-swap-outline folder-sync folder-sync-outline folder-table folder-table-outline folder-text folder-text-outline folder-upload folder-upload-outline folder-wrench folder-wrench-outline folder-zip folder-zip-outline font-awesome food food-apple food-apple-outline food-croissant food-drumstick food-drumstick-off food-drumstick-off-outline food-drumstick-outline food-fork-drink food-halal food-hot-dog food-kosher food-off food-off-outline food-outline food-steak food-steak-off food-takeout-box food-takeout-box-outline food-turkey food-variant food-variant-off foot-print football football-australian football-helmet forest forest-outline forklift form-dropdown form-select form-textarea form-textbox form-textbox-lock form-textbox-password format-align-bottom format-align-center format-align-justify format-align-left format-align-middle format-align-right format-align-top format-annotation-minus format-annotation-plus format-bold format-clear format-color-fill format-color-highlight format-color-marker-cancel format-color-text format-columns format-float-center format-float-left format-float-none format-float-right format-font format-font-size-decrease format-font-size-increase format-header-1 format-header-2 format-header-3 format-header-4 format-header-5 format-header-6 format-header-decrease format-header-equal format-header-increase format-header-pound format-horizontal-align-center format-horizontal-align-left format-horizontal-align-right format-indent-decrease format-indent-increase format-italic format-letter-case format-letter-case-lower format-letter-case-upper format-letter-ends-with format-letter-matches format-letter-spacing format-letter-spacing-variant format-letter-starts-with format-line-height format-line-spacing format-line-style format-line-weight format-list-bulleted format-list-bulleted-square format-list-bulleted-triangle format-list-bulleted-type format-list-checkbox format-list-checks format-list-group format-list-group-plus format-list-numbered format-list-numbered-rtl format-list-text format-overline format-page-break format-page-split format-paint format-paragraph format-paragraph-spacing format-pilcrow format-pilcrow-arrow-left format-pilcrow-arrow-right format-quote-close format-quote-close-outline format-quote-open format-quote-open-outline format-rotate-90 format-section format-size format-strikethrough format-strikethrough-variant format-subscript format-superscript format-text format-text-rotation-angle-down format-text-rotation-angle-up format-text-rotation-down format-text-rotation-down-vertical format-text-rotation-none format-text-rotation-up format-text-rotation-vertical format-text-variant format-text-variant-outline format-text-wrapping-clip format-text-wrapping-overflow format-text-wrapping-wrap format-textbox format-title format-underline format-underline-wavy format-vertical-align-bottom format-vertical-align-center format-vertical-align-top format-wrap-inline format-wrap-square format-wrap-tight format-wrap-top-bottom forum forum-minus forum-minus-outline forum-outline forum-plus forum-plus-outline forum-remove forum-remove-outline forward forwardburger fountain fountain-pen fountain-pen-tip fraction-one-half freebsd french-fries frequently-asked-questions fridge fridge-alert fridge-alert-outline fridge-bottom fridge-industrial fridge-industrial-alert fridge-industrial-alert-outline fridge-industrial-off fridge-industrial-off-outline fridge-industrial-outline fridge-off fridge-off-outline fridge-outline fridge-top fridge-variant fridge-variant-alert fridge-variant-alert-outline fridge-variant-off fridge-variant-off-outline fridge-variant-outline fruit-cherries fruit-cherries-off fruit-citrus fruit-citrus-off fruit-grapes fruit-grapes-outline fruit-pear fruit-pineapple fruit-watermelon fuel fuel-cell fullscreen fullscreen-exit function function-variant furigana-horizontal furigana-vertical fuse fuse-alert fuse-blade fuse-off gamepad gamepad-circle gamepad-circle-down gamepad-circle-left gamepad-circle-outline gamepad-circle-right gamepad-circle-up gamepad-down gamepad-left gamepad-outline gamepad-right gamepad-round gamepad-round-down gamepad-round-left gamepad-round-outline gamepad-round-right gamepad-round-up gamepad-square gamepad-square-outline gamepad-up gamepad-variant gamepad-variant-outline gamma gantry-crane garage garage-alert garage-alert-variant garage-lock garage-open garage-open-variant garage-variant garage-variant-lock gas-burner gas-cylinder gas-station gas-station-in-use gas-station-in-use-outline gas-station-off gas-station-off-outline gas-station-outline gate gate-alert gate-and gate-arrow-left gate-arrow-right gate-buffer gate-nand gate-nor gate-not gate-open gate-or gate-xnor gate-xor gatsby gauge gauge-empty gauge-full gauge-low gavel gender-female gender-male gender-male-female gender-male-female-variant gender-non-binary gender-transgender generator-mobile generator-portable generator-stationary gentoo gesture gesture-double-tap gesture-pinch gesture-spread gesture-swipe gesture-swipe-down gesture-swipe-horizontal gesture-swipe-left gesture-swipe-right gesture-swipe-up gesture-swipe-vertical gesture-tap gesture-tap-box gesture-tap-button gesture-tap-hold gesture-two-double-tap gesture-two-tap ghost ghost-off ghost-off-outline ghost-outline gift gift-off gift-off-outline gift-open gift-open-outline gift-outline git github gitlab glass-cocktail glass-cocktail-off glass-flute glass-fragile glass-mug glass-mug-off glass-mug-variant glass-mug-variant-off glass-pint-outline glass-stange glass-tulip glass-wine glasses globe-light globe-light-outline globe-model gmail gnome go-kart go-kart-track gog gold golf golf-cart golf-tee gondola goodreads google google-ads google-analytics google-assistant google-cardboard google-chrome google-circles google-circles-communities google-circles-extended google-circles-group google-classroom google-cloud google-downasaur google-drive google-earth google-fit google-glass google-hangouts google-keep google-lens google-maps google-my-business google-nearby google-play google-plus google-podcast google-spreadsheet google-street-view google-translate gradient-horizontal gradient-vertical grain graph graph-outline graphql grass grave-stone grease-pencil greater-than greater-than-or-equal greenhouse grid grid-large grid-off grill grill-outline group guitar-acoustic guitar-electric guitar-pick guitar-pick-outline guy-fawkes-mask gymnastics hail hair-dryer hair-dryer-outline halloween hamburger hamburger-check hamburger-minus hamburger-off hamburger-plus hamburger-remove hammer hammer-screwdriver hammer-sickle hammer-wrench hand-back-left hand-back-left-off hand-back-left-off-outline hand-back-left-outline hand-back-right hand-back-right-off hand-back-right-off-outline hand-back-right-outline hand-clap hand-clap-off hand-coin hand-coin-outline hand-cycle hand-extended hand-extended-outline hand-front-left hand-front-left-outline hand-front-right hand-front-right-outline hand-heart hand-heart-outline hand-okay hand-peace hand-peace-variant hand-pointing-down hand-pointing-left hand-pointing-right hand-pointing-up hand-saw hand-wash hand-wash-outline hand-water hand-wave hand-wave-outline handball handcuffs hands-pray handshake handshake-outline hanger hard-hat harddisk harddisk-plus harddisk-remove hat-fedora hazard-lights hdmi-port hdr hdr-off head head-alert head-alert-outline head-check head-check-outline head-cog head-cog-outline head-dots-horizontal head-dots-horizontal-outline head-flash head-flash-outline head-heart head-heart-outline head-lightbulb head-lightbulb-outline head-minus head-minus-outline head-outline head-plus head-plus-outline head-question head-question-outline head-remove head-remove-outline head-snowflake head-snowflake-outline head-sync head-sync-outline headphones headphones-bluetooth headphones-box headphones-off headphones-settings headset headset-dock headset-off heart heart-box heart-box-outline heart-broken heart-broken-outline heart-circle heart-circle-outline heart-cog heart-cog-outline heart-flash heart-half heart-half-full heart-half-outline heart-minus heart-minus-outline heart-multiple heart-multiple-outline heart-off heart-off-outline heart-outline heart-plus heart-plus-outline heart-pulse heart-remove heart-remove-outline heart-search heart-settings heart-settings-outline heat-pump heat-pump-outline heat-wave heating-coil helicopter help help-box help-box-multiple help-box-multiple-outline help-box-outline help-circle help-circle-outline help-network help-network-outline help-rhombus help-rhombus-outline hexadecimal hexagon hexagon-multiple hexagon-multiple-outline hexagon-outline hexagon-slice-1 hexagon-slice-2 hexagon-slice-3 hexagon-slice-4 hexagon-slice-5 hexagon-slice-6 hexagram hexagram-outline high-definition high-definition-box highway hiking history hockey-puck hockey-sticks hololens home home-account home-alert home-alert-outline home-analytics home-assistant home-automation home-battery home-battery-outline home-circle home-circle-outline home-city home-city-outline home-clock home-clock-outline home-edit home-edit-outline home-export-outline home-flood home-floor-0 home-floor-1 home-floor-2 home-floor-3 home-floor-a home-floor-b home-floor-g home-floor-l home-floor-negative-1 home-group home-group-minus home-group-plus home-group-remove home-heart home-import-outline home-lightbulb home-lightbulb-outline home-lightning-bolt home-lightning-bolt-outline home-lock home-lock-open home-map-marker home-minus home-minus-outline home-modern home-off home-off-outline home-outline home-percent home-percent-outline home-plus home-plus-outline home-remove home-remove-outline home-roof home-search home-search-outline home-silo home-silo-outline home-sound-in home-sound-in-outline home-sound-out home-sound-out-outline home-switch home-switch-outline home-thermometer home-thermometer-outline home-variant home-variant-outline hook hook-off hoop-house hops horizontal-rotate-clockwise horizontal-rotate-counterclockwise horse horse-human horse-variant horse-variant-fast horseshoe hospital hospital-box hospital-box-outline hospital-building hospital-marker hot-tub hours-12 hours-24 hub hub-outline hubspot hulu human human-baby-changing-table human-cane human-capacity-decrease human-capacity-increase human-child human-dolly human-edit human-female human-female-boy human-female-dance human-female-female human-female-female-child human-female-girl human-greeting human-greeting-proximity human-greeting-variant human-handsdown human-handsup human-male human-male-board human-male-board-poll human-male-boy human-male-child human-male-female human-male-female-child human-male-girl human-male-height human-male-height-variant human-male-male human-male-male-child human-non-binary human-pregnant human-queue human-scooter human-walker human-wheelchair human-white-cane humble-bundle hvac hvac-off hydraulic-oil-level hydraulic-oil-temperature hydro-power hydrogen-station ice-cream ice-cream-off ice-pop id-card identifier ideogram-cjk ideogram-cjk-variant image image-album image-area image-area-close image-auto-adjust image-broken image-broken-variant image-check image-check-outline image-edit image-edit-outline image-filter-black-white image-filter-center-focus image-filter-center-focus-strong image-filter-center-focus-strong-outline image-filter-center-focus-weak image-filter-drama image-filter-drama-outline image-filter-frames image-filter-hdr image-filter-hdr-outline image-filter-none image-filter-tilt-shift image-filter-vintage image-frame image-lock image-lock-outline image-marker image-marker-outline image-minus image-minus-outline image-move image-multiple image-multiple-outline image-off image-off-outline image-outline image-plus image-plus-outline image-refresh image-refresh-outline image-remove image-remove-outline image-search image-search-outline image-size-select-actual image-size-select-large image-size-select-small image-sync image-sync-outline image-text import inbox inbox-arrow-down inbox-arrow-down-outline inbox-arrow-up inbox-arrow-up-outline inbox-full inbox-full-outline inbox-multiple inbox-multiple-outline inbox-outline inbox-remove inbox-remove-outline incognito incognito-circle incognito-circle-off incognito-off induction infinity information information-box information-box-outline information-off information-off-outline information-outline information-slab-box information-slab-box-outline information-slab-circle information-slab-circle-outline information-slab-symbol information-symbol information-variant information-variant-box information-variant-box-outline information-variant-circle information-variant-circle-outline instagram instrument-triangle integrated-circuit-chip invert-colors invert-colors-off invoice invoice-arrow-left invoice-arrow-left-outline invoice-arrow-right invoice-arrow-right-outline invoice-check invoice-check-outline invoice-clock invoice-clock-outline invoice-edit invoice-edit-outline invoice-export-outline invoice-fast invoice-fast-outline invoice-import invoice-import-outline invoice-list invoice-list-outline invoice-minus invoice-minus-outline invoice-multiple invoice-multiple-outline invoice-outline invoice-plus invoice-plus-outline invoice-remove invoice-remove-outline invoice-send invoice-send-outline invoice-text invoice-text-arrow-left invoice-text-arrow-left-outline invoice-text-arrow-right invoice-text-arrow-right-outline invoice-text-check invoice-text-check-outline invoice-text-clock invoice-text-clock-outline invoice-text-edit invoice-text-edit-outline invoice-text-fast invoice-text-fast-outline invoice-text-minus invoice-text-minus-outline invoice-text-multiple invoice-text-multiple-outline invoice-text-outline invoice-text-plus invoice-text-plus-outline invoice-text-remove invoice-text-remove-outline invoice-text-send invoice-text-send-outline iobroker ip ip-network ip-network-outline ip-outline ipod iron iron-board iron-outline island island-variant iv-bag jabber jeepney jellyfish jellyfish-outline jira jquery jsfiddle jump-rope kabaddi kangaroo karate kayaking keg kettle kettle-alert kettle-alert-outline kettle-off kettle-off-outline kettle-outline kettle-pour-over kettle-steam kettle-steam-outline kettlebell key key-alert key-alert-outline key-arrow-right key-chain key-chain-variant key-change key-link key-minus key-outline key-plus key-remove key-star key-variant key-wireless keyboard keyboard-backspace keyboard-caps keyboard-close keyboard-close-outline keyboard-esc keyboard-f1 keyboard-f10 keyboard-f11 keyboard-f12 keyboard-f2 keyboard-f3 keyboard-f4 keyboard-f5 keyboard-f6 keyboard-f7 keyboard-f8 keyboard-f9 keyboard-off keyboard-off-outline keyboard-outline keyboard-return keyboard-settings keyboard-settings-outline keyboard-space keyboard-tab keyboard-tab-reverse keyboard-variant khanda kickstarter kite kite-outline kitesurfing klingon knife knife-military knob koala kodi kubernetes label label-multiple label-multiple-outline label-off label-off-outline label-outline label-percent label-percent-outline label-variant label-variant-outline ladder ladybug lambda lamp lamp-outline lamps lamps-outline lan lan-check lan-connect lan-disconnect lan-pending land-fields land-plots land-plots-circle land-plots-circle-variant land-plots-marker land-rows-horizontal land-rows-vertical landslide landslide-outline language-c language-cpp language-csharp language-css3 language-fortran language-go language-haskell language-html5 language-java language-javascript language-kotlin language-lua language-markdown language-markdown-outline language-php language-python language-r language-ruby language-ruby-on-rails language-rust language-swift language-typescript language-xaml laptop laptop-account laptop-off laravel laser-pointer lasso lastpass latitude launch lava-lamp layers layers-edit layers-minus layers-off layers-off-outline layers-outline layers-plus layers-remove layers-search layers-search-outline layers-triple layers-triple-outline lead-pencil leaf leaf-circle leaf-circle-outline leaf-maple leaf-maple-off leaf-off leak leak-off lectern led-off led-on led-outline led-strip led-strip-variant led-strip-variant-off led-variant-off led-variant-on led-variant-outline leek less-than less-than-or-equal library library-outline library-shelves license lifebuoy light-flood-down light-flood-up light-recessed light-switch light-switch-off lightbulb lightbulb-alert lightbulb-alert-outline lightbulb-auto lightbulb-auto-outline lightbulb-cfl lightbulb-cfl-off lightbulb-cfl-spiral lightbulb-cfl-spiral-off lightbulb-fluorescent-tube lightbulb-fluorescent-tube-outline lightbulb-group lightbulb-group-off lightbulb-group-off-outline lightbulb-group-outline lightbulb-multiple lightbulb-multiple-off lightbulb-multiple-off-outline lightbulb-multiple-outline lightbulb-night lightbulb-night-outline lightbulb-off lightbulb-off-outline lightbulb-on lightbulb-on-10 lightbulb-on-20 lightbulb-on-30 lightbulb-on-40 lightbulb-on-50 lightbulb-on-60 lightbulb-on-70 lightbulb-on-80 lightbulb-on-90 lightbulb-on-outline lightbulb-outline lightbulb-question lightbulb-question-outline lightbulb-spot lightbulb-spot-off lightbulb-variant lightbulb-variant-outline lighthouse lighthouse-on lightning-bolt lightning-bolt-circle lightning-bolt-outline line-scan lingerie link link-box link-box-outline link-box-variant link-box-variant-outline link-circle link-circle-outline link-edit link-lock link-off link-plus link-variant link-variant-minus link-variant-off link-variant-plus link-variant-remove linkedin linux linux-mint lipstick liquid-spot liquor list-box list-box-outline list-status litecoin loading location-enter location-exit lock lock-alert lock-alert-outline lock-check lock-check-outline lock-clock lock-minus lock-minus-outline lock-off lock-off-outline lock-open lock-open-alert lock-open-alert-outline lock-open-check lock-open-check-outline lock-open-minus lock-open-minus-outline lock-open-outline lock-open-plus lock-open-plus-outline lock-open-remove lock-open-remove-outline lock-open-variant lock-open-variant-outline lock-outline lock-pattern lock-percent lock-percent-open lock-percent-open-outline lock-percent-open-variant lock-percent-open-variant-outline lock-percent-outline lock-plus lock-plus-outline lock-question lock-remove lock-remove-outline lock-reset lock-smart locker locker-multiple login login-variant logout logout-variant longitude looks lotion lotion-outline lotion-plus lotion-plus-outline loupe lumx lungs mace magazine-pistol magazine-rifle magic-staff magnet magnet-on magnify magnify-close magnify-expand magnify-minus magnify-minus-cursor magnify-minus-outline magnify-plus magnify-plus-cursor magnify-plus-outline magnify-remove-cursor magnify-remove-outline magnify-scan mail mailbox mailbox-open mailbox-open-outline mailbox-open-up mailbox-open-up-outline mailbox-outline mailbox-up mailbox-up-outline manjaro map map-check map-check-outline map-clock map-clock-outline map-legend map-marker map-marker-account map-marker-account-outline map-marker-alert map-marker-alert-outline map-marker-check map-marker-check-outline map-marker-circle map-marker-distance map-marker-down map-marker-left map-marker-left-outline map-marker-minus map-marker-minus-outline map-marker-multiple map-marker-multiple-outline map-marker-off map-marker-off-outline map-marker-outline map-marker-path map-marker-plus map-marker-plus-outline map-marker-question map-marker-question-outline map-marker-radius map-marker-radius-outline map-marker-remove map-marker-remove-outline map-marker-remove-variant map-marker-right map-marker-right-outline map-marker-star map-marker-star-outline map-marker-up map-minus map-outline map-plus map-search map-search-outline mapbox margin marker marker-cancel marker-check mastodon material-design material-ui math-compass math-cos math-integral math-integral-box math-log math-norm math-norm-box math-sin math-tan matrix medal medal-outline medical-bag medical-cotton-swab medication medication-outline meditation memory memory-arrow-down menorah menorah-fire menu menu-close menu-down menu-down-outline menu-left menu-left-outline menu-open menu-right menu-right-outline menu-swap menu-swap-outline menu-up menu-up-outline merge message message-alert message-alert-outline message-arrow-left message-arrow-left-outline message-arrow-right message-arrow-right-outline message-badge message-badge-outline message-bookmark message-bookmark-outline message-bulleted message-bulleted-off message-check message-check-outline message-cog message-cog-outline message-draw message-fast message-fast-outline message-flash message-flash-outline message-image message-image-outline message-lock message-lock-outline message-minus message-minus-outline message-off message-off-outline message-outline message-plus message-plus-outline message-processing message-processing-outline message-question message-question-outline message-reply message-reply-outline message-reply-text message-reply-text-outline message-settings message-settings-outline message-star message-star-outline message-text message-text-clock message-text-clock-outline message-text-fast message-text-fast-outline message-text-lock message-text-lock-outline message-text-outline message-video meteor meter-electric meter-electric-outline meter-gas meter-gas-outline metronome metronome-tick micro-sd microphone microphone-message microphone-message-off microphone-minus microphone-off microphone-outline microphone-plus microphone-question microphone-question-outline microphone-settings microphone-variant microphone-variant-off microscope microsoft microsoft-access microsoft-azure microsoft-azure-devops microsoft-bing microsoft-dynamics-365 microsoft-edge microsoft-excel microsoft-internet-explorer microsoft-office microsoft-onedrive microsoft-onenote microsoft-outlook microsoft-powerpoint microsoft-sharepoint microsoft-teams microsoft-visual-studio microsoft-visual-studio-code microsoft-windows microsoft-windows-classic microsoft-word microsoft-xbox microsoft-xbox-controller microsoft-xbox-controller-battery-alert microsoft-xbox-controller-battery-charging microsoft-xbox-controller-battery-empty microsoft-xbox-controller-battery-full microsoft-xbox-controller-battery-low microsoft-xbox-controller-battery-medium microsoft-xbox-controller-battery-unknown microsoft-xbox-controller-menu microsoft-xbox-controller-off microsoft-xbox-controller-view microwave microwave-off middleware middleware-outline midi midi-port mine minecraft mini-sd minidisc minus minus-box minus-box-multiple minus-box-multiple-outline minus-box-outline minus-circle minus-circle-multiple minus-circle-multiple-outline minus-circle-off minus-circle-off-outline minus-circle-outline minus-network minus-network-outline minus-thick mirror mirror-rectangle mirror-variant mixed-martial-arts mixed-reality molecule molecule-co molecule-co2 monitor monitor-account monitor-arrow-down monitor-arrow-down-variant monitor-cellphone monitor-cellphone-star monitor-dashboard monitor-edit monitor-eye monitor-lock monitor-multiple monitor-off monitor-screenshot monitor-share monitor-shimmer monitor-small monitor-speaker monitor-speaker-off monitor-star monitor-vertical moon-first-quarter moon-full moon-last-quarter moon-new moon-waning-crescent moon-waning-gibbous moon-waxing-crescent moon-waxing-gibbous moped moped-electric moped-electric-outline moped-outline more mortar-pestle mortar-pestle-plus mosque mosque-outline mother-heart mother-nurse motion motion-outline motion-pause motion-pause-outline motion-play motion-play-outline motion-sensor motion-sensor-off motorbike motorbike-electric motorbike-off mouse mouse-bluetooth mouse-left-click mouse-left-click-outline mouse-move-down mouse-move-up mouse-move-vertical mouse-off mouse-outline mouse-right-click mouse-right-click-outline mouse-scroll-wheel mouse-variant mouse-variant-off move-resize move-resize-variant movie movie-check movie-check-outline movie-cog movie-cog-outline movie-edit movie-edit-outline movie-filter movie-filter-outline movie-minus movie-minus-outline movie-off movie-off-outline movie-open movie-open-check movie-open-check-outline movie-open-cog movie-open-cog-outline movie-open-edit movie-open-edit-outline movie-open-minus movie-open-minus-outline movie-open-off movie-open-off-outline movie-open-outline movie-open-play movie-open-play-outline movie-open-plus movie-open-plus-outline movie-open-remove movie-open-remove-outline movie-open-settings movie-open-settings-outline movie-open-star movie-open-star-outline movie-outline movie-play movie-play-outline movie-plus movie-plus-outline movie-remove movie-remove-outline movie-roll movie-search movie-search-outline movie-settings movie-settings-outline movie-star movie-star-outline mower mower-bag mower-bag-on mower-on muffin multicast multimedia multiplication multiplication-box mushroom mushroom-off mushroom-off-outline mushroom-outline music music-accidental-double-flat music-accidental-double-sharp music-accidental-flat music-accidental-natural music-accidental-sharp music-box music-box-multiple music-box-multiple-outline music-box-outline music-circle music-circle-outline music-clef-alto music-clef-bass music-clef-treble music-note music-note-bluetooth music-note-bluetooth-off music-note-eighth music-note-eighth-dotted music-note-half music-note-half-dotted music-note-minus music-note-off music-note-off-outline music-note-outline music-note-plus music-note-quarter music-note-quarter-dotted music-note-sixteenth music-note-sixteenth-dotted music-note-whole music-note-whole-dotted music-off music-rest-eighth music-rest-half music-rest-quarter music-rest-sixteenth music-rest-whole mustache nail nas nativescript nature nature-outline nature-people nature-people-outline navigation navigation-outline navigation-variant navigation-variant-outline near-me necklace needle needle-off netflix network network-off network-off-outline network-outline network-pos network-strength-1 network-strength-1-alert network-strength-2 network-strength-2-alert network-strength-3 network-strength-3-alert network-strength-4 network-strength-4-alert network-strength-4-cog network-strength-off network-strength-off-outline network-strength-outline new-box newspaper newspaper-check newspaper-minus newspaper-plus newspaper-remove newspaper-variant newspaper-variant-multiple newspaper-variant-multiple-outline newspaper-variant-outline nfc nfc-search-variant nfc-tap nfc-variant nfc-variant-off ninja nintendo-game-boy nintendo-switch nintendo-wii nintendo-wiiu nix nodejs noodles not-equal not-equal-variant note note-alert note-alert-outline note-check note-check-outline note-edit note-edit-outline note-minus note-minus-outline note-multiple note-multiple-outline note-off note-off-outline note-outline note-plus note-plus-outline note-remove note-remove-outline note-search note-search-outline note-text note-text-outline notebook notebook-check notebook-check-outline notebook-edit notebook-edit-outline notebook-heart notebook-heart-outline notebook-minus notebook-minus-outline notebook-multiple notebook-outline notebook-plus notebook-plus-outline notebook-remove notebook-remove-outline notification-clear-all npm nuke null numeric numeric-0 numeric-0-box numeric-0-box-multiple numeric-0-box-multiple-outline numeric-0-box-outline numeric-0-circle numeric-0-circle-outline numeric-1 numeric-1-box numeric-1-box-multiple numeric-1-box-multiple-outline numeric-1-box-outline numeric-1-circle numeric-1-circle-outline numeric-10 numeric-10-box numeric-10-box-multiple numeric-10-box-multiple-outline numeric-10-box-outline numeric-10-circle numeric-10-circle-outline numeric-2 numeric-2-box numeric-2-box-multiple numeric-2-box-multiple-outline numeric-2-box-outline numeric-2-circle numeric-2-circle-outline numeric-3 numeric-3-box numeric-3-box-multiple numeric-3-box-multiple-outline numeric-3-box-outline numeric-3-circle numeric-3-circle-outline numeric-4 numeric-4-box numeric-4-box-multiple numeric-4-box-multiple-outline numeric-4-box-outline numeric-4-circle numeric-4-circle-outline numeric-5 numeric-5-box numeric-5-box-multiple numeric-5-box-multiple-outline numeric-5-box-outline numeric-5-circle numeric-5-circle-outline numeric-6 numeric-6-box numeric-6-box-multiple numeric-6-box-multiple-outline numeric-6-box-outline numeric-6-circle numeric-6-circle-outline numeric-7 numeric-7-box numeric-7-box-multiple numeric-7-box-multiple-outline numeric-7-box-outline numeric-7-circle numeric-7-circle-outline numeric-8 numeric-8-box numeric-8-box-multiple numeric-8-box-multiple-outline numeric-8-box-outline numeric-8-circle numeric-8-circle-outline numeric-9 numeric-9-box numeric-9-box-multiple numeric-9-box-multiple-outline numeric-9-box-outline numeric-9-circle numeric-9-circle-outline numeric-9-plus numeric-9-plus-box numeric-9-plus-box-multiple numeric-9-plus-box-multiple-outline numeric-9-plus-box-outline numeric-9-plus-circle numeric-9-plus-circle-outline numeric-negative-1 numeric-off numeric-positive-1 nut nutrition nuxt oar ocarina oci ocr octagon octagon-outline octagram octagram-edit octagram-edit-outline octagram-minus octagram-minus-outline octagram-outline octagram-plus octagram-plus-outline octahedron octahedron-off odnoklassniki offer office-building office-building-cog office-building-cog-outline office-building-marker office-building-marker-outline office-building-minus office-building-minus-outline office-building-outline office-building-plus office-building-plus-outline office-building-remove office-building-remove-outline oil oil-lamp oil-level oil-temperature om omega one-up onepassword opacity open-in-app open-in-new open-source-initiative openid opera orbit orbit-variant order-alphabetical-ascending order-alphabetical-descending order-bool-ascending order-bool-ascending-variant order-bool-descending order-bool-descending-variant order-numeric-ascending order-numeric-descending origin ornament ornament-variant outdoor-lamp overscan owl pac-man package package-check package-down package-up package-variant package-variant-closed package-variant-closed-check package-variant-closed-minus package-variant-closed-plus package-variant-closed-remove package-variant-minus package-variant-plus package-variant-remove page-first page-last page-layout-body page-layout-footer page-layout-header page-layout-header-footer page-layout-sidebar-left page-layout-sidebar-right page-next page-next-outline page-previous page-previous-outline pail pail-minus pail-minus-outline pail-off pail-off-outline pail-outline pail-plus pail-plus-outline pail-remove pail-remove-outline palette palette-advanced palette-outline palette-swatch palette-swatch-outline palette-swatch-variant palm-tree pan pan-bottom-left pan-bottom-right pan-down pan-horizontal pan-left pan-right pan-top-left pan-top-right pan-up pan-vertical panda pandora panorama panorama-fisheye panorama-horizontal panorama-horizontal-outline panorama-outline panorama-sphere panorama-sphere-outline panorama-variant panorama-variant-outline panorama-vertical panorama-vertical-outline panorama-wide-angle panorama-wide-angle-outline paper-cut-vertical paper-roll paper-roll-outline paperclip paperclip-check paperclip-lock paperclip-minus paperclip-off paperclip-plus paperclip-remove parachute parachute-outline paragliding parking party-popper passport passport-alert passport-biometric passport-cancel passport-check passport-minus passport-plus passport-remove pasta patio-heater patreon pause pause-box pause-box-outline pause-circle pause-circle-outline pause-octagon pause-octagon-outline paw paw-off paw-off-outline paw-outline peace peanut peanut-off peanut-off-outline peanut-outline pen pen-lock pen-minus pen-off pen-plus pen-remove pencil pencil-box pencil-box-multiple pencil-box-multiple-outline pencil-box-outline pencil-circle pencil-circle-outline pencil-lock pencil-lock-outline pencil-minus pencil-minus-outline pencil-off pencil-off-outline pencil-outline pencil-plus pencil-plus-outline pencil-remove pencil-remove-outline pencil-ruler pencil-ruler-outline penguin pentagon pentagon-outline pentagram percent percent-box percent-box-outline percent-circle percent-circle-outline percent-outline periodic-table perspective-less perspective-more ph phone phone-alert phone-alert-outline phone-bluetooth phone-bluetooth-outline phone-cancel phone-cancel-outline phone-check phone-check-outline phone-classic phone-classic-off phone-clock phone-dial phone-dial-outline phone-forward phone-forward-outline phone-hangup phone-hangup-outline phone-in-talk phone-in-talk-outline phone-incoming phone-incoming-outgoing phone-incoming-outgoing-outline phone-incoming-outline phone-lock phone-lock-outline phone-log phone-log-outline phone-message phone-message-outline phone-minus phone-minus-outline phone-missed phone-missed-outline phone-off phone-off-outline phone-outgoing phone-outgoing-outline phone-outline phone-paused phone-paused-outline phone-plus phone-plus-outline phone-refresh phone-refresh-outline phone-remove phone-remove-outline phone-return phone-return-outline phone-ring phone-ring-outline phone-rotate-landscape phone-rotate-portrait phone-settings phone-settings-outline phone-sync phone-sync-outline phone-voip pi pi-box pi-hole piano piano-off pickaxe picture-in-picture-bottom-right picture-in-picture-bottom-right-outline picture-in-picture-top-right picture-in-picture-top-right-outline pier pier-crane pig pig-variant pig-variant-outline piggy-bank piggy-bank-outline pill pill-multiple pill-off pillar pin pin-off pin-off-outline pin-outline pine-tree pine-tree-box pine-tree-fire pine-tree-variant pine-tree-variant-outline pinterest pinwheel pinwheel-outline pipe pipe-disconnected pipe-leak pipe-valve pipe-wrench pirate pistol piston pitchfork pizza plane-car plane-train play play-box play-box-edit-outline play-box-lock play-box-lock-open play-box-lock-open-outline play-box-lock-outline play-box-multiple play-box-multiple-outline play-box-outline play-circle play-circle-outline play-network play-network-outline play-outline play-pause play-protected-content play-speed playlist-check playlist-edit playlist-minus playlist-music playlist-music-outline playlist-play playlist-plus playlist-remove playlist-star plex pliers plus plus-box plus-box-multiple plus-box-multiple-outline plus-box-outline plus-circle plus-circle-multiple plus-circle-multiple-outline plus-circle-outline plus-lock plus-lock-open plus-minus plus-minus-box plus-minus-variant plus-network plus-network-outline plus-outline plus-thick pocket podcast podium podium-bronze podium-gold podium-silver point-of-sale pokeball pokemon-go poker-chip polaroid police-badge police-badge-outline police-station poll polo polymer pool pool-thermometer popcorn post post-lamp post-outline postage-stamp pot pot-mix pot-mix-outline pot-outline pot-steam pot-steam-outline pound pound-box pound-box-outline power power-cycle power-off power-on power-plug power-plug-battery power-plug-battery-outline power-plug-off power-plug-off-outline power-plug-outline power-settings power-sleep power-socket power-socket-au power-socket-ch power-socket-de power-socket-eu power-socket-fr power-socket-it power-socket-jp power-socket-uk power-socket-us power-standby powershell prescription presentation presentation-play pretzel printer printer-3d printer-3d-nozzle printer-3d-nozzle-alert printer-3d-nozzle-alert-outline printer-3d-nozzle-heat printer-3d-nozzle-heat-outline printer-3d-nozzle-off printer-3d-nozzle-off-outline printer-3d-nozzle-outline printer-3d-off printer-alert printer-check printer-eye printer-off printer-off-outline printer-outline printer-pos printer-pos-alert printer-pos-alert-outline printer-pos-cancel printer-pos-cancel-outline printer-pos-check printer-pos-check-outline printer-pos-cog printer-pos-cog-outline printer-pos-edit printer-pos-edit-outline printer-pos-minus printer-pos-minus-outline printer-pos-network printer-pos-network-outline printer-pos-off printer-pos-off-outline printer-pos-outline printer-pos-pause printer-pos-pause-outline printer-pos-play printer-pos-play-outline printer-pos-plus printer-pos-plus-outline printer-pos-refresh printer-pos-refresh-outline printer-pos-remove printer-pos-remove-outline printer-pos-star printer-pos-star-outline printer-pos-stop printer-pos-stop-outline printer-pos-sync printer-pos-sync-outline printer-pos-wrench printer-pos-wrench-outline printer-search printer-settings printer-wireless priority-high priority-low professional-hexagon progress-alert progress-check progress-clock progress-close progress-download progress-helper progress-pencil progress-question progress-star progress-star-four-points progress-tag progress-upload progress-wrench projector projector-off projector-screen projector-screen-off projector-screen-off-outline projector-screen-outline projector-screen-variant projector-screen-variant-off projector-screen-variant-off-outline projector-screen-variant-outline propane-tank propane-tank-outline protocol publish publish-off pulse pump pump-off pumpkin purse purse-outline puzzle puzzle-check puzzle-check-outline puzzle-edit puzzle-edit-outline puzzle-heart puzzle-heart-outline puzzle-minus puzzle-minus-outline puzzle-outline puzzle-plus puzzle-plus-outline puzzle-remove puzzle-remove-outline puzzle-star puzzle-star-outline pyramid pyramid-off qi qqchat qrcode qrcode-edit qrcode-minus qrcode-plus qrcode-remove qrcode-scan quadcopter quality-high quality-low quality-medium queue-first-in-last-out quora rabbit rabbit-variant rabbit-variant-outline racing-helmet racquetball radar radiator radiator-disabled radiator-off radio radio-am radio-fm radio-handheld radio-off radio-tower radioactive radioactive-circle radioactive-circle-outline radioactive-off radiobox-blank radiobox-indeterminate-variant radiobox-marked radiology-box radiology-box-outline radius radius-outline railroad-light rake raspberry-pi raw raw-off ray-end ray-end-arrow ray-start ray-start-arrow ray-start-end ray-start-vertex-end ray-vertex razor-double-edge razor-single-edge react read receipt receipt-clock receipt-clock-outline receipt-outline receipt-send receipt-send-outline receipt-text receipt-text-arrow-left receipt-text-arrow-left-outline receipt-text-arrow-right receipt-text-arrow-right-outline receipt-text-check receipt-text-check-outline receipt-text-clock receipt-text-clock-outline receipt-text-edit receipt-text-edit-outline receipt-text-minus receipt-text-minus-outline receipt-text-outline receipt-text-plus receipt-text-plus-outline receipt-text-remove receipt-text-remove-outline receipt-text-send receipt-text-send-outline record record-circle record-circle-outline record-player record-rec rectangle rectangle-outline recycle recycle-variant reddit redhat redo redo-variant reflect-horizontal reflect-vertical refresh refresh-auto refresh-circle regex registered-trademark reiterate relation-many-to-many relation-many-to-one relation-many-to-one-or-many relation-many-to-only-one relation-many-to-zero-or-many relation-many-to-zero-or-one relation-one-or-many-to-many relation-one-or-many-to-one relation-one-or-many-to-one-or-many relation-one-or-many-to-only-one relation-one-or-many-to-zero-or-many relation-one-or-many-to-zero-or-one relation-one-to-many relation-one-to-one relation-one-to-one-or-many relation-one-to-only-one relation-one-to-zero-or-many relation-one-to-zero-or-one relation-only-one-to-many relation-only-one-to-one relation-only-one-to-one-or-many relation-only-one-to-only-one relation-only-one-to-zero-or-many relation-only-one-to-zero-or-one relation-zero-or-many-to-many relation-zero-or-many-to-one relation-zero-or-many-to-one-or-many relation-zero-or-many-to-only-one relation-zero-or-many-to-zero-or-many relation-zero-or-many-to-zero-or-one relation-zero-or-one-to-many relation-zero-or-one-to-one relation-zero-or-one-to-one-or-many relation-zero-or-one-to-only-one relation-zero-or-one-to-zero-or-many relation-zero-or-one-to-zero-or-one relative-scale reload reload-alert reminder remote remote-desktop remote-off remote-tv remote-tv-off rename rename-box rename-box-outline rename-outline reorder-horizontal reorder-vertical repeat repeat-off repeat-once repeat-variant replay reply reply-all reply-all-outline reply-circle reply-outline reproduction resistor resistor-nodes resize resize-bottom-right responsive restart restart-alert restart-off restore restore-alert rewind rewind-10 rewind-15 rewind-30 rewind-45 rewind-5 rewind-60 rewind-outline rhombus rhombus-medium rhombus-medium-outline rhombus-outline rhombus-split rhombus-split-outline ribbon rice rickshaw rickshaw-electric ring rivet road road-variant robber robot robot-angry robot-angry-outline robot-confused robot-confused-outline robot-dead robot-dead-outline robot-excited robot-excited-outline robot-happy robot-happy-outline robot-industrial robot-industrial-outline robot-love robot-love-outline robot-mower robot-mower-outline robot-off robot-off-outline robot-outline robot-vacuum robot-vacuum-alert robot-vacuum-off robot-vacuum-variant robot-vacuum-variant-alert robot-vacuum-variant-off rocket rocket-launch rocket-launch-outline rocket-outline rodent roller-shade roller-shade-closed roller-skate roller-skate-off rollerblade rollerblade-off rollupjs rolodex rolodex-outline roman-numeral-1 roman-numeral-10 roman-numeral-2 roman-numeral-3 roman-numeral-4 roman-numeral-5 roman-numeral-6 roman-numeral-7 roman-numeral-8 roman-numeral-9 room-service room-service-outline rotate-360 rotate-3d rotate-3d-variant rotate-left rotate-left-variant rotate-orbit rotate-right rotate-right-variant rounded-corner router router-network router-network-wireless router-wireless router-wireless-off router-wireless-settings routes routes-clock rowing rss rss-box rss-off rug rugby ruler ruler-square ruler-square-compass run run-fast rv-truck sack sack-outline sack-percent safe safe-square safe-square-outline safety-goggles sail-boat sail-boat-sink sale sale-outline salesforce sass satellite satellite-uplink satellite-variant sausage sausage-off saw-blade sawtooth-wave saxophone scale scale-balance scale-bathroom scale-off scale-unbalanced scan-helper scanner scanner-off scatter-plot scatter-plot-outline scent scent-off school school-outline scissors-cutting scooter scooter-electric scoreboard scoreboard-outline screen-rotation screen-rotation-lock screw-flat-top screw-lag screw-machine-flat-top screw-machine-round-top screw-round-top screwdriver script script-outline script-text script-text-key script-text-key-outline script-text-outline script-text-play script-text-play-outline sd seal seal-variant search-web seat seat-flat seat-flat-angled seat-individual-suite seat-legroom-extra seat-legroom-normal seat-legroom-reduced seat-outline seat-passenger seat-recline-extra seat-recline-normal seatbelt security security-network seed seed-off seed-off-outline seed-outline seed-plus seed-plus-outline seesaw segment select select-all select-arrow-down select-arrow-up select-color select-compare select-drag select-group select-inverse select-marker select-multiple select-multiple-marker select-off select-place select-remove select-search selection selection-drag selection-ellipse selection-ellipse-arrow-inside selection-ellipse-remove selection-marker selection-multiple selection-multiple-marker selection-off selection-remove selection-search semantic-web send send-check send-check-outline send-circle send-circle-outline send-clock send-clock-outline send-lock send-lock-outline send-outline send-variant send-variant-clock send-variant-clock-outline send-variant-outline serial-port server server-minus server-minus-outline server-network server-network-off server-network-outline server-off server-outline server-plus server-plus-outline server-remove server-security set-all set-center set-center-right set-left set-left-center set-left-right set-merge set-none set-right set-split set-square set-top-box settings-helper shaker shaker-outline shape shape-circle-plus shape-outline shape-oval-plus shape-plus shape-plus-outline shape-polygon-plus shape-rectangle-plus shape-square-plus shape-square-rounded-plus share share-all share-all-outline share-circle share-off share-off-outline share-outline share-variant share-variant-outline shark shark-fin shark-fin-outline shark-off sheep shield shield-account shield-account-outline shield-account-variant shield-account-variant-outline shield-airplane shield-airplane-outline shield-alert shield-alert-outline shield-bug shield-bug-outline shield-car shield-check shield-check-outline shield-cross shield-cross-outline shield-crown shield-crown-outline shield-edit shield-edit-outline shield-half shield-half-full shield-home shield-home-outline shield-key shield-key-outline shield-link-variant shield-link-variant-outline shield-lock shield-lock-open shield-lock-open-outline shield-lock-outline shield-moon shield-moon-outline shield-off shield-off-outline shield-outline shield-plus shield-plus-outline shield-refresh shield-refresh-outline shield-remove shield-remove-outline shield-search shield-star shield-star-outline shield-sun shield-sun-outline shield-sword shield-sword-outline shield-sync shield-sync-outline shimmer ship-wheel shipping-pallet shoe-ballet shoe-cleat shoe-formal shoe-heel shoe-print shoe-sneaker shopping shopping-music shopping-outline shopping-search shopping-search-outline shore shovel shovel-off shower shower-head shredder shuffle shuffle-disabled shuffle-variant shuriken sickle sigma sigma-lower sign-caution sign-direction sign-direction-minus sign-direction-plus sign-direction-remove sign-language sign-language-outline sign-pole sign-real-estate sign-text sign-yield signal signal-2g signal-3g signal-4g signal-5g signal-cellular-1 signal-cellular-2 signal-cellular-3 signal-cellular-outline signal-distance-variant signal-hspa signal-hspa-plus signal-off signal-variant signature signature-freehand signature-image signature-text silo silo-outline silverware silverware-clean silverware-fork silverware-fork-knife silverware-spoon silverware-variant sim sim-alert sim-alert-outline sim-off sim-off-outline sim-outline simple-icons sina-weibo sine-wave sitemap sitemap-outline size-l size-m size-s size-xl size-xs size-xxl size-xxs size-xxxl skate skate-off skateboard skateboarding skew-less skew-more ski ski-cross-country ski-water skip-backward skip-backward-outline skip-forward skip-forward-outline skip-next skip-next-circle skip-next-circle-outline skip-next-outline skip-previous skip-previous-circle skip-previous-circle-outline skip-previous-outline skull skull-crossbones skull-crossbones-outline skull-outline skull-scan skull-scan-outline skype skype-business slack slash-forward slash-forward-box sledding sleep sleep-off slide slope-downhill slope-uphill slot-machine slot-machine-outline smart-card smart-card-off smart-card-off-outline smart-card-outline smart-card-reader smart-card-reader-outline smog smoke smoke-detector smoke-detector-alert smoke-detector-alert-outline smoke-detector-off smoke-detector-off-outline smoke-detector-outline smoke-detector-variant smoke-detector-variant-alert smoke-detector-variant-off smoking smoking-off smoking-pipe smoking-pipe-off snail snake snapchat snowboard snowflake snowflake-alert snowflake-check snowflake-melt snowflake-off snowflake-thermometer snowflake-variant snowman snowmobile snowshoeing soccer soccer-field social-distance-2-meters social-distance-6-feet sofa sofa-outline sofa-single sofa-single-outline solar-panel solar-panel-large solar-power solar-power-variant solar-power-variant-outline soldering-iron solid sony-playstation sort sort-alphabetical-ascending sort-alphabetical-ascending-variant sort-alphabetical-descending sort-alphabetical-descending-variant sort-alphabetical-variant sort-ascending sort-bool-ascending sort-bool-ascending-variant sort-bool-descending sort-bool-descending-variant sort-calendar-ascending sort-calendar-descending sort-clock-ascending sort-clock-ascending-outline sort-clock-descending sort-clock-descending-outline sort-descending sort-numeric-ascending sort-numeric-ascending-variant sort-numeric-descending sort-numeric-descending-variant sort-numeric-variant sort-reverse-variant sort-variant sort-variant-lock sort-variant-lock-open sort-variant-off sort-variant-remove soundbar soundcloud source-branch source-branch-check source-branch-minus source-branch-plus source-branch-refresh source-branch-remove source-branch-sync source-commit source-commit-end source-commit-end-local source-commit-local source-commit-next-local source-commit-start source-commit-start-next-local source-fork source-merge source-pull source-repository source-repository-multiple soy-sauce soy-sauce-off spa spa-outline space-invaders space-station spade speaker speaker-bluetooth speaker-message speaker-multiple speaker-off speaker-pause speaker-play speaker-stop speaker-wireless spear speedometer speedometer-medium speedometer-slow spellcheck sphere sphere-off spider spider-outline spider-thread spider-web spirit-level spoon-sugar spotify spotlight spotlight-beam spray spray-bottle sprinkler sprinkler-fire sprinkler-variant sprout sprout-outline square square-circle square-circle-outline square-edit-outline square-medium square-medium-outline square-off square-off-outline square-opacity square-outline square-root square-root-box square-rounded square-rounded-badge square-rounded-badge-outline square-rounded-outline square-small square-wave squeegee ssh stack-exchange stack-overflow stackpath stadium stadium-outline stadium-variant stairs stairs-box stairs-down stairs-up stamper standard-definition star star-box star-box-multiple star-box-multiple-outline star-box-outline star-check star-check-outline star-circle star-circle-outline star-cog star-cog-outline star-crescent star-david star-face star-four-points star-four-points-box star-four-points-box-outline star-four-points-circle star-four-points-circle-outline star-four-points-outline star-four-points-small star-half star-half-full star-minus star-minus-outline star-off star-off-outline star-outline star-plus star-plus-outline star-remove star-remove-outline star-settings star-settings-outline star-shooting star-shooting-outline star-three-points star-three-points-outline state-machine steam steering steering-off step-backward step-backward-2 step-forward step-forward-2 stethoscope sticker sticker-alert sticker-alert-outline sticker-check sticker-check-outline sticker-circle-outline sticker-emoji sticker-minus sticker-minus-outline sticker-outline sticker-plus sticker-plus-outline sticker-remove sticker-remove-outline sticker-text sticker-text-outline stocking stomach stool stool-outline stop stop-circle stop-circle-outline storage-tank storage-tank-outline store store-24-hour store-alert store-alert-outline store-check store-check-outline store-clock store-clock-outline store-cog store-cog-outline store-edit store-edit-outline store-marker store-marker-outline store-minus store-minus-outline store-off store-off-outline store-outline store-plus store-plus-outline store-remove store-remove-outline store-search store-search-outline store-settings store-settings-outline storefront storefront-check storefront-check-outline storefront-edit storefront-edit-outline storefront-minus storefront-minus-outline storefront-outline storefront-plus storefront-plus-outline storefront-remove storefront-remove-outline stove strategy stretch-to-page stretch-to-page-outline string-lights string-lights-off subdirectory-arrow-left subdirectory-arrow-right submarine subtitles subtitles-outline subway subway-alert-variant subway-variant summit sun-angle sun-angle-outline sun-clock sun-clock-outline sun-compass sun-snowflake sun-snowflake-variant sun-thermometer sun-thermometer-outline sun-wireless sun-wireless-outline sunglasses surfing surround-sound surround-sound-2-0 surround-sound-2-1 surround-sound-3-1 surround-sound-5-1 surround-sound-5-1-2 surround-sound-7-1 svg swap-horizontal swap-horizontal-bold swap-horizontal-circle swap-horizontal-circle-outline swap-horizontal-hidden swap-horizontal-variant swap-vertical swap-vertical-bold swap-vertical-circle swap-vertical-circle-outline swap-vertical-variant swim switch sword sword-cross syllabary-hangul syllabary-hiragana syllabary-katakana syllabary-katakana-halfwidth symbol symfony synagogue synagogue-outline sync sync-alert sync-circle sync-off tab tab-minus tab-plus tab-remove tab-search tab-unselected table table-account table-alert table-arrow-down table-arrow-left table-arrow-right table-arrow-up table-border table-cancel table-chair table-check table-clock table-cog table-column table-column-plus-after table-column-plus-before table-column-remove table-column-width table-edit table-eye table-eye-off table-filter table-furniture table-headers-eye table-headers-eye-off table-heart table-key table-large table-large-plus table-large-remove table-lock table-merge-cells table-minus table-multiple table-network table-of-contents table-off table-picnic table-pivot table-plus table-question table-refresh table-remove table-row table-row-height table-row-plus-after table-row-plus-before table-row-remove table-search table-settings table-split-cell table-star table-sync table-tennis tablet tablet-cellphone tablet-dashboard taco tag tag-arrow-down tag-arrow-down-outline tag-arrow-left tag-arrow-left-outline tag-arrow-right tag-arrow-right-outline tag-arrow-up tag-arrow-up-outline tag-check tag-check-outline tag-edit tag-edit-outline tag-faces tag-heart tag-heart-outline tag-hidden tag-minus tag-minus-outline tag-multiple tag-multiple-outline tag-off tag-off-outline tag-outline tag-plus tag-plus-outline tag-remove tag-remove-outline tag-search tag-search-outline tag-text tag-text-outline tailwind tally-mark-1 tally-mark-2 tally-mark-3 tally-mark-4 tally-mark-5 tangram tank tanker-truck tape-drive tape-measure target target-account target-variant taxi tea tea-outline teamviewer teddy-bear telescope television television-ambient-light television-box television-classic television-classic-off television-guide television-off television-pause television-play television-shimmer television-speaker television-speaker-off television-stop temperature-celsius temperature-fahrenheit temperature-kelvin temple-buddhist temple-buddhist-outline temple-hindu temple-hindu-outline tennis tennis-ball tennis-ball-outline tent terraform terrain test-tube test-tube-empty test-tube-off text text-account text-box text-box-check text-box-check-outline text-box-edit text-box-edit-outline text-box-minus text-box-minus-outline text-box-multiple text-box-multiple-outline text-box-outline text-box-plus text-box-plus-outline text-box-remove text-box-remove-outline text-box-search text-box-search-outline text-long text-recognition text-search text-search-variant text-shadow text-short texture texture-box theater theme-light-dark thermometer thermometer-alert thermometer-auto thermometer-bluetooth thermometer-check thermometer-chevron-down thermometer-chevron-up thermometer-high thermometer-lines thermometer-low thermometer-minus thermometer-off thermometer-plus thermometer-probe thermometer-probe-off thermometer-water thermostat thermostat-auto thermostat-box thermostat-box-auto thermostat-cog thought-bubble thought-bubble-outline thumb-down thumb-down-outline thumb-up thumb-up-outline thumbs-up-down thumbs-up-down-outline ticket ticket-account ticket-confirmation ticket-confirmation-outline ticket-outline ticket-percent ticket-percent-outline tie tilde tilde-off timelapse timeline timeline-alert timeline-alert-outline timeline-check timeline-check-outline timeline-clock timeline-clock-outline timeline-minus timeline-minus-outline timeline-outline timeline-plus timeline-plus-outline timeline-question timeline-question-outline timeline-remove timeline-remove-outline timeline-text timeline-text-outline timer timer-10 timer-3 timer-alert timer-alert-outline timer-cancel timer-cancel-outline timer-check timer-check-outline timer-cog timer-cog-outline timer-edit timer-edit-outline timer-lock timer-lock-open timer-lock-open-outline timer-lock-outline timer-marker timer-marker-outline timer-minus timer-minus-outline timer-music timer-music-outline timer-off timer-off-outline timer-outline timer-pause timer-pause-outline timer-play timer-play-outline timer-plus timer-plus-outline timer-refresh timer-refresh-outline timer-remove timer-remove-outline timer-sand timer-sand-complete timer-sand-empty timer-sand-full timer-sand-paused timer-settings timer-settings-outline timer-star timer-star-outline timer-stop timer-stop-outline timer-sync timer-sync-outline timetable tire toaster toaster-off toaster-oven toggle-switch toggle-switch-off toggle-switch-off-outline toggle-switch-outline toggle-switch-variant toggle-switch-variant-off toilet toolbox toolbox-outline tools tooltip tooltip-account tooltip-cellphone tooltip-check tooltip-check-outline tooltip-edit tooltip-edit-outline tooltip-image tooltip-image-outline tooltip-minus tooltip-minus-outline tooltip-outline tooltip-plus tooltip-plus-outline tooltip-question tooltip-question-outline tooltip-remove tooltip-remove-outline tooltip-text tooltip-text-outline tooth tooth-outline toothbrush toothbrush-electric toothbrush-paste torch tortoise toslink touch-text-outline tournament tow-truck tower-beach tower-fire town-hall toy-brick toy-brick-marker toy-brick-marker-outline toy-brick-minus toy-brick-minus-outline toy-brick-outline toy-brick-plus toy-brick-plus-outline toy-brick-remove toy-brick-remove-outline toy-brick-search toy-brick-search-outline track-light track-light-off trackpad trackpad-lock tractor tractor-variant trademark traffic-cone traffic-light traffic-light-outline train train-bus train-car train-car-autorack train-car-box train-car-box-full train-car-box-open train-car-caboose train-car-centerbeam train-car-centerbeam-full train-car-container train-car-flatbed train-car-flatbed-car train-car-flatbed-tank train-car-gondola train-car-gondola-full train-car-hopper train-car-hopper-covered train-car-hopper-full train-car-intermodal train-car-passenger train-car-passenger-door train-car-passenger-door-open train-car-passenger-variant train-car-tank train-variant tram tram-side transcribe transcribe-close transfer transfer-down transfer-left transfer-right transfer-up transit-connection transit-connection-horizontal transit-connection-variant transit-detour transit-skip transit-transfer transition transition-masked translate translate-off translate-variant transmission-tower transmission-tower-export transmission-tower-import transmission-tower-off trash-can trash-can-outline tray tray-alert tray-arrow-down tray-arrow-up tray-full tray-minus tray-plus tray-remove treasure-chest treasure-chest-outline tree tree-outline trello trending-down trending-neutral trending-up triangle triangle-down triangle-down-outline triangle-outline triangle-small-down triangle-small-up triangle-wave triforce trophy trophy-award trophy-broken trophy-outline trophy-variant trophy-variant-outline truck truck-alert truck-alert-outline truck-cargo-container truck-check truck-check-outline truck-delivery truck-delivery-outline truck-fast truck-fast-outline truck-flatbed truck-minus truck-minus-outline truck-off-road truck-off-road-off truck-outline truck-plus truck-plus-outline truck-remove truck-remove-outline truck-snowflake truck-trailer trumpet tshirt-crew tshirt-crew-outline tshirt-v tshirt-v-outline tsunami tumble-dryer tumble-dryer-alert tumble-dryer-off tune tune-variant tune-vertical tune-vertical-variant tunnel tunnel-outline turbine turkey turnstile turnstile-outline turtle twitch twitter two-factor-authentication typewriter ubisoft ubuntu ufo ufo-outline ultra-high-definition umbraco umbrella umbrella-beach umbrella-beach-outline umbrella-closed umbrella-closed-outline umbrella-closed-variant umbrella-outline underwear-outline undo undo-variant unfold-less-horizontal unfold-less-vertical unfold-more-horizontal unfold-more-vertical ungroup unicode unicorn unicorn-variant unicycle unity unreal update upload upload-box upload-box-outline upload-circle upload-circle-outline upload-lock upload-lock-outline upload-multiple upload-multiple-outline upload-network upload-network-outline upload-off upload-off-outline upload-outline usb usb-c-port usb-flash-drive usb-flash-drive-outline usb-port vacuum vacuum-outline valve valve-closed valve-open van-passenger van-utility vanish vanish-quarter vanity-light variable variable-box vector-arrange-above vector-arrange-below vector-bezier vector-circle vector-circle-variant vector-combine vector-curve vector-difference vector-difference-ab vector-difference-ba vector-ellipse vector-intersection vector-line vector-link vector-point vector-point-edit vector-point-minus vector-point-plus vector-point-select vector-polygon vector-polygon-variant vector-polyline vector-polyline-edit vector-polyline-minus vector-polyline-plus vector-polyline-remove vector-radius vector-rectangle vector-selection vector-square vector-square-close vector-square-edit vector-square-minus vector-square-open vector-square-plus vector-square-remove vector-triangle vector-union vhs vibrate vibrate-off video video-2d video-3d video-3d-off video-3d-variant video-4k-box video-account video-box video-box-off video-check video-check-outline video-high-definition video-image video-input-antenna video-input-component video-input-hdmi video-input-scart video-input-svideo video-marker video-marker-outline video-minus video-minus-outline video-off video-off-outline video-outline video-plus video-plus-outline video-stabilization video-standard-definition video-switch video-switch-outline video-vintage video-wireless video-wireless-outline view-agenda view-agenda-outline view-array view-array-outline view-carousel view-carousel-outline view-column view-column-outline view-comfy view-comfy-outline view-compact view-compact-outline view-dashboard view-dashboard-edit view-dashboard-edit-outline view-dashboard-outline view-dashboard-variant view-dashboard-variant-outline view-day view-day-outline view-gallery view-gallery-outline view-grid view-grid-compact view-grid-outline view-grid-plus view-grid-plus-outline view-headline view-list view-list-outline view-module view-module-outline view-parallel view-parallel-outline view-quilt view-quilt-outline view-sequential view-sequential-outline view-split-horizontal view-split-vertical view-stream view-stream-outline view-week view-week-outline vimeo violin virtual-reality virus virus-off virus-off-outline virus-outline vlc voicemail volcano volcano-outline volleyball volume-equal volume-high volume-low volume-medium volume-minus volume-mute volume-off volume-plus volume-source volume-variant-off volume-vibrate vote vote-outline vpn vuejs vuetify walk wall wall-fire wall-sconce wall-sconce-flat wall-sconce-flat-outline wall-sconce-flat-variant wall-sconce-flat-variant-outline wall-sconce-outline wall-sconce-round wall-sconce-round-outline wall-sconce-round-variant wall-sconce-round-variant-outline wallet wallet-bifold wallet-bifold-outline wallet-giftcard wallet-membership wallet-outline wallet-plus wallet-plus-outline wallet-travel wallpaper wan wardrobe wardrobe-outline warehouse washing-machine washing-machine-alert washing-machine-off watch watch-export watch-export-variant watch-import watch-import-variant watch-variant watch-vibrate watch-vibrate-off water water-alert water-alert-outline water-boiler water-boiler-alert water-boiler-auto water-boiler-off water-check water-check-outline water-circle water-minus water-minus-outline water-off water-off-outline water-opacity water-outline water-percent water-percent-alert water-plus water-plus-outline water-polo water-pump water-pump-off water-remove water-remove-outline water-sync water-thermometer water-thermometer-outline water-well water-well-outline waterfall watering-can watering-can-outline watermark wave wave-arrow-down wave-arrow-up wave-undercurrent waveform waves waves-arrow-left waves-arrow-right waves-arrow-up waze weather-cloudy weather-cloudy-alert weather-cloudy-arrow-right weather-cloudy-clock weather-dust weather-fog weather-hail weather-hazy weather-hurricane weather-hurricane-outline weather-lightning weather-lightning-rainy weather-moonset weather-moonset-down weather-moonset-up weather-night weather-night-partly-cloudy weather-partly-cloudy weather-partly-lightning weather-partly-rainy weather-partly-snowy weather-partly-snowy-rainy weather-pouring weather-rainy weather-snowy weather-snowy-heavy weather-snowy-rainy weather-sunny weather-sunny-alert weather-sunny-off weather-sunset weather-sunset-down weather-sunset-up weather-tornado weather-windy weather-windy-variant web web-box web-cancel web-check web-clock web-minus web-off web-plus web-refresh web-remove web-sync webcam webcam-off webhook webpack webrtc wechat weight weight-gram weight-kilogram weight-lifter weight-pound whatsapp wheel-barrow wheelchair wheelchair-accessibility whistle whistle-outline white-balance-auto white-balance-incandescent white-balance-iridescent white-balance-sunny widgets widgets-outline wifi wifi-alert wifi-arrow-down wifi-arrow-left wifi-arrow-left-right wifi-arrow-right wifi-arrow-up wifi-arrow-up-down wifi-cancel wifi-check wifi-cog wifi-lock wifi-lock-open wifi-marker wifi-minus wifi-off wifi-plus wifi-refresh wifi-remove wifi-settings wifi-star wifi-strength-1 wifi-strength-1-alert wifi-strength-1-lock wifi-strength-1-lock-open wifi-strength-2 wifi-strength-2-alert wifi-strength-2-lock wifi-strength-2-lock-open wifi-strength-3 wifi-strength-3-alert wifi-strength-3-lock wifi-strength-3-lock-open wifi-strength-4 wifi-strength-4-alert wifi-strength-4-lock wifi-strength-4-lock-open wifi-strength-alert-outline wifi-strength-lock-open-outline wifi-strength-lock-outline wifi-strength-off wifi-strength-off-outline wifi-strength-outline wifi-sync wikipedia wind-power wind-power-outline wind-turbine wind-turbine-alert wind-turbine-check window-close window-closed window-closed-variant window-maximize window-minimize window-open window-open-variant window-restore window-shutter window-shutter-alert window-shutter-auto window-shutter-cog window-shutter-open window-shutter-settings windsock wiper wiper-wash wiper-wash-alert wizard-hat wordpress wrap wrap-disabled wrench wrench-check wrench-check-outline wrench-clock wrench-clock-outline wrench-cog wrench-cog-outline wrench-outline xamarin xml xmpp yahoo yeast yin-yang yoga youtube youtube-gaming youtube-studio youtube-subscription youtube-tv yurt z-wave zend zigbee zip-box zip-box-outline zip-disk zodiac-aquarius zodiac-aries zodiac-cancer zodiac-capricorn zodiac-gemini zodiac-leo zodiac-libra zodiac-pisces zodiac-sagittarius zodiac-scorpio zodiac-taurus zodiac-virgo".split(" ").map(t=>"mdi:"+t)),this.requestUpdate()}_closeCustomIconModal(){this._customIconModalOpen=!1,this._customIconSearch="",this._customIconPreview="",this._customIconLabel="",this._iconDisplayLimit=200,this.requestUpdate()}_saveCustomIcon(){let t=String(this._customIconPreview||"").trim(),e=String(this._customIconLabel||"").trim();if(!t||!e)return;let i=Array.isArray(this._customIcons)?[...this._customIcons]:[];if(!i.find(a=>a.id===t)){i.push({id:t,label:e});try{localStorage.setItem("c4k_custom_icons",JSON.stringify(i))}catch{}this._customIcons=i}this._pickIcon(t),this._closeCustomIconModal()}_deleteCustomIcon(t){let i=(Array.isArray(this._customIcons)?[...this._customIcons]:[]).filter(s=>s.id!==t);try{localStorage.setItem("c4k_custom_icons",JSON.stringify(i))}catch{}this._customIcons=i,this.requestUpdate()}async _waitForNewTemplateTask(t,e,i=6e3){let s=Date.now(),a=o=>new Promise(c=>setTimeout(c,o)),r=String(e?.title||"").trim(),p=Number(e?.points||0);for(;Date.now()-s<(Number(i)||6e3);){try{let o=(this._store.allTasks||[]).filter(c=>!c.assigned_to&&!t?.has?.(c.id)).filter(c=>String(c.title||"").trim()===r&&Number(c.points||0)===p);if(o.length)return o.sort((c,u)=>{try{return new Date(u.created).getTime()-new Date(c.created).getTime()}catch{return 0}}),o[0]}catch{}await a(150)}return null}async _createTask(){let t=this._pointsEnabled();if(this._touchedTitle=!0,this._touchedPoints=t,this._hasFormErrors)return;let e=new Set((this._store.allTasks||[]).filter($=>!$.assigned_to).map($=>$.id)),i=this._weeklyEnabled?"weekly":this._monthlyEnabled?"monthly":this._repeatEnabled?"repeat":"",s=i==="repeat",a=t?!!this._taskEarlyBonusEnabled:!1,r=a&&(i==="repeat"||i==="weekly"||i==="monthly")?void 0:String(this._taskDue||"").trim()||void 0,p=s?Array.from(this._repeatDays||[]):[],o=s?Array.from(this._repeatAssign||[]):[],c=Array.from(this._taskCategories||[]),u=i==="weekly"||i==="monthly"?!1:!!this._persistUntilDone,l=!!this._quickComplete,d=!!this._skipApproval,m=!!this._fastestWins,g=t?!!this._taskBonusEnabled:!1,_=g?String(this._taskBonusTitle||"").trim():"",f=g?Number(this._taskBonusPoints||0):0,y=i?Array.from(this._repeatAssign||[]):[],D=new Date,N=D.getDay(),O=[6,0,1,2,3,4,5][N],j=i==="weekly"?O===0:i==="monthly"?D.getDate()===1:s?p.includes(O)||p.includes(["mon","tue","wed","thu","fri","sat","sun"][O]):!1,A={title:this._taskTitle,points:t?Number(this._taskPoints):0,description:this._taskDesc||"",due:r,schedule_mode:i||void 0,time_bonus_enabled:t?!!this._taskTimeBonusEnabled:!1,time_bonus_before:t&&this._taskTimeBonusEnabled?String(this._taskTimeBonusBefore||"").trim():"",time_bonus_points:t&&this._taskTimeBonusEnabled?Number(this._taskTimeBonusPoints||0):0,early_bonus_enabled:a,early_bonus_days:a&&this._taskEarlyBonusDays!==""&&this._taskEarlyBonusDays!=null?Number(this._taskEarlyBonusDays):void 0,early_bonus_points:a&&this._taskEarlyBonusPoints!==""&&this._taskEarlyBonusPoints!=null?Number(this._taskEarlyBonusPoints):void 0,bonus_enabled:g,icon:this._taskIcon||void 0,multiple_per_day:!!this._multiplePerDay,quick_complete:l,skip_approval:d,fastest_wins:m,bonus_title:_,bonus_points:Number.isFinite(f)?f:0,repeat_days:p,repeat_child_id:i&&(y[0]||"")||void 0,repeat_child_ids:i&&y.length?y:void 0,persist_until_completed:u,penalty_points:t&&this._penaltyEnabled?Number(this._penaltyAmount??1):0,due_time:this._taskDueTime||"",penalty_time:this._penaltyTime||"",mark_overdue:u?!!this._markOverdue:!0,categories:c};if(await this.hass.callService("chores4kids","add_task",A),j&&y.length){let $=await this._waitForNewTemplateTask(e,{title:this._taskTitle,points:t?Number(this._taskPoints):0});if($?.id)for(let v of y)v&&await this.hass.callService("chores4kids","assign_task",{task_id:$.id,child_id:v})}try{if(this._collapsed?.tasks){let $={...this._collapsed||{}};$.tasks=!1,this._collapsed=$,localStorage.setItem("c4k_admin_collapsed",JSON.stringify($))}}catch{}this._taskTitle=this._taskPoints=this._taskDesc=this._taskIcon="",this._taskDue="",this._taskDueTime="",this._penaltyEnabled=!1,this._penaltyAmount=1,this._penaltyTime="",this._taskTimeBonusEnabled=!1,this._taskTimeBonusBefore="",this._taskTimeBonusPoints="",this._taskEarlyBonusDays="",this._taskEarlyBonusPoints="",this._taskEarlyBonusEnabled=!1,this._taskBonusEnabled=!1,this._taskBonusTitle="",this._taskBonusPoints="",this._repeatDays=new Set,this._repeatAssign=new Set,this._repeatEnabled=!1,this._weeklyEnabled=!1,this._monthlyEnabled=!1,this._taskCategories=new Set,this._markOverdue=!0,this._persistUntilDone=!1,this._multiplePerDay=!1,this._quickComplete=!1,this._skipApproval=!1,this._fastestWins=!1,this._touchedTitle=!1,this._touchedPoints=!1}async _setStatus(t,e){try{await this.hass.callService("chores4kids","set_task_status",{task_id:t,status:e})}finally{e!=="awaiting_approval"&&this._clearCompleted(t),e==="assigned"&&this._setBonusVisualState(t,"assigned")}}_canManualReassign(t){try{if(!(t?.skip_approval&&t?.persist_until_completed&&t?.status==="approved")||!(this._isTaskOverdue(t)||this._isFromBeforeToday(t))||!this._autoAssignActive(t)||!this._isScheduledToday(t))return!1;let i=Array.isArray(t.repeat_child_ids)&&t.repeat_child_ids.length?t.repeat_child_ids:t.repeat_child_id?[t.repeat_child_id]:[t.assigned_to];for(let s of i){if(!s)continue;if(!(this._store.allTasks||[]).some(r=>!!r.assigned_to&&r.assigned_to===s&&r.title===t.title&&Number(r.points)===Number(t.points)&&!r.carried_over&&["assigned","in_progress","awaiting_approval"].includes(r.status)))return!0}return!1}catch{return!1}}async _manualReassign(t){try{if(!t||!(this._isTaskOverdue(t)||this._isFromBeforeToday(t))||!this._autoAssignActive(t)||!this._isScheduledToday(t))return;let i=Array.isArray(t.repeat_child_ids)&&t.repeat_child_ids.length?t.repeat_child_ids:t.repeat_child_id?[t.repeat_child_id]:[t.assigned_to],s=(this._store.allTasks||[]).find(a=>!a.assigned_to&&a.title===t.title&&Number(a.points)===Number(t.points));for(let a of i)try{if(!a||(this._store.allTasks||[]).some(p=>!!p.assigned_to&&p.assigned_to===a&&p.title===t.title&&Number(p.points)===Number(t.points)&&!p.carried_over&&["assigned","in_progress","awaiting_approval"].includes(p.status)))continue;if(s?.id)await this.hass.callService("chores4kids","assign_task",{task_id:s.id,child_id:a}),this._setBonusVisualState(s.id,"assigned");else{let p=String(t?.schedule_mode||"").toLowerCase();await this.hass.callService("chores4kids","add_task",{title:t.title,points:Number(t.points),description:t.description||"",icon:t.icon||void 0,multiple_per_day:!!t.multiple_per_day,quick_complete:!!t.quick_complete,skip_approval:!!t.skip_approval,persist_until_completed:!!t.persist_until_completed,categories:Array.isArray(t.categories)?t.categories:[],schedule_mode:p==="weekly"||p==="monthly"||p==="repeat"?p:void 0,repeat_days:p==="repeat"||!p?Array.isArray(t.repeat_days)?t.repeat_days:[]:[],repeat_child_id:t.repeat_child_id||void 0,child_id:a})}}catch(r){console.error("Failed to manually reassign task:",r)}try{s?.id&&this._ensureAssignedHasCategories(s,i)}catch{}this.requestUpdate()}catch(e){console.error("Failed to manually reassign task:",e)}}async _approve(t,e=!1){if(!t?.id||!e&&this._isTaskBusy(t.id))return!1;e||this._setTaskBusy(t.id,!0);try{return this._isTaskOverdue(t)&&this._autoAssignActive(t)&&this._isScheduledToday(t)?(this._reassignTask=t,this.requestUpdate(),!1):(await this.hass.callService("chores4kids","approve_task",{task_id:t.id}),!0)}catch(i){console.error("Failed to approve task:",i);let s=String(i?.message||i||"Unknown error");return alert(`Kunne ikke godkende opgaven: ${s}`),!1}finally{e||this._setTaskBusy(t.id,!1)}}async _assignTask(t,e){if(!e){alert(this._t("alert.choose_child_first"));return}await this.hass.callService("chores4kids","assign_task",{task_id:t.id,child_id:e}),this._setBonusVisualState(t.id,"assigned"),t._assignTo="",this.requestUpdate()}async _assignTaskMulti(t,e){let i=Array.isArray(e)?e.filter(Boolean):[];if(!i.length){alert(this._t("alert.choose_child_first"));return}for(let s of i)try{await this.hass.callService("chores4kids","assign_task",{task_id:t.id,child_id:s}),this._setBonusVisualState(t.id,"assigned")}catch{}try{this._ensureAssignedHasCategories(t,i)}catch{}try{let s=this.shadowRoot.querySelector(`tr[data-task="${t.id}"]`);s?.querySelectorAll(".c4k-assign")?.forEach(r=>r.checked=!1);let a=s?.querySelector(".multi-dd-value");a&&(a.textContent=this._t("select.assign_child")),a?.classList.add("placeholder")}catch{}this._openAssignMenuFor=null,this.requestUpdate()}_ensureAssignedHasCategories(t,e){let i=Array.isArray(t?.categories)?t.categories:[];i.length&&setTimeout(()=>{try{let s=(this._store.allTasks||[]).filter(r=>!!r.assigned_to&&r.title===t.title&&Number(r.points)===Number(t.points)),a=Date.now();for(let r of e){let p=s.filter(u=>u.assigned_to===r),o=null,c=-1/0;for(let u of p){let l=0;try{l=new Date(u.created).getTime()}catch{}l>c&&(c=l,o=u)}o&&(!Array.isArray(o.categories)||o.categories.length===0)&&this.hass.callService("chores4kids","update_task",{task_id:o.id,categories:i})}}catch{}},500)}async _addCategory(){let t=String(this._newCategoryName||"").trim();if(!t)return;let e=this._normalizeHexColor(this._newCategoryColor),i=e?{name:t,color:e}:{name:t};await this.hass.callService("chores4kids","add_category",i),this._newCategoryName="",this._newCategoryColor=""}async _setCategoryColor(t,e){try{if(!t?.id)return;let i=String(e?.target?.value||"").trim();await this.hass.callService("chores4kids","set_category_color",{category_id:t.id,color:i})}catch(i){console.error("Failed to set category color:",i)}}async _promptRenameCategory(t){let e=prompt(this._t("btn.rename"),t.name);!e||e===t.name||await this.hass.callService("chores4kids","rename_category",{category_id:t.id,new_name:e})}async _deleteCategory(t){confirm(this._t("btn.delete")+"?")&&await this.hass.callService("chores4kids","delete_category",{category_id:t.id})}_updateAssignSummary(t,e){try{let i=this.shadowRoot.querySelector(`tr[data-task="${t}"]`),s=Array.from(i?.querySelectorAll(".c4k-assign:checked")||[]),a=s.map(o=>o.value),r=s.map(o=>o.parentElement?.querySelector("span")?.textContent?.trim()).filter(Boolean);e&&(e._assignToMulti=a);let p=i?.querySelector(".multi-dd-value");p&&(r.length===0?(p.textContent=this._t("select.assign_child"),p.classList.add("placeholder")):(p.textContent=r.slice(0,2).join(", ")+(r.length>2?` +${r.length-2}`:""),p.classList.remove("placeholder")))}catch{}}_editTask(t){this._editingTask=t,this._taskDueTime=t.due_time||"",this._taskTitle=t.title,this._taskPoints=String(t.points),this._penaltyEnabled=Number(t.penalty_points)>0,this._penaltyAmount=t.penalty_points||1,this._penaltyTime=t.penalty_time||"",this._taskDesc=t.description||"",this._taskIcon=t.icon||"",this._taskDue=(()=>{let p=this._parseDueToDate(t?.due);return p?this._formatDateISO(p):""})(),this._taskEarlyBonusDays=t?.early_bonus_days!=null&&Number(t.early_bonus_days)>0?String(t.early_bonus_days):"",this._taskEarlyBonusPoints=t?.early_bonus_points!=null&&Number(t.early_bonus_points)>0?String(t.early_bonus_points):"",this._taskEarlyBonusEnabled=(()=>{let p=t?.early_bonus_enabled;return p===!0?!0:p===!1?!1:Number(t?.early_bonus_days||0)>0&&Number(t?.early_bonus_points||0)>0})(),this._taskBonusTitle=String(t?.bonus_title||""),this._taskBonusPoints=t?.bonus_points!=null&&Number(t.bonus_points)>0?String(t.bonus_points):"",this._taskBonusEnabled=!!(String(t?.bonus_title||"").trim()||Number(t?.bonus_points||0)>0);let e=String(t?.schedule_mode||"").toLowerCase();this._weeklyEnabled=e==="weekly",this._monthlyEnabled=e==="monthly";let i=["mon","tue","wed","thu","fri","sat","sun"],s=Array.isArray(t.repeat_days)?t.repeat_days.map(p=>typeof p=="number"?i[p]:String(p).slice(0,3)):[];this._repeatDays=new Set(s);let a=Array.isArray(t.repeat_child_ids)?t.repeat_child_ids:t.repeat_child_id?[t.repeat_child_id]:[];this._repeatAssign=new Set(a),this._repeatEnabled=!this._weeklyEnabled&&!this._monthlyEnabled&&!!(s.length||a.length||e==="repeat"),this._persistUntilDone=!!t.persist_until_completed,this._markOverdue=t.mark_overdue!==!1,this._multiplePerDay=!!t.multiple_per_day,this._quickComplete=!!t.quick_complete,this._skipApproval=!!t.skip_approval,this._fastestWins=!!t.fastest_wins;let r=Array.isArray(t.categories)?t.categories:[];this._taskCategories=new Set(r),(this._weeklyEnabled||this._monthlyEnabled)&&(this._persistUntilDone=!1,this._markOverdue=!0),this._taskTimeBonusEnabled=!!(t?.time_bonus_enabled||String(t?.time_bonus_before||"").trim()&&Number(t?.time_bonus_points||0)>0),this._taskTimeBonusBefore=String(t?.time_bonus_before||""),this._taskTimeBonusPoints=t?.time_bonus_points!=null&&Number(t.time_bonus_points)>0?String(t.time_bonus_points):""}async _saveEditedTask(){if(!this._editingTask)return;let t=this._pointsEnabled();if(this._touchedTitle=!0,this._touchedPoints=t,this.requestUpdate(),!this._hasFormErrors)try{let e=t?!!this._taskEarlyBonusEnabled:!1,i=this._weeklyEnabled?"weekly":this._monthlyEnabled?"monthly":this._repeatEnabled?"repeat":"",s=i==="repeat",a=e&&(i==="repeat"||i==="weekly"||i==="monthly")?void 0:String(this._taskDue||"").trim()||void 0,r=i?Array.from(this._repeatAssign||[]):[],p=s?Array.from(this._repeatDays||[]):[];if(await this.hass.callService("chores4kids","set_task_repeat",{task_id:this._editingTask.id,repeat_days:p,repeat_child_id:r[0]||void 0,repeat_child_ids:r,schedule_mode:i||void 0}),await this.hass.callService("chores4kids","update_task",{task_id:this._editingTask.id,title:this._taskTitle,points:t?Number(this._taskPoints):0,description:this._taskDesc||"",due:a??(this._editingTask?.due?"":void 0),time_bonus_enabled:t?!!this._taskTimeBonusEnabled:!1,time_bonus_before:t&&this._taskTimeBonusEnabled?String(this._taskTimeBonusBefore||"").trim():"",time_bonus_points:t&&this._taskTimeBonusEnabled?Number(this._taskTimeBonusPoints||0):0,early_bonus_enabled:e,early_bonus_days:e&&this._taskEarlyBonusDays!==""&&this._taskEarlyBonusDays!=null?Number(this._taskEarlyBonusDays):void 0,early_bonus_points:e&&this._taskEarlyBonusPoints!==""&&this._taskEarlyBonusPoints!=null?Number(this._taskEarlyBonusPoints):void 0,bonus_enabled:t&&this._taskBonusEnabled,bonus_title:t&&this._taskBonusEnabled?String(this._taskBonusTitle||"").trim():"",bonus_points:t&&this._taskBonusEnabled?Number(this._taskBonusPoints||0):0,icon:this._taskIcon||"",persist_until_completed:i==="weekly"||i==="monthly"?!1:!!this._persistUntilDone,penalty_points:t&&this._penaltyEnabled?Number(this._penaltyAmount??1):0,due_time:this._taskDueTime||"",penalty_time:this._penaltyTime||"",mark_overdue:!(i==="weekly"||i==="monthly")&&this._persistUntilDone?!!this._markOverdue:!0,multiple_per_day:!!this._multiplePerDay,quick_complete:!!this._quickComplete,skip_approval:!!this._skipApproval,fastest_wins:!!this._fastestWins,categories:Array.from(this._taskCategories||[])}),!this._editingTask.assigned_to&&i&&r.length>0){let o=new Date,c=o.getDay(),l=[6,0,1,2,3,4,5][c];if(i==="weekly"?l===0:i==="monthly"?o.getDate()===1:s?p.includes(l)||p.includes(["mon","tue","wed","thu","fri","sat","sun"][l]):!1)for(let m of r)try{if(!m||(this._store.allTasks||[]).some(_=>!!_.assigned_to&&_.assigned_to===m&&String(_.repeat_template_id||"")===String(this._editingTask.id||"")&&["assigned","in_progress","awaiting_approval"].includes(String(_.status||""))&&!this._isFromBeforeToday(_)))continue;await this.hass.callService("chores4kids","assign_task",{task_id:this._editingTask.id,child_id:m}),this._setBonusVisualState(this._editingTask.id,"assigned")}catch{}}}finally{this._editingTask=null,this._taskTitle=this._taskPoints=this._taskDesc=this._taskIcon="",this._taskDue="",this._taskDueTime="",this._penaltyEnabled=!1,this._penaltyAmount=1,this._penaltyTime="",this._taskTimeBonusEnabled=!1,this._taskTimeBonusBefore="",this._taskTimeBonusPoints="",this._taskEarlyBonusDays="",this._taskEarlyBonusPoints="",this._taskEarlyBonusEnabled=!1,this._taskBonusEnabled=!1,this._taskBonusTitle="",this._taskBonusPoints="",this._repeatDays=new Set,this._repeatAssign=new Set,this._repeatEnabled=!1,this._weeklyEnabled=!1,this._monthlyEnabled=!1,this._taskCategories=new Set,this._markOverdue=!0,this._multiplePerDay=!1,this._quickComplete=!1,this._skipApproval=!1,this._touchedTitle=!1,this._touchedPoints=!1}}async _deleteTask(t){confirm(this._t("confirm.delete_task"))&&(await this.hass.callService("chores4kids","delete_task",{task_id:t}),this._clearCompleted(t),this._setBonusVisualState(t,"assigned"))}async _addShopItem(){if(!this._pointsEnabled())return;let t=String(this._shopTitle||"").trim(),e=Number(this._shopPrice||0);if(!(!t||!Number.isFinite(e))){await this.hass.callService("chores4kids","add_shop_item",{title:t,price:e,child_ids:this._shopAudienceDrafts?.new||[],requires_delivery:!!this._shopRequiresDelivery,image:this._shopImage||void 0}),this._clearShopAudience("new"),this._shopRequiresDelivery=!1,this._shopTitle=this._shopPrice=this._shopImage="";try{let i=this.shadowRoot.getElementById("c4k-shop-file");i&&(i.value="")}catch{}}}async _deleteShopItem(t){this._pointsEnabled()&&t&&await this.hass.callService("chores4kids","delete_shop_item",{item_id:t})}async _clearShopHistory(){if(this._pointsEnabled()&&confirm(this._t("confirm.clear_history")))try{await this.hass.callService("chores4kids","clear_shop_history",{})}catch{try{await this.hass.callService("chores4kids","reset_shop_history",{})}catch{alert("Service chores4kids.clear_shop_history not available")}}}async _onPickImage(t){if(!this._pointsEnabled())return;let e=t.target?.files?.[0];if(!e)return;let i=new FileReader;i.onload=async()=>{try{let s=i.result,a=(e.name.split(".").pop()||"jpg").toLowerCase(),r=`c4k_${Date.now()}_${Math.random().toString(36).slice(2)}.${a}`;await this.hass.callService("chores4kids","upload_shop_image",{filename:r,data:String(s)}),this._shopImage=`/local/chores4kids/${r}`}finally{this.requestUpdate()}},i.readAsDataURL(e)}_startEditItem(t){this._editItem={id:t.id,title:t.title,price:t.price,image:t.image||"",active:t.active!==!1},this.requestUpdate()}async _onPickEditImage(t){if(!this._pointsEnabled())return;let e=t.target?.files?.[0];if(!e)return;let i=new FileReader;i.onload=async()=>{let s=i.result,a=(e.name.split(".").pop()||"jpg").toLowerCase(),r=`c4k_${Date.now()}_${Math.random().toString(36).slice(2)}.${a}`;await this.hass.callService("chores4kids","upload_shop_image",{filename:r,data:String(s)}),this._editItem={...this._editItem,image:`/local/chores4kids/${r}`},this.requestUpdate()},i.readAsDataURL(e)}async _saveEditItem(){if(!this._pointsEnabled())return;let t=this._editItem;t&&(await this.hass.callService("chores4kids","update_shop_item",{item_id:t.id,title:String(t.title||"").trim(),price:Number(t.price||0),image:t.image||"",active:!!t.active}),this._editItem=null,this.requestUpdate())}async _toggleItemActive(t,e){if(!this._pointsEnabled())return;let i=!!e.target.checked;await this.hass.callService("chores4kids","update_shop_item",{item_id:t.id,active:i})}_openAdvanced(t){if(!this._pointsEnabled())return;try{let s=Object.values(this.hass.states).find(a=>a?.entity_id?.includes("chores4kids_shop"))?.attributes?.items?.find?.(a=>a.id===t.id);this._advItem=s||t}catch{this._advItem=t}let e=Array.isArray(this._advItem.actions)?JSON.parse(JSON.stringify(this._advItem.actions)):[];this._advSteps=e.map(i=>{let s=String(i?.type||"").toLowerCase();if(s==="service"){let a=i.entity_id||i.data?.entity_id||"",r=i.service||i.op;return{type:"entity_service",entity_id:a,op:r}}return s==="entity_service"?{type:"entity_service",entity_id:i.entity_id||"",op:i.op||i.service}:s==="delay"?{type:"delay",seconds:Number(i.seconds||i.secs||0)}:i}),this.requestUpdate()}_defaultOpFor(t){let e=(t||"").split(".")[0];return this._opsForDomain(e)[0]||"turn_on"}_opsForDomain(t){switch(t){case"switch":case"light":case"fan":case"input_boolean":return["turn_on","turn_off","toggle"];case"media_player":return["turn_on","turn_off","media_play","media_pause","toggle"];case"lock":return["lock","unlock"];default:return["turn_on","turn_off"]}}async _saveAdvanced(){if(!this._pointsEnabled()||!this._advItem)return;let t=(this._advSteps||[]).map(e=>e.type==="delay"?{type:"delay",seconds:Number(e.seconds||0)}:{type:"entity_service",entity_id:e.entity_id,op:e.op||"turn_on"});await this.hass.callService("chores4kids","update_shop_item",{item_id:this._advItem.id,actions:t}),this._advItem=null,this._advSteps=[],this.requestUpdate()}async _completeNow(t){return this._changeChildTaskStatus(t,"awaiting_approval")}async _advance(t){return this._changeChildTaskStatus(t,t?.status==="assigned"?"in_progress":"awaiting_approval")}async _changeChildTaskStatus(t,e){if(!(!t?.id||this._isTaskBusy(t.id))){this._setTaskBusy(t.id,!0);try{let i={task_id:t.id,status:e};e==="awaiting_approval"&&(i.completed_ts=Date.now()),await this.hass.callService("chores4kids","set_task_status",i),e==="awaiting_approval"&&(this._recordCompleted(t.id,i.completed_ts),this._playCompletionSound(),this._confettiEnabled()&&this._triggerConfetti(),this.requestUpdate())}finally{this._setTaskBusy(t.id,!1)}}}_triggerConfetti(){if(!this._confettiEnabled())return;console.log("_triggerConfetti called!");let t=document.createElement("div");t.style.cssText="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99999; overflow: hidden;";let e=document.createElement("style");e.textContent=`
 			@keyframes confetti-fall {
 				0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
 				100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 			}
-		`;
-		document.head.appendChild(style);
-		
-		for(let i = 0; i < 1000; i++) {
-			const confetti = document.createElement('div');
-			const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#ffd3b6', '#dcedc1', '#a8dadc', '#f1c0e8', '#cfbaf0'];
-			const color = colors[Math.floor(Math.random() * colors.length)];
-			const left = Math.random() * 100;
-			const delay = Math.random() * 3;
-			const duration = 2.5 + Math.random() * 1;
-			
-			confetti.style.cssText = `
+		`,document.head.appendChild(e);for(let i=0;i<1e3;i++){let s=document.createElement("div"),a=["#ff6b6b","#4ecdc4","#ffe66d","#a8e6cf","#ff8b94","#ffd3b6","#dcedc1","#a8dadc","#f1c0e8","#cfbaf0"],r=a[Math.floor(Math.random()*a.length)],p=Math.random()*100,o=Math.random()*3,c=2.5+Math.random()*1;s.style.cssText=`
 				position: absolute;
 				width: 10px;
 				height: 10px;
-				background: ${color};
-				left: ${left}%;
+				background: ${r};
+				left: ${p}%;
 				top: -10px;
 				opacity: 1;
-				animation: confetti-fall ${duration}s linear ${delay}s forwards;
-			`;
-			container.appendChild(confetti);
-		}
-		document.body.appendChild(container);
-		console.log('Confetti container appended with', container.children.length, 'pieces');
-		setTimeout(() => {
-			container.remove();
-			style.remove();
-		}, 6000);
-	}
-
-	async _playCompletionSound(){
-		try{
-			const candidates = [];
-			if (this.config?.completion_sound) candidates.push(this.config.completion_sound);
-			candidates.push('/local/chores4kids/completion.mp3','/local/chores4kids/completion.wav','/local/chores4kids/completion.ogg');
-			for (const url of candidates){
-				try{
-					// Cache-bust so deletions take effect immediately
-					const sep = url.includes('?') ? '&' : '?';
-					const resolvedUrl = this._resolveUrl(url);
-					const audio = new Audio(`${resolvedUrl}${sep}_=${Date.now()}`);
-					audio.volume = 0.7;
-					await audio.play();
-					return; // success
-				}catch(err){ /* try next */ }
-			}
-			console.log('No playable completion sound found');
-		}catch(e){ console.log('Sound playback error:', e); }
-	}
-	async _buy(item, childId){
-		if(!this._pointsEnabled()) return;
-		if(!item?.id || !childId) return;
-		if(this._buyingItemId===item.id) return;
-		const cooldownMs = 5000;
-		this._buyingItemId = item.id;
-		this._buySuccessItemId = null;
-		this.requestUpdate();
-		let purchaseOk = false;
-		try{
-			await this.hass.callService('chores4kids','buy_shop_item',{ child_id: childId, item_id: item.id });
-			purchaseOk = true;
-			this._buySuccessItemId = item.id;
-			this.requestUpdate();
-			setTimeout(()=>{
-				if(this._buyingItemId===item.id){
-					this._buyingItemId = null;
-					this.requestUpdate();
-				}
-			}, cooldownMs);
-			setTimeout(()=>{
-				if(this._buySuccessItemId===item.id){
-					this._buySuccessItemId = null;
-					this.requestUpdate();
-				}
-			}, cooldownMs);
-		}finally{
-			if(!purchaseOk){
-				this._buyingItemId = null;
-				this._buySuccessItemId = null;
-				this.requestUpdate();
-			}
-		}
-	}
-	
-	// DEBUG: Mark task as overdue for testing
-	async _debugMarkOverdue(task) {
-		if(!task?.id) return;
-		try {
-			// Call backend service to mark as carried over
-			await this.hass.callService('chores4kids','debug_mark_overdue',{ task_id: task.id });
-		} catch(e) {
-			console.error('Debug mark overdue failed:', e);
-		}
-	}
-}
-
-try{ customElements.define('chores4kids-card', Chores4KidsDevCard); }catch(e){ /* ignore */ }
-// Simple GUI editor
-class Chores4KidsDevCardEditor extends LitElement{
-	static get properties(){ return { hass: {}, _config: {} }; }
-	setConfig(config){
-		this._config = { mode:'admin', ...config };
-		this.requestUpdate();
-	}
-	updated(changedProps){
-		try{
-			if (changedProps.has('hass') || changedProps.has('_config')){
-				this._ensureDetectedCompletionSound();
-			}
-		}catch{ /* ignore */ }
-	}
-	_setAdminSection(key, enabled){
-		const keys = Object.keys(C4K_ADMIN_SECTIONS);
-		const current = this._config.admin_sections;
-		const sections = keys.filter(k => k === key ? enabled : !Array.isArray(current) || current.includes(k));
-		const config = {...this._config, admin_sections: sections};
-		if (sections.length === keys.length) delete config.admin_sections;
-		this._config = config;
-		this._emit();
-	}
-	_getGlobalConfettiEnabled(){
-		try{
-			const a = this._getUiSensorAttrs?.() || {};
-			if (typeof a.confetti_enabled === 'boolean') return a.confetti_enabled;
-		}catch{ /* ignore */ }
-		// Default ON
-		return true;
-	}
-	async _saveGlobalConfettiEnabled(enabled){
-		try{
-			await this._saveGlobalUiSettings({ confetti_enabled: !!enabled });
-		}catch(e){
-			console.warn('Failed to save confetti_enabled', e);
-		}
-	}
-	_getGlobalEnablePoints(){
-		try{
-			const states = this.hass?.states || {};
-			let s = states['sensor.chores4kids_ui'];
-			if (!s){
-				s = Object.values(states).find(st=>{
-					try{
-						if (!st?.entity_id?.startsWith('sensor.')) return false;
-						const a = st.attributes || {};
-						return ('enable_points' in a) || ('start_task_bg' in a) || ('complete_task_bg' in a) || ('kid_points_bg' in a)
-							|| ('task_done_bg' in a) || ('task_done_text' in a)
-							|| ('start_task_text' in a) || ('complete_task_text' in a) || ('kid_points_text' in a)
-							|| ('task_points_bg' in a) || ('task_points_text' in a);
-					}catch{ return false; }
-				});
-			}
-			const a = s?.attributes || {};
-			if (typeof a.enable_points === 'boolean') return a.enable_points;
-		}catch{ /* ignore */ }
-		return true;
-	}
-	async _saveGlobalEnablePoints(enabled){
-		try{
-			if (!this.hass) return;
-			await this.hass.callService('chores4kids','set_ui_colors',{ enable_points: !!enabled });
-		}catch(e){
-			console.warn('Failed to save enable_points', e);
-		}
-	}
-	_saveGlobalColors(cfg){
-		// Persist globally in HA backend so it syncs across users/devices.
-		try{
-			if (!this.hass) return;
-			const payload = {
-				start_task_bg: cfg?.start_task_bg || '',
-				complete_task_bg: cfg?.complete_task_bg || '',
-				kid_points_bg: cfg?.kid_points_bg || '',
-				task_done_bg: cfg?.task_done_bg || '',
-				start_task_text: cfg?.start_task_text || '',
-				complete_task_text: cfg?.complete_task_text || '',
-				kid_points_text: cfg?.kid_points_text || '',
-				task_done_text: cfg?.task_done_text || '',
-				task_points_bg: cfg?.task_points_bg || '',
-				task_points_text: cfg?.task_points_text || '',
-			};
-			// debounce service calls while typing
-			this._pendingUiColors = payload;
-			if (this._uiColorSaveTimer) clearTimeout(this._uiColorSaveTimer);
-			this._uiColorSaveTimer = setTimeout(async ()=>{
-				try{
-					await this.hass.callService('chores4kids','set_ui_colors', this._pendingUiColors || payload);
-				}catch(e){
-					console.warn('Failed to save UI colors', e);
-				}
-			}, 250);
-		}catch{ /* ignore */ }
-	}
-	_t(key, vars){ return c4kLocalize(key, c4kCardLocale(this._config?.language, this.hass), vars, c4kSettings(this.hass).points_label); }
-	_emit(){ this.dispatchEvent(new CustomEvent('config-changed',{ detail:{ config: this._config }, bubbles:true, composed:true })); }
-	async _uploadTaskIcon(event) {
-		const input = event.target;
-		const file = input.files?.[0];
-		if (!file) return;
-		input.disabled = true;
-		const url = URL.createObjectURL(file);
-		try {
-			const image = new Image();
-			image.src = url;
-			await image.decode();
-			const size = 128;
-			const canvas = document.createElement('canvas');
-			canvas.width = canvas.height = size;
-			const ctx = canvas.getContext('2d');
-			const scale = size / Math.max(image.naturalWidth, image.naturalHeight);
-			const width = image.naturalWidth * scale, height = image.naturalHeight * scale;
-			ctx.drawImage(image, (size-width)/2, (size-height)/2, width, height);
-			const label = file.name.replace(/\.[^.]+$/, '').trim() || file.name;
-			await this.hass.callService('chores4kids', 'upload_task_icon', {label, image: canvas.toDataURL('image/png').split(',')[1]});
-		} catch {
-			alert(this._t('icon.upload_failed'));
-		} finally {
-			URL.revokeObjectURL(url);
-			input.disabled = false;
-			input.value = '';
-		}
-	}
-
-	async _onSoundUpload(e) {
-		const file = e.target?.files?.[0];
-		if(!file) return;
-		const reader = new FileReader();
-		reader.onload = async () => {
-			try {
-				const dataUrl = reader.result;
-				const ext = (file.name.split('.').pop() || 'mp3').toLowerCase();
-				// Use a stable filename so all dashboards share the same sound
-				const name = `completion.${ext}`;
-				// Upload to Home Assistant using existing shop image service
-				await this.hass.callService('chores4kids','upload_shop_image',{ filename: name, data: String(dataUrl) });
-				// Update config with the path
-				this._config = {...this._config, completion_sound: `/local/chores4kids/${name}`};
-				// allow selecting the same file again later
-				try{ if (e?.target) e.target.value = ''; }catch{}
-				this._emit();
-			} catch(err) {
-				console.error('Sound upload failed:', err);
-				alert('Failed to upload sound file');
-			}
-		};
-		reader.readAsDataURL(file);
-	}
-	_getCompletionSoundFilename(){
-		try{
-			const raw = String(this._config?.completion_sound || '').trim();
-			if (!raw) return '';
-			const m = raw.match(/\/local\/chores4kids\/([^/?#]+)$/);
-			if (m && m[1]) return m[1];
-			const last = raw.split('/').pop();
-			return String(last || '').trim();
-		}catch{ return ''; }
-	}
-	async _urlExists(url){
-		try{
-			const bust = (url.includes('?') ? '&' : '?') + `_=${Date.now()}`;
-			let r = await fetch(url + bust, { method:'HEAD', cache:'no-store' });
-			if (r.ok) return true;
-			// Some servers block HEAD; try a tiny GET.
-			if (r.status === 405 || r.status === 403){
-				r = await fetch(url + bust, { method:'GET', cache:'no-store', headers: { 'Range': 'bytes=0-0' } });
-				if (r.ok) return true;
-			}
-		}catch{ /* ignore */ }
-		return false;
-	}
-	async _ensureDetectedCompletionSound(force=false){
-		try{
-			const cfg = this._config || {};
-			if (cfg.mode === 'kid') return;
-			// If explicitly configured, no need to detect.
-			if (cfg.completion_sound){
-				this._detectedCompletionSound = null;
-				return;
-			}
-			if (!force && this._detectedCompletionSound) return;
-			if (this._soundDetectInFlight) return;
-			this._soundDetectInFlight = true;
-			const exts = ['mp3','wav','ogg','m4a','aac'];
-			let found = null;
-			for (const ext of exts){
-				const url = `/local/chores4kids/completion.${ext}`;
-				// eslint-disable-next-line no-await-in-loop
-				if (await this._urlExists(url)) { found = { url, filename: `completion.${ext}` }; break; }
-			}
-			this._detectedCompletionSound = found;
-			this.requestUpdate();
-		}catch{ /* ignore */ }
-		finally{ this._soundDetectInFlight = false; }
-	}
-	async _deleteCompletionSound(){
-		try{
-			if (!this.hass) return;
-			const fromCfg = this._getCompletionSoundFilename();
-			const filename = fromCfg || this._detectedCompletionSound?.filename || '';
-			if (!confirm(this._t('editor.delete_sound_confirm'))) return;
-			// Try deleting the explicitly referenced filename (if any)
-			if (filename){
-				try{ await this.hass.callService('chores4kids','delete_uploaded_file',{ filename }); }catch(e){ /* fall through */ }
-			}
-			// Always also delete legacy completion files
-			await this.hass.callService('chores4kids','delete_completion_sound',{});
-			this._config = {...(this._config||{}), completion_sound: ''};
-			this._detectedCompletionSound = null;
-			this._emit();
-			this._ensureDetectedCompletionSound(true);
-		}catch(e){
-			console.error('Sound delete failed:', e);
-			alert(this._t('editor.delete_sound_failed'));
-		}
-	}
-	_getChildren(){
-		try{
-			const states = this.hass?.states || {};
-			const names = Object.values(states)
-				.filter((s)=> s && s.entity_id?.startsWith('sensor.') && s.attributes?.child_id && s.attributes?.name)
-				.map((s)=> s.attributes.name)
-				.filter(Boolean);
-			return Array.from(new Set(names)).sort((a,b)=> String(a).localeCompare(String(b)));
-		}catch{ return []; }
-	}
-	_getNotifyServiceOptions(){
-		try{
-			const services = this.hass?.services?.notify || {};
-			return Object.keys(services).sort((a,b)=> String(a).localeCompare(String(b)));
-		}catch{ return []; }
-	}
-	_getGlobalNotifyServices(){
-		try{
-			const a = this._getUiSensorAttrs?.() || {};
-			const fromCfg = Array.isArray(this._config?.notify_services) ? this._config.notify_services : [];
-			const list = Array.isArray(a.notify_services) ? a.notify_services : [];
-			const cleaned = [...list, ...fromCfg].map(s=> String(s||'').trim()).filter(Boolean)
-				.filter((v,i,a)=> a.indexOf(v)===i);
-			const single = String(a.notify_service || '').trim();
-			if (single && !cleaned.includes(single)) cleaned.push(single);
-			return cleaned;
-		}catch{ return []; }
-	}
-	_getNotifyServiceSettings(){
-		try{
-			const a = this._getUiSensorAttrs?.() || {};
-			const fromCfg = (this._config?.notify_service_settings && typeof this._config.notify_service_settings === 'object') ? this._config.notify_service_settings : {};
-			const fromStore = (a.notify_service_settings && typeof a.notify_service_settings === 'object') ? a.notify_service_settings : {};
-			const merged = { ...fromStore };
-			for (const [svc, opts] of Object.entries(fromCfg || {})){
-				if (!opts || typeof opts !== 'object') continue;
-				merged[svc] = { ...(merged[svc] || {}), ...opts };
-			}
-			return merged;
-		}catch{ return {}; }
-	}
-	_setNotifyServiceSetting(service, key, value){
-		try{
-			const map = this._getNotifyServiceSettings();
-			const next = { ...map, [service]: { ...(map?.[service] || {}), [key]: !!value } };
-			this._config = { ...(this._config||{}), notify_service_settings: next };
-			this._saveGlobalUiSettings({ notify_service_settings: next });
-			this._emit();
-		}catch{ /* ignore */ }
-	}
-	_getUiSensorAttrs(){
-		try{
-			const states = this.hass?.states;
-			if (!states) return {};
-			let s = states['sensor.chores4kids_ui'];
-			if (!s){
-				s = Object.values(states).find(st=>{
-					try{
-						if (!st?.entity_id?.startsWith('sensor.')) return false;
-						const a = st.attributes || {};
-						return (
-							('enable_points' in a) || ('start_task_bg' in a) || ('complete_task_bg' in a) || ('kid_points_bg' in a)
-							|| ('task_done_bg' in a) || ('task_done_text' in a)
-							|| ('start_task_text' in a) || ('complete_task_text' in a) || ('kid_points_text' in a)
-							|| ('task_points_bg' in a) || ('task_points_text' in a)
-							|| ('kid_task_title_size' in a) || ('kid_task_points_size' in a) || ('kid_task_button_size' in a)
-							|| ('confetti_enabled' in a)
-							|| ('notify_service' in a) || ('notify_services' in a) || ('notify_service_settings' in a)
-						);
-					}catch{ return false; }
-				});
-			}
-			return (s?.attributes && typeof s.attributes === 'object') ? s.attributes : {};
-		}catch{ return {}; }
-	}
-	_getGlobalKidFontSizes(){
-		const a = this._getUiSensorAttrs();
-		return {
-			title: a?.kid_task_title_size || '',
-			points: a?.kid_task_points_size || '',
-			button: a?.kid_task_button_size || '',
-		};
-	}
-	_saveGlobalUiSettings(payload){
-		// Persist globally in HA backend so it syncs across users/devices.
-		try{
-			if (!this.hass) return;
-			const next = { ...(this._pendingUiColors || {}), ...(payload || {}) };
-			this._pendingUiColors = next;
-			const hasNotifySettings = payload && Object.prototype.hasOwnProperty.call(payload, 'notify_service_settings');
-			if (hasNotifySettings){
-				try{ this.hass.callService('chores4kids','set_ui_colors', this._pendingUiColors || next); }catch(e){
-					console.warn('Failed to save UI settings (notify)', e);
-				}
-				return;
-			}
-			if (this._uiColorSaveTimer) clearTimeout(this._uiColorSaveTimer);
-			this._uiColorSaveTimer = setTimeout(async ()=>{
-				try{
-					await this.hass.callService('chores4kids','set_ui_colors', this._pendingUiColors || next);
-				}catch(e){
-					console.warn('Failed to save UI settings', e);
-				}
-			}, 250);
-		}catch{ /* ignore */ }
-	}
-		render(){
-		const cfg=this._config||{};
-		const kids=this._getChildren();
-		const notifyOptions = this._getNotifyServiceOptions();
-		const globalNotify = this._getGlobalNotifyServices();
-		const notifyAvailable = (notifyOptions||[]).filter(s=> !globalNotify.includes(s));
-		const notifySettings = this._getNotifyServiceSettings();
-		const globalFs = this._getGlobalKidFontSizes();
-		const fsTitle = (this._fsTaskTitle != null) ? this._fsTaskTitle : globalFs.title;
-		const fsPoints = (this._fsTaskPoints != null) ? this._fsTaskPoints : globalFs.points;
-		const fsButton = (this._fsTaskButton != null) ? this._fsTaskButton : globalFs.button;
-		return html`
+				animation: confetti-fall ${c}s linear ${o}s forwards;
+			`,t.appendChild(s)}document.body.appendChild(t),console.log("Confetti container appended with",t.children.length,"pieces"),setTimeout(()=>{t.remove(),e.remove()},6e3)}async _playCompletionSound(){try{let t=[];this.config?.completion_sound&&t.push(this.config.completion_sound),t.push("/local/chores4kids/completion.mp3","/local/chores4kids/completion.wav","/local/chores4kids/completion.ogg");for(let e of t)try{let i=e.includes("?")?"&":"?",s=this._resolveUrl(e),a=new Audio(`${s}${i}_=${Date.now()}`);a.volume=.7,await a.play();return}catch{}console.log("No playable completion sound found")}catch(t){console.log("Sound playback error:",t)}}async _buy(t,e){if(!this._pointsEnabled()||!t?.id||!e||this._buyingItemId===t.id)return;let i=5e3;this._buyingItemId=t.id,this._buySuccessItemId=null,this.requestUpdate();let s=!1;try{await this.hass.callService("chores4kids","buy_shop_item",{child_id:e,item_id:t.id}),s=!0,this._buySuccessItemId=t.id,this.requestUpdate(),setTimeout(()=>{this._buyingItemId===t.id&&(this._buyingItemId=null,this.requestUpdate())},i),setTimeout(()=>{this._buySuccessItemId===t.id&&(this._buySuccessItemId=null,this.requestUpdate())},i)}finally{s||(this._buyingItemId=null,this._buySuccessItemId=null,this.requestUpdate())}}async _debugMarkOverdue(t){if(t?.id)try{await this.hass.callService("chores4kids","debug_mark_overdue",{task_id:t.id})}catch(e){console.error("Debug mark overdue failed:",e)}}};try{customElements.define("chores4kids-card",kt)}catch{}var $t=class extends C{static get properties(){return{hass:{},_config:{}}}setConfig(t){this._config={mode:"admin",...t},this.requestUpdate()}updated(t){try{(t.has("hass")||t.has("_config"))&&this._ensureDetectedCompletionSound()}catch{}}_setAdminSection(t,e){let i=Object.keys(Vt),s=this._config.admin_sections,a=i.filter(p=>p===t?e:!Array.isArray(s)||s.includes(p)),r={...this._config,admin_sections:a};a.length===i.length&&delete r.admin_sections,this._config=r,this._emit()}_getGlobalConfettiEnabled(){try{let t=this._getUiSensorAttrs?.()||{};if(typeof t.confetti_enabled=="boolean")return t.confetti_enabled}catch{}return!0}async _saveGlobalConfettiEnabled(t){try{await this._saveGlobalUiSettings({confetti_enabled:!!t})}catch(e){console.warn("Failed to save confetti_enabled",e)}}_getGlobalEnablePoints(){try{let t=this.hass?.states||{},e=t["sensor.chores4kids_ui"];e||(e=Object.values(t).find(s=>{try{if(!s?.entity_id?.startsWith("sensor."))return!1;let a=s.attributes||{};return"enable_points"in a||"start_task_bg"in a||"complete_task_bg"in a||"kid_points_bg"in a||"task_done_bg"in a||"task_done_text"in a||"start_task_text"in a||"complete_task_text"in a||"kid_points_text"in a||"task_points_bg"in a||"task_points_text"in a}catch{return!1}}));let i=e?.attributes||{};if(typeof i.enable_points=="boolean")return i.enable_points}catch{}return!0}async _saveGlobalEnablePoints(t){try{if(!this.hass)return;await this.hass.callService("chores4kids","set_ui_colors",{enable_points:!!t})}catch(e){console.warn("Failed to save enable_points",e)}}_saveGlobalColors(t){try{if(!this.hass)return;let e={start_task_bg:t?.start_task_bg||"",complete_task_bg:t?.complete_task_bg||"",kid_points_bg:t?.kid_points_bg||"",task_done_bg:t?.task_done_bg||"",start_task_text:t?.start_task_text||"",complete_task_text:t?.complete_task_text||"",kid_points_text:t?.kid_points_text||"",task_done_text:t?.task_done_text||"",task_points_bg:t?.task_points_bg||"",task_points_text:t?.task_points_text||""};this._pendingUiColors=e,this._uiColorSaveTimer&&clearTimeout(this._uiColorSaveTimer),this._uiColorSaveTimer=setTimeout(async()=>{try{await this.hass.callService("chores4kids","set_ui_colors",this._pendingUiColors||e)}catch(i){console.warn("Failed to save UI colors",i)}},250)}catch{}}_t(t,e){return yt(t,et(this._config?.language,this.hass),e,S(this.hass).points_label)}_emit(){this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:this._config},bubbles:!0,composed:!0}))}async _uploadTaskIcon(t){let e=t.target,i=e.files?.[0];if(!i)return;e.disabled=!0;let s=URL.createObjectURL(i);try{let a=new Image;a.src=s,await a.decode();let r=128,p=document.createElement("canvas");p.width=p.height=r;let o=p.getContext("2d"),c=r/Math.max(a.naturalWidth,a.naturalHeight),u=a.naturalWidth*c,l=a.naturalHeight*c;o.drawImage(a,(r-u)/2,(r-l)/2,u,l);let d=i.name.replace(/\.[^.]+$/,"").trim()||i.name;await this.hass.callService("chores4kids","upload_task_icon",{label:d,image:p.toDataURL("image/png").split(",")[1]})}catch{alert(this._t("icon.upload_failed"))}finally{URL.revokeObjectURL(s),e.disabled=!1,e.value=""}}async _onSoundUpload(t){let e=t.target?.files?.[0];if(!e)return;let i=new FileReader;i.onload=async()=>{try{let s=i.result,r=`completion.${(e.name.split(".").pop()||"mp3").toLowerCase()}`;await this.hass.callService("chores4kids","upload_shop_image",{filename:r,data:String(s)}),this._config={...this._config,completion_sound:`/local/chores4kids/${r}`};try{t?.target&&(t.target.value="")}catch{}this._emit()}catch(s){console.error("Sound upload failed:",s),alert("Failed to upload sound file")}},i.readAsDataURL(e)}_getCompletionSoundFilename(){try{let t=String(this._config?.completion_sound||"").trim();if(!t)return"";let e=t.match(/\/local\/chores4kids\/([^/?#]+)$/);if(e&&e[1])return e[1];let i=t.split("/").pop();return String(i||"").trim()}catch{return""}}async _urlExists(t){try{let e=(t.includes("?")?"&":"?")+`_=${Date.now()}`,i=await fetch(t+e,{method:"HEAD",cache:"no-store"});if(i.ok||(i.status===405||i.status===403)&&(i=await fetch(t+e,{method:"GET",cache:"no-store",headers:{Range:"bytes=0-0"}}),i.ok))return!0}catch{}return!1}async _ensureDetectedCompletionSound(t=!1){try{let e=this._config||{};if(e.mode==="kid")return;if(e.completion_sound){this._detectedCompletionSound=null;return}if(!t&&this._detectedCompletionSound||this._soundDetectInFlight)return;this._soundDetectInFlight=!0;let i=["mp3","wav","ogg","m4a","aac"],s=null;for(let a of i){let r=`/local/chores4kids/completion.${a}`;if(await this._urlExists(r)){s={url:r,filename:`completion.${a}`};break}}this._detectedCompletionSound=s,this.requestUpdate()}catch{}finally{this._soundDetectInFlight=!1}}async _deleteCompletionSound(){try{if(!this.hass)return;let e=this._getCompletionSoundFilename()||this._detectedCompletionSound?.filename||"";if(!confirm(this._t("editor.delete_sound_confirm")))return;if(e)try{await this.hass.callService("chores4kids","delete_uploaded_file",{filename:e})}catch{}await this.hass.callService("chores4kids","delete_completion_sound",{}),this._config={...this._config||{},completion_sound:""},this._detectedCompletionSound=null,this._emit(),this._ensureDetectedCompletionSound(!0)}catch(t){console.error("Sound delete failed:",t),alert(this._t("editor.delete_sound_failed"))}}_getChildren(){try{let t=this.hass?.states||{},e=Object.values(t).filter(i=>i&&i.entity_id?.startsWith("sensor.")&&i.attributes?.child_id&&i.attributes?.name).map(i=>i.attributes.name).filter(Boolean);return Array.from(new Set(e)).sort((i,s)=>String(i).localeCompare(String(s)))}catch{return[]}}_getNotifyServiceOptions(){try{let t=this.hass?.services?.notify||{};return Object.keys(t).sort((e,i)=>String(e).localeCompare(String(i)))}catch{return[]}}_getGlobalNotifyServices(){try{let t=this._getUiSensorAttrs?.()||{},e=Array.isArray(this._config?.notify_services)?this._config.notify_services:[],s=[...Array.isArray(t.notify_services)?t.notify_services:[],...e].map(r=>String(r||"").trim()).filter(Boolean).filter((r,p,o)=>o.indexOf(r)===p),a=String(t.notify_service||"").trim();return a&&!s.includes(a)&&s.push(a),s}catch{return[]}}_getNotifyServiceSettings(){try{let t=this._getUiSensorAttrs?.()||{},e=this._config?.notify_service_settings&&typeof this._config.notify_service_settings=="object"?this._config.notify_service_settings:{},s={...t.notify_service_settings&&typeof t.notify_service_settings=="object"?t.notify_service_settings:{}};for(let[a,r]of Object.entries(e||{}))!r||typeof r!="object"||(s[a]={...s[a]||{},...r});return s}catch{return{}}}_setNotifyServiceSetting(t,e,i){try{let s=this._getNotifyServiceSettings(),a={...s,[t]:{...s?.[t]||{},[e]:!!i}};this._config={...this._config||{},notify_service_settings:a},this._saveGlobalUiSettings({notify_service_settings:a}),this._emit()}catch{}}_getUiSensorAttrs(){try{let t=this.hass?.states;if(!t)return{};let e=t["sensor.chores4kids_ui"];return e||(e=Object.values(t).find(i=>{try{if(!i?.entity_id?.startsWith("sensor."))return!1;let s=i.attributes||{};return"enable_points"in s||"start_task_bg"in s||"complete_task_bg"in s||"kid_points_bg"in s||"task_done_bg"in s||"task_done_text"in s||"start_task_text"in s||"complete_task_text"in s||"kid_points_text"in s||"task_points_bg"in s||"task_points_text"in s||"kid_task_title_size"in s||"kid_task_points_size"in s||"kid_task_button_size"in s||"confetti_enabled"in s||"notify_service"in s||"notify_services"in s||"notify_service_settings"in s}catch{return!1}})),e?.attributes&&typeof e.attributes=="object"?e.attributes:{}}catch{return{}}}_getGlobalKidFontSizes(){let t=this._getUiSensorAttrs();return{title:t?.kid_task_title_size||"",points:t?.kid_task_points_size||"",button:t?.kid_task_button_size||""}}_saveGlobalUiSettings(t){try{if(!this.hass)return;let e={...this._pendingUiColors||{},...t||{}};if(this._pendingUiColors=e,t&&Object.prototype.hasOwnProperty.call(t,"notify_service_settings")){try{this.hass.callService("chores4kids","set_ui_colors",this._pendingUiColors||e)}catch(s){console.warn("Failed to save UI settings (notify)",s)}return}this._uiColorSaveTimer&&clearTimeout(this._uiColorSaveTimer),this._uiColorSaveTimer=setTimeout(async()=>{try{await this.hass.callService("chores4kids","set_ui_colors",this._pendingUiColors||e)}catch(s){console.warn("Failed to save UI settings",s)}},250)}catch{}}render(){let t=this._config||{},e=this._getChildren(),i=this._getNotifyServiceOptions(),s=this._getGlobalNotifyServices(),a=(i||[]).filter(l=>!s.includes(l)),r=this._getNotifyServiceSettings(),p=this._getGlobalKidFontSizes(),o=this._fsTaskTitle!=null?this._fsTaskTitle:p.title,c=this._fsTaskPoints!=null?this._fsTaskPoints:p.points,u=this._fsTaskButton!=null?this._fsTaskButton:p.button;return n`
 		<div class="card-config">
 			<div class="section-box">
 				<div class="form-field">
-					<label>${this._t('editor.developer_mode')}</label>
+					<label>${this._t("editor.developer_mode")}</label>
 					<label style="display:flex;align-items:center;gap:8px;">
-						<span>${this._t('ui.toggle_off_on')}</span>
-						<ha-switch .checked=${cfg.debug_mode === true} @change=${e=>{ this._config={...cfg, debug_mode: !!e.target.checked}; this._emit(); }}></ha-switch>
+						<span>${this._t("ui.toggle_off_on")}</span>
+						<ha-switch .checked=${t.debug_mode===!0} @change=${l=>{this._config={...t,debug_mode:!!l.target.checked},this._emit()}}></ha-switch>
 					</label>
-					<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.developer_mode_help')}</small>
+					<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.developer_mode_help")}</small>
 				</div>
 				<div class="form-field">
-					<label for="card-language">${this._t('editor.language')}</label>
-					<select id="card-language" @change=${e=>{ this._config={...cfg, language:e.target.value}; this._emit(); }}>
-						<option value="auto" ?selected=${!Object.hasOwn(C4K_I18N, cfg.language)}>${this._t('editor.language_auto')}</option>
-						${Object.entries(C4K_I18N).map(([code, labels])=>html`<option value=${code} ?selected=${cfg.language === code}>${labels['editor.language_name']}</option>`)}
+					<label for="card-language">${this._t("editor.language")}</label>
+					<select id="card-language" @change=${l=>{this._config={...t,language:l.target.value},this._emit()}}>
+						<option value="auto" ?selected=${!Object.hasOwn(B,t.language)}>${this._t("editor.language_auto")}</option>
+						${Object.entries(B).map(([l,d])=>n`<option value=${l} ?selected=${t.language===l}>${d["editor.language_name"]}</option>`)}
 					</select>
 				</div>
-				<div class="form-field"><label>${this._t('editor.mode')}</label>
-					<select .value=${cfg.mode||'admin'} @change=${e=>{ this._config={...cfg, mode:e.target.value}; this._emit(); }}>
-						<option value="admin">${this._t('editor.mode_admin')}</option>
-						<option value="kid">${this._t('editor.mode_kid')}</option>
-						<option value="overview">${this._t('editor.mode_overview')}</option>
+				<div class="form-field"><label>${this._t("editor.mode")}</label>
+					<select .value=${t.mode||"admin"} @change=${l=>{this._config={...t,mode:l.target.value},this._emit()}}>
+						<option value="admin">${this._t("editor.mode_admin")}</option>
+						<option value="kid">${this._t("editor.mode_kid")}</option>
+						<option value="overview">${this._t("editor.mode_overview")}</option>
 					</select>
 				</div>
-				${(cfg.mode||'admin')==='admin' ? html`
+				${(t.mode||"admin")==="admin"?n`
 					<fieldset class="admin-sections">
-						<legend>${this._t('editor.sections')}</legend>
-						${Object.entries(C4K_ADMIN_SECTIONS).map(([key, label]) => html`
-							<label><input type="checkbox" value=${key}
-								.checked=${!Array.isArray(cfg.admin_sections) || cfg.admin_sections.includes(key)}
-								@change=${e => this._setAdminSection(key, e.target.checked)}>
-								${this._t(label)}</label>
+						<legend>${this._t("editor.sections")}</legend>
+						${Object.entries(Vt).map(([l,d])=>n`
+							<label><input type="checkbox" value=${l}
+								.checked=${!Array.isArray(t.admin_sections)||t.admin_sections.includes(l)}
+								@change=${m=>this._setAdminSection(l,m.target.checked)}>
+								${this._t(d)}</label>
 						`)}
 					</fieldset>
 					<div class="form-field">
-						<label for="c4k-task-icon">${this._t('icon.library')} · ${this._t('shop.upload')}</label>
+						<label for="c4k-task-icon">${this._t("icon.library")} · ${this._t("shop.upload")}</label>
 						<input id="c4k-task-icon" type="file" accept=".svg,.png,.jpg,.jpeg,.webp" @change=${this._uploadTaskIcon}>
-						<div>${Object.entries(this._getUiSensorAttrs().task_icons || {}).map(([id, label])=>html`<span>${c4kTaskIcon(id)} ${label} </span>`)}</div>
+						<div>${Object.entries(this._getUiSensorAttrs().task_icons||{}).map(([l,d])=>n`<span>${E(l)} ${d} </span>`)}</div>
 					</div>
 					<div class="form-field">
-						<label>${this._t('editor.confetti')}</label>
+						<label>${this._t("editor.confetti")}</label>
 						<label style="display:flex;align-items:center;gap:8px;">
-							<span>${this._t('ui.toggle_off_on')}</span>
-							<ha-switch .checked=${this._getGlobalConfettiEnabled()} @change=${async e=>{ const enabled=!!e.target.checked; await this._saveGlobalConfettiEnabled(enabled); this._config={...cfg, confetti: enabled}; this._emit(); }}></ha-switch>
+							<span>${this._t("ui.toggle_off_on")}</span>
+							<ha-switch .checked=${this._getGlobalConfettiEnabled()} @change=${async l=>{let d=!!l.target.checked;await this._saveGlobalConfettiEnabled(d),this._config={...t,confetti:d},this._emit()}}></ha-switch>
 						</label>
-						<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.confetti_help')}</small>
+						<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.confetti_help")}</small>
 					</div>
-				` : ''}
-				${cfg.mode !== 'kid' ? html`
+				`:""}
+				${t.mode!=="kid"?n`
 					<div class="form-field">
-						<label>${this._t('editor.completion_sound')}</label>
-						<input type="file" accept="audio/*" @change=${e=> this._onSoundUpload(e)} style="width:100%; max-width:100%; box-sizing:border-box; margin-bottom:4px;" />
-						${(cfg.completion_sound || this._detectedCompletionSound) ? html`
+						<label>${this._t("editor.completion_sound")}</label>
+						<input type="file" accept="audio/*" @change=${l=>this._onSoundUpload(l)} style="width:100%; max-width:100%; box-sizing:border-box; margin-bottom:4px;" />
+						${t.completion_sound||this._detectedCompletionSound?n`
 							<div style="display:flex;align-items:center;gap:8px;margin-top:4px; flex-wrap:wrap;">
-								<small style="opacity:.8;flex:1;word-break:break-all;">${cfg.completion_sound || this._detectedCompletionSound?.url}</small>
-								${cfg.completion_sound ? html`
-									<button @click=${()=>{ this._config={...cfg, completion_sound: ''}; this._emit(); }} style="padding:4px 8px;font-size:0.8rem;">${this._t('form.clear')}</button>
-								` : ''}
-								<button @click=${()=> this._deleteCompletionSound()} ?disabled=${!(cfg.completion_sound || this._detectedCompletionSound?.filename)} style="padding:4px 8px;font-size:0.8rem;">${this._t('editor.delete_sound')}</button>
+								<small style="opacity:.8;flex:1;word-break:break-all;">${t.completion_sound||this._detectedCompletionSound?.url}</small>
+								${t.completion_sound?n`
+									<button @click=${()=>{this._config={...t,completion_sound:""},this._emit()}} style="padding:4px 8px;font-size:0.8rem;">${this._t("form.clear")}</button>
+								`:""}
+								<button @click=${()=>this._deleteCompletionSound()} ?disabled=${!(t.completion_sound||this._detectedCompletionSound?.filename)} style="padding:4px 8px;font-size:0.8rem;">${this._t("editor.delete_sound")}</button>
 							</div>
-						` : ''}
+						`:""}
 
-						${(!(cfg.completion_sound || this._detectedCompletionSound)) ? html`
+						${t.completion_sound||this._detectedCompletionSound?"":n`
 							<div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
-								<button @click=${()=> this._deleteCompletionSound()} style="padding:4px 8px;font-size:0.8rem;">${this._t('editor.delete_sound')}</button>
+								<button @click=${()=>this._deleteCompletionSound()} style="padding:4px 8px;font-size:0.8rem;">${this._t("editor.delete_sound")}</button>
 							</div>
-						` : ''}
-						<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.completion_sound_help')}</small>
+						`}
+						<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.completion_sound_help")}</small>
 					</div>
-				` : ''}
+				`:""}
 			</div>
 
-			${(cfg.mode||'admin')==='admin' ? html`
+			${(t.mode||"admin")==="admin"?n`
 				<div class="section-box">
 					<div class="form-field">
-						<label>${this._t('section.notifications')}</label>
-						<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.notify_target_help')}</small>
+						<label>${this._t("section.notifications")}</label>
+						<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.notify_target_help")}</small>
 						<div class="notify-chips">
-							${(globalNotify||[]).length ? (globalNotify||[]).map(s=> html`
+							${(s||[]).length?(s||[]).map(l=>n`
 								<span class="notify-chip">
-									${s}
-									<button class="chip-x" title="${this._t('form.clear')}" @click=${()=>{
-										const next = (globalNotify||[]).filter(x=> x!==s);
-										this._saveGlobalUiSettings({ notify_services: next, notify_service: next[0] || '' });
-										this._config={...cfg, notify_service: next[0] || '', notify_services: next};
-										this._emit();
-									}}>&times;</button>
+									${l}
+									<button class="chip-x" title="${this._t("form.clear")}" @click=${()=>{let d=(s||[]).filter(m=>m!==l);this._saveGlobalUiSettings({notify_services:d,notify_service:d[0]||""}),this._config={...t,notify_service:d[0]||"",notify_services:d},this._emit()}}>&times;</button>
 								</span>
-							`) : html`<span class="notify-empty">${this._t('editor.notify_target_none')}</span>`}
+							`):n`<span class="notify-empty">${this._t("editor.notify_target_none")}</span>`}
 						</div>
-						<select .value=${''} @change=${e=>{ const v=String(e.target.value||''); if(!v){ this._saveGlobalUiSettings({ notify_services: [], notify_service: '' }); this._config={...cfg, notify_service: '', notify_services: []}; this._emit(); return; } const next=[...(globalNotify||[]), v].filter((x,i,a)=>a.indexOf(x)===i); this._saveGlobalUiSettings({ notify_services: next, notify_service: next[0] || '' }); this._config={...cfg, notify_service: next[0] || '', notify_services: next}; this._emit(); try{ e.target.value=''; }catch{} }}>
-							<option value="">${this._t('editor.notify_target_none')}</option>
-							${(notifyAvailable||[]).map(s=> html`<option value="${s}">${s}</option>`)}
+						<select .value=${""} @change=${l=>{let d=String(l.target.value||"");if(!d){this._saveGlobalUiSettings({notify_services:[],notify_service:""}),this._config={...t,notify_service:"",notify_services:[]},this._emit();return}let m=[...s||[],d].filter((g,_,f)=>f.indexOf(g)===_);this._saveGlobalUiSettings({notify_services:m,notify_service:m[0]||""}),this._config={...t,notify_service:m[0]||"",notify_services:m},this._emit();try{l.target.value=""}catch{}}}>
+							<option value="">${this._t("editor.notify_target_none")}</option>
+							${(a||[]).map(l=>n`<option value="${l}">${l}</option>`)}
 						</select>
-						${(globalNotify||[]).length ? html`
+						${(s||[]).length?n`
 							<div style="margin-top:10px; display:grid; gap:10px;">
-								${(globalNotify||[]).map(service=>{
-									const s = notifySettings?.[service] || {};
-									const taskCompleteEnabled = (s.task_complete !== undefined) ? !!s.task_complete : true;
-									const shopPurchaseEnabled = (s.shop_purchase !== undefined) ? !!s.shop_purchase : true;
-									const shopImageEnabled = (s.shop_image !== undefined) ? !!s.shop_image : true;
-									return html`
-										<ha-expansion-panel .header=${service} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
+								${(s||[]).map(l=>{let d=r?.[l]||{},m=d.task_complete!==void 0?!!d.task_complete:!0,g=d.shop_purchase!==void 0?!!d.shop_purchase:!0,_=d.shop_image!==void 0?!!d.shop_image:!0;return n`
+										<ha-expansion-panel .header=${l} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
 											<div style="padding:10px; display:grid; gap:10px;">
 												<label style="display:flex;align-items:center;gap:8px;">
-													<ha-switch .checked=${taskCompleteEnabled} @change=${e=> this._setNotifyServiceSetting(service, 'task_complete', e.target.checked)}></ha-switch>
-													<span>${this._t('editor.notify_toggle_complete')}</span>
+													<ha-switch .checked=${m} @change=${f=>this._setNotifyServiceSetting(l,"task_complete",f.target.checked)}></ha-switch>
+													<span>${this._t("editor.notify_toggle_complete")}</span>
 												</label>
 												<label style="display:flex;align-items:center;gap:8px;">
-													<ha-switch .checked=${shopPurchaseEnabled} @change=${e=> this._setNotifyServiceSetting(service, 'shop_purchase', e.target.checked)}></ha-switch>
-													<span>${this._t('editor.notify_toggle_shop')}</span>
+													<ha-switch .checked=${g} @change=${f=>this._setNotifyServiceSetting(l,"shop_purchase",f.target.checked)}></ha-switch>
+													<span>${this._t("editor.notify_toggle_shop")}</span>
 												</label>
-												<label style="display:flex;align-items:center;gap:8px; margin-left:26px; opacity:${shopPurchaseEnabled ? '1' : '.5'};">
-													<ha-switch .checked=${shopImageEnabled} ?disabled=${!shopPurchaseEnabled} @change=${e=> this._setNotifyServiceSetting(service, 'shop_image', e.target.checked)}></ha-switch>
-													<span>${this._t('editor.notify_toggle_shop_image')}</span>
+												<label style="display:flex;align-items:center;gap:8px; margin-left:26px; opacity:${g?"1":".5"};">
+													<ha-switch .checked=${_} ?disabled=${!g} @change=${f=>this._setNotifyServiceSetting(l,"shop_image",f.target.checked)}></ha-switch>
+													<span>${this._t("editor.notify_toggle_shop_image")}</span>
 												</label>
 											</div>
 										</ha-expansion-panel>
-									`;
-								})}
+									`})}
 							</div>
-						` : ''}
+						`:""}
 					</div>
 				</div>
-			` : ''}
+			`:""}
 
-			${cfg.mode==='admin' ? html`
+			${t.mode==="admin"?n`
 				<div class="section-box">
 					<div class="form-field">
-						<label for="c4k-unit-name">${this._t('editor.unit_name')}</label>
-						<input id="c4k-unit-name" maxlength="48" .value=${c4kSettings(this.hass).points_label || ''}
-							placeholder=${c4kLocalize('lbl.points', c4kCardLocale(cfg.language, this.hass))}
-							@change=${e=>this.hass.callService('chores4kids','set_ui_colors',{points_label:e.target.value.trim()})}>
+						<label for="c4k-unit-name">${this._t("editor.unit_name")}</label>
+						<input id="c4k-unit-name" maxlength="48" .value=${S(this.hass).points_label||""}
+							placeholder=${yt("lbl.points",et(t.language,this.hass))}
+							@change=${l=>this.hass.callService("chores4kids","set_ui_colors",{points_label:l.target.value.trim()})}>
 					</div>
 					<div class="form-field">
-						<label for="c4k-chore-columns">${this._t('editor.task_columns')}</label>
-						<select id="c4k-chore-columns" @change=${e=>this.hass.callService('chores4kids','set_ui_colors',{chore_columns:e.target.value})}>
-							${['auto','1','2','3'].map(value=>html`<option value=${value} ?selected=${value === (c4kSettings(this.hass).chore_columns || 'auto')}>${value==='auto' ? this._t('editor.columns_auto') : value}</option>`)}
+						<label for="c4k-chore-columns">${this._t("editor.task_columns")}</label>
+						<select id="c4k-chore-columns" @change=${l=>this.hass.callService("chores4kids","set_ui_colors",{chore_columns:l.target.value})}>
+							${["auto","1","2","3"].map(l=>n`<option value=${l} ?selected=${l===(S(this.hass).chore_columns||"auto")}>${l==="auto"?this._t("editor.columns_auto"):l}</option>`)}
 						</select>
 					</div>
 					<div class="form-field">
-						<label>${this._t('editor.enable_points')}</label>
+						<label>${this._t("editor.enable_points")}</label>
 						<label style="display:flex;align-items:center;gap:8px;">
-							<span>${this._t('ui.toggle_off_on')}</span>
-							<ha-switch .checked=${this._getGlobalEnablePoints()} @change=${async e=>{ const enabled=!!e.target.checked; await this._saveGlobalEnablePoints(enabled); this._config={...cfg, enable_points: enabled}; this._emit(); }}></ha-switch>
+							<span>${this._t("ui.toggle_off_on")}</span>
+							<ha-switch .checked=${this._getGlobalEnablePoints()} @change=${async l=>{let d=!!l.target.checked;await this._saveGlobalEnablePoints(d),this._config={...t,enable_points:d},this._emit()}}></ha-switch>
 						</label>
-						<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.enable_points_help')}</small>
+						<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.enable_points_help")}</small>
 					</div>
 					<div class="form-field">
-						<label>${this._t('section.scoreboard')}</label>
+						<label>${this._t("section.scoreboard")}</label>
 						<label style="display:flex;align-items:center;gap:8px;">
-							<span>${this._t('ui.toggle_off_on')}</span>
-							<ha-switch .checked=${(cfg.enable_points !== false) && (cfg.show_scoreboard !== false)} ?disabled=${cfg.enable_points === false} @change=${e=>{ this._config={...cfg, show_scoreboard: !!e.target.checked}; this._emit(); }}></ha-switch>
+							<span>${this._t("ui.toggle_off_on")}</span>
+							<ha-switch .checked=${t.enable_points!==!1&&t.show_scoreboard!==!1} ?disabled=${t.enable_points===!1} @change=${l=>{this._config={...t,show_scoreboard:!!l.target.checked},this._emit()}}></ha-switch>
 						</label>
 					</div>
 				</div>
 
 				<div class="section-box">
 					<div class="form-field">
-						<label>${this._t('editor.colors')}</label>
+						<label>${this._t("editor.colors")}</label>
 						<div style="display:grid; gap:12px; margin-top:8px;">
-						${C4K_COLOR_STATES.map(state => html`<ha-expansion-panel .header=${this._t('status.' + state)}>
-								${['bg','text'].map(part => {
-									const key = state + '_' + part;
-									const value = this._getUiSensorAttrs()[key] ?? cfg[key] ?? '';
-									const save = color => {
-										this._config = {...this._config, [key]: color};
-										this._saveGlobalUiSettings({[key]: color});
-										this._emit();
-									};
-									return html`<label>${this._t('editor.color_field_' + part)}
-										<input type="color" .value=${value || '#000000'} @change=${e=>save(e.target.value)}>
-										<button type="button" @click=${()=>save('')}>${this._t('form.clear')}</button>
-									</label>`;
-								})}
+						${vt.map(l=>n`<ha-expansion-panel .header=${this._t("status."+l)}>
+								${["bg","text"].map(d=>{let m=l+"_"+d,g=this._getUiSensorAttrs()[m]??t[m]??"",_=f=>{this._config={...this._config,[m]:f},this._saveGlobalUiSettings({[m]:f}),this._emit()};return n`<label>${this._t("editor.color_field_"+d)}
+										<input type="color" .value=${g||"#000000"} @change=${f=>_(f.target.value)}>
+										<button type="button" @click=${()=>_("")}>${this._t("form.clear")}</button>
+									</label>`})}
 							</ha-expansion-panel>`)}
-							<ha-expansion-panel .header=${this._t('editor.color_group_start')} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
+							<ha-expansion-panel .header=${this._t("editor.color_group_start")} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
 							<div style="padding:10px;">
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_bg')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_bg")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.start_task_bg||''} @input=${e=>{ this._config={...cfg, start_task_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.start_task_bg||'') ? cfg.start_task_bg : '#000000')} @change=${e=>{ this._config={...cfg, start_task_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, start_task_bg: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.start_task_bg||""} @input=${l=>{this._config={...t,start_task_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.start_task_bg||"")?t.start_task_bg:"#000000"} @change=${l=>{this._config={...t,start_task_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,start_task_bg:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_text')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_text")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.start_task_text||''} @input=${e=>{ this._config={...cfg, start_task_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.start_task_text||'') ? cfg.start_task_text : '#000000')} @change=${e=>{ this._config={...cfg, start_task_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, start_task_text: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.start_task_text||""} @input=${l=>{this._config={...t,start_task_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.start_task_text||"")?t.start_task_text:"#000000"} @change=${l=>{this._config={...t,start_task_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,start_task_text:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
-								<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.color_empty_default')}</small>
+								<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.color_empty_default")}</small>
 							</div>
 						</ha-expansion-panel>
 
-						<ha-expansion-panel .header=${this._t('editor.color_group_complete')} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
+						<ha-expansion-panel .header=${this._t("editor.color_group_complete")} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
 							<div style="padding:10px;">
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_bg')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_bg")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.complete_task_bg||''} @input=${e=>{ this._config={...cfg, complete_task_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.complete_task_bg||'') ? cfg.complete_task_bg : '#000000')} @change=${e=>{ this._config={...cfg, complete_task_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, complete_task_bg: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.complete_task_bg||""} @input=${l=>{this._config={...t,complete_task_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.complete_task_bg||"")?t.complete_task_bg:"#000000"} @change=${l=>{this._config={...t,complete_task_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,complete_task_bg:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_text')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_text")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.complete_task_text||''} @input=${e=>{ this._config={...cfg, complete_task_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.complete_task_text||'') ? cfg.complete_task_text : '#000000')} @change=${e=>{ this._config={...cfg, complete_task_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, complete_task_text: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.complete_task_text||""} @input=${l=>{this._config={...t,complete_task_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.complete_task_text||"")?t.complete_task_text:"#000000"} @change=${l=>{this._config={...t,complete_task_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,complete_task_text:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
-								<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.color_empty_default')}</small>
+								<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.color_empty_default")}</small>
 							</div>
 						</ha-expansion-panel>
 
-						<ha-expansion-panel .header=${this._t('btn.task_done')} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
+						<ha-expansion-panel .header=${this._t("btn.task_done")} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
 							<div style="padding:10px;">
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_bg')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_bg")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.task_done_bg||''} @input=${e=>{ this._config={...cfg, task_done_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.task_done_bg||'') ? cfg.task_done_bg : '#000000')} @change=${e=>{ this._config={...cfg, task_done_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, task_done_bg: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.task_done_bg||""} @input=${l=>{this._config={...t,task_done_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.task_done_bg||"")?t.task_done_bg:"#000000"} @change=${l=>{this._config={...t,task_done_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,task_done_bg:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_text')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_text")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.task_done_text||''} @input=${e=>{ this._config={...cfg, task_done_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.task_done_text||'') ? cfg.task_done_text : '#000000')} @change=${e=>{ this._config={...cfg, task_done_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, task_done_text: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.task_done_text||""} @input=${l=>{this._config={...t,task_done_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.task_done_text||"")?t.task_done_text:"#000000"} @change=${l=>{this._config={...t,task_done_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,task_done_text:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
-								<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.color_empty_default')}</small>
+								<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.color_empty_default")}</small>
 							</div>
 						</ha-expansion-panel>
 
-						${cfg.enable_points === false ? '' : html`<ha-expansion-panel .header=${this._t('editor.color_group_kid_points')} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
+						${t.enable_points===!1?"":n`<ha-expansion-panel .header=${this._t("editor.color_group_kid_points")} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
 							<div style="padding:10px;">
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_bg')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_bg")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.kid_points_bg||''} @input=${e=>{ this._config={...cfg, kid_points_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.kid_points_bg||'') ? cfg.kid_points_bg : '#000000')} @change=${e=>{ this._config={...cfg, kid_points_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, kid_points_bg: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.kid_points_bg||""} @input=${l=>{this._config={...t,kid_points_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.kid_points_bg||"")?t.kid_points_bg:"#000000"} @change=${l=>{this._config={...t,kid_points_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,kid_points_bg:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_text')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_text")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.kid_points_text||''} @input=${e=>{ this._config={...cfg, kid_points_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.kid_points_text||'') ? cfg.kid_points_text : '#000000')} @change=${e=>{ this._config={...cfg, kid_points_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, kid_points_text: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.kid_points_text||""} @input=${l=>{this._config={...t,kid_points_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.kid_points_text||"")?t.kid_points_text:"#000000"} @change=${l=>{this._config={...t,kid_points_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,kid_points_text:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
-								<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.color_empty_default')}</small>
+								<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.color_empty_default")}</small>
 							</div>
 						</ha-expansion-panel>`}
 
-						${cfg.enable_points === false ? '' : html`<ha-expansion-panel .header=${this._t('editor.color_group_task_points')} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
+						${t.enable_points===!1?"":n`<ha-expansion-panel .header=${this._t("editor.color_group_task_points")} style="border:1px solid var(--divider-color); border-radius:8px; overflow:hidden;">
 							<div style="padding:10px;">
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_bg')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_bg")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.task_points_bg||''} @input=${e=>{ this._config={...cfg, task_points_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.task_points_bg||'') ? cfg.task_points_bg : '#000000')} @change=${e=>{ this._config={...cfg, task_points_bg: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, task_points_bg: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.task_points_bg||""} @input=${l=>{this._config={...t,task_points_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.task_points_bg||"")?t.task_points_bg:"#000000"} @change=${l=>{this._config={...t,task_points_bg:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,task_points_bg:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
 								<div class="form-field" style="margin-top:6px;">
-									<label style="font-weight:600;">${this._t('editor.color_field_text')}</label>
+									<label style="font-weight:600;">${this._t("editor.color_field_text")}</label>
 									<div style="display:flex; gap:8px; align-items:center;">
-										<input .value=${cfg.task_points_text||''} @input=${e=>{ this._config={...cfg, task_points_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} placeholder="#RRGGBB" style="flex:1;" />
-										<input type="color" .value=${(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(cfg.task_points_text||'') ? cfg.task_points_text : '#000000')} @change=${e=>{ this._config={...cfg, task_points_text: e.target.value}; this._saveGlobalColors(this._config); this._emit(); }} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
-											<button @click=${()=>{ this._config={...cfg, task_points_text: ''}; this._saveGlobalColors(this._config); this._emit(); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+										<input .value=${t.task_points_text||""} @input=${l=>{this._config={...t,task_points_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} placeholder="#RRGGBB" style="flex:1;" />
+										<input type="color" .value=${/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(t.task_points_text||"")?t.task_points_text:"#000000"} @change=${l=>{this._config={...t,task_points_text:l.target.value},this._saveGlobalColors(this._config),this._emit()}} style="width:44px; height:36px; padding:0; border:0; background:transparent;" />
+											<button @click=${()=>{this._config={...t,task_points_text:""},this._saveGlobalColors(this._config),this._emit()}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 									</div>
 								</div>
-								<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.color_empty_default')}</small>
+								<small style="opacity:.8; margin-top:4px; display:block;">${this._t("editor.color_empty_default")}</small>
 							</div>
 						</ha-expansion-panel>`}
 					</div>
@@ -5334,53 +1535,50 @@ class Chores4KidsDevCardEditor extends LitElement{
 							<div class="form-field">
 								<label style="font-weight:600;">Task title</label>
 								<div style="display:flex; gap:8px; align-items:center;">
-									<input type="number" min="10" max="40" step="1" .value=${(fsTitle||'').replace('px','')} @input=${e=>{ const raw=String(e.target.value||'').trim(); this._fsTaskTitle = raw; const v = raw==='' ? '' : `${Number(raw)}px`; this._saveGlobalUiSettings({ kid_task_title_size: v }); }} placeholder="16" style="flex:1;" />
+									<input type="number" min="10" max="40" step="1" .value=${(o||"").replace("px","")} @input=${l=>{let d=String(l.target.value||"").trim();this._fsTaskTitle=d;let m=d===""?"":`${Number(d)}px`;this._saveGlobalUiSettings({kid_task_title_size:m})}} placeholder="16" style="flex:1;" />
 									<span style="opacity:.8; white-space:nowrap;">px</span>
-									<button @click=${()=>{ this._fsTaskTitle=''; this._saveGlobalUiSettings({ kid_task_title_size: '' }); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+									<button @click=${()=>{this._fsTaskTitle="",this._saveGlobalUiSettings({kid_task_title_size:""})}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 								</div>
 							</div>
 							<div class="form-field">
-								<label style="font-weight:600;">${this._t('editor.color_group_task_points')}</label>
+								<label style="font-weight:600;">${this._t("editor.color_group_task_points")}</label>
 								<div style="display:flex; gap:8px; align-items:center;">
-									<input type="number" min="10" max="30" step="1" .value=${(fsPoints||'').replace('px','')} @input=${e=>{ const raw=String(e.target.value||'').trim(); this._fsTaskPoints = raw; const v = raw==='' ? '' : `${Number(raw)}px`; this._saveGlobalUiSettings({ kid_task_points_size: v }); }} placeholder="12" style="flex:1;" />
+									<input type="number" min="10" max="30" step="1" .value=${(c||"").replace("px","")} @input=${l=>{let d=String(l.target.value||"").trim();this._fsTaskPoints=d;let m=d===""?"":`${Number(d)}px`;this._saveGlobalUiSettings({kid_task_points_size:m})}} placeholder="12" style="flex:1;" />
 									<span style="opacity:.8; white-space:nowrap;">px</span>
-									<button @click=${()=>{ this._fsTaskPoints=''; this._saveGlobalUiSettings({ kid_task_points_size: '' }); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+									<button @click=${()=>{this._fsTaskPoints="",this._saveGlobalUiSettings({kid_task_points_size:""})}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 								</div>
 							</div>
 							<div class="form-field">
 								<label style="font-weight:600;">Task button text</label>
 								<div style="display:flex; gap:8px; align-items:center;">
-									<input type="number" min="10" max="30" step="1" .value=${(fsButton||'').replace('px','')} @input=${e=>{ const raw=String(e.target.value||'').trim(); this._fsTaskButton = raw; const v = raw==='' ? '' : `${Number(raw)}px`; this._saveGlobalUiSettings({ kid_task_button_size: v }); }} placeholder="14" style="flex:1;" />
+									<input type="number" min="10" max="30" step="1" .value=${(u||"").replace("px","")} @input=${l=>{let d=String(l.target.value||"").trim();this._fsTaskButton=d;let m=d===""?"":`${Number(d)}px`;this._saveGlobalUiSettings({kid_task_button_size:m})}} placeholder="14" style="flex:1;" />
 									<span style="opacity:.8; white-space:nowrap;">px</span>
-									<button @click=${()=>{ this._fsTaskButton=''; this._saveGlobalUiSettings({ kid_task_button_size: '' }); }} style="padding:6px 10px;">${this._t('form.clear')}</button>
+									<button @click=${()=>{this._fsTaskButton="",this._saveGlobalUiSettings({kid_task_button_size:""})}} style="padding:6px 10px;">${this._t("form.clear")}</button>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			` : ''}
+			`:""}
 
-			${cfg.mode==='kid' ? html`
+			${t.mode==="kid"?n`
 				<div class="section-box">
 					<div class="form-field">
-						<label>${this._t('editor.child_label')}</label>
-						${kids.length ? html`
-							<select @change=${e=>{ this._config={...cfg, child: e.target.value}; this._emit(); }}>
-								<option value="" ?selected=${!cfg.child}>${this._t('editor.child_select_prompt')}</option>
-								${cfg.child && !kids.includes(cfg.child) ? html`<option value=${cfg.child} ?selected=${true}>(custom) ${cfg.child}</option>`: ''}
-								${kids.map(n=> html`<option value=${n} ?selected=${n===cfg.child}>${n}</option>`) }
+						<label>${this._t("editor.child_label")}</label>
+						${e.length?n`
+							<select @change=${l=>{this._config={...t,child:l.target.value},this._emit()}}>
+								<option value="" ?selected=${!t.child}>${this._t("editor.child_select_prompt")}</option>
+								${t.child&&!e.includes(t.child)?n`<option value=${t.child} ?selected=${!0}>(custom) ${t.child}</option>`:""}
+								${e.map(l=>n`<option value=${l} ?selected=${l===t.child}>${l}</option>`)}
 							</select>
-						`: html`
-							<input .value=${cfg.child||''} @input=${e=>{ this._config={...cfg, child: e.target.value}; this._emit(); }} placeholder="${this._t('editor.child_placeholder')}" />
-							<small style="opacity:.8;">${this._t('editor.child_hint')}</small>
+						`:n`
+							<input .value=${t.child||""} @input=${l=>{this._config={...t,child:l.target.value},this._emit()}} placeholder="${this._t("editor.child_placeholder")}" />
+							<small style="opacity:.8;">${this._t("editor.child_hint")}</small>
 						`}
 					</div>
 				</div>
-			`:''}
-		</div>`;
-	}
-	static get styles(){
-		return css`
+			`:""}
+		</div>`}static get styles(){return Q`
 		.admin-sections{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;border:1px solid var(--divider-color);border-radius:8px;padding:10px}
 		.admin-sections label{display:flex;align-items:center;gap:6px;min-height:32px}
 		.admin-sections input[type=checkbox]{width:auto}
@@ -5390,13 +1588,55 @@ class Chores4KidsDevCardEditor extends LitElement{
 			label{ display:block; font-weight:600; margin-bottom:4px; }
 			input,select{ width:100%; padding:8px 10px; border-radius:8px; border:1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); }
 			ha-expansion-panel{ background: var(--ha-card-background, var(--card-background-color)); }
-		`;
-	}
-}
-try{ customElements.define('chores4kids-card-editor', Chores4KidsDevCardEditor); }catch(e){ /* ignore */ }
+		`}};try{customElements.define("chores4kids-card-editor",$t)}catch{}window.customCards=window.customCards||[];window.customCards.push({type:"chores4kids-card",name:"Chores4Kids (Parent/Child/Latest)",preview:!0,description:"Combined card \u2013 choose Parent, Child, or Latest tasks in the editor"});
+/*! Third-party licenses
+BSD 3-Clause License
 
-// Lovelace card registry
-window.customCards = window.customCards || [];
-window.customCards.push({ type: 'chores4kids-card', name: 'Chores4Kids (Parent/Child/Latest)', preview: true, description: 'Combined card – choose Parent, Child, or Latest tasks in the editor' });
+Copyright (c) 2017 Google LLC. All rights reserved.
 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Pictogrammers Free License
+--------------------------
+
+This icon collection is released as free, open source, and GPL friendly by
+the [Pictogrammers](http://pictogrammers.com/) icon group. You may use it
+for commercial projects, open source projects, or anything really.
+
+# Icons: Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+Some of the icons are redistributed under the Apache 2.0 license. All other
+icons are either redistributed under their respective licenses or are
+distributed under the Apache 2.0 license.
+
+# Fonts: Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+All web and desktop fonts are distributed under the Apache 2.0 license. Web
+and desktop fonts contain some icons that are redistributed under the Apache
+2.0 license. All other icons are either redistributed under their respective
+licenses or are distributed under the Apache 2.0 license.
+
+# Code: MIT (https://opensource.org/licenses/MIT)
+The MIT license applies to all non-font and non-icon files.
+*/

@@ -2,7 +2,7 @@
 
 [![Latest release downloads](https://img.shields.io/github/downloads/qlerup/chores4kids/latest/total?label=latest%20release%20downloads)](https://github.com/qlerup/chores4kids/releases/latest) [![Support the project on Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20the%20project-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/qlerup)
 
-Give each child a Home Assistant dashboard where they can start chores, earn points and choose rewards. Parents assign tasks and approve completions. The integration and all three dashboard views come in one package.
+Give each child a Home Assistant dashboard where they can start chores, earn points and choose rewards. Parents assign tasks and approve completions. The integration and all three dashboard views come in one package. The installed card and its icon search load directly from your Home Assistant server, including on local-network-only tablets.
 
 ## [Open the user guide](https://qlerup.github.io/chores4kids/)
 
@@ -34,3 +34,7 @@ New to the card? Follow [Create your first family dashboard](https://qlerup.gith
 [![Open this repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=qlerup&repository=chores4kids)
 
 [Releases and downloads](https://github.com/qlerup/chores4kids/releases) | [Report an issue](https://github.com/qlerup/chores4kids/issues) | [Support the project on Ko-fi](https://ko-fi.com/qlerup) | [Guide source](docs/index.md)
+
+## Building the dashboard card
+
+Edit `src/chores4kids-card.js`. Run `npm ci` and `npm run build`, then commit the generated `chores4kids-card.js` alongside the source change. The release ZIP ships this self-contained module.

@@ -11,6 +11,8 @@
 
 The integration places the bundled module at `/local/chores4kids-card.js` and registers it on storage-mode dashboards. If you manage dashboard resources in YAML, add that URL once with type `module` and reload the dashboard. If the editor still cannot find the card, see [resource troubleshooting](../troubleshooting.md).
 
+Once installed, the card, editor and built-in icon search load from Home Assistant over the local network. A tablet only needs a connection to the Home Assistant server to use these features.
+
 ## Upgrade from the separate card and integration
 
 Remove the old standalone HACS entries, install the bundled integration, then restart Home Assistant. Check dashboard resources for duplicate copies of the card and reload any open dashboards.

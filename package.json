@@ -1,0 +1,12 @@
+{
+  "name": "chores4kids-card",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-card.mjs"
+  },
+  "devDependencies": {
+    "@mdi/svg": "7.4.47",
+    "esbuild": "0.28.2",
+    "lit": "3.3.3"
+  }
+}
