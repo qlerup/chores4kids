@@ -762,7 +762,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await store.async_save()
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
-    hass.services.async_register(DOMAIN, "upload_task_icon", svc_upload_task_icon)
+    hass.services.async_register(DOMAIN, "upload_task_icon", _admin_only(svc_upload_task_icon))
 
     # Upload images for shop items into /config/www/chores4kids
     async def svc_upload_shop_image(call: ServiceCall):
@@ -786,7 +786,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await hass.async_add_executor_job(_write)
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
-    hass.services.async_register(DOMAIN, 'upload_shop_image', svc_upload_shop_image)
+    hass.services.async_register(DOMAIN, 'upload_shop_image', _admin_only(svc_upload_shop_image))
 
     async def svc_delete_uploaded_file(call: ServiceCall):
         """Delete a previously uploaded file from /config/www/chores4kids.
@@ -820,7 +820,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             raise ValueError('delete_failed') from ex
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
-    hass.services.async_register(DOMAIN, 'delete_uploaded_file', svc_delete_uploaded_file)
+    hass.services.async_register(DOMAIN, 'delete_uploaded_file', _admin_only(svc_delete_uploaded_file))
 
     async def svc_delete_completion_sound(call: ServiceCall):
         """Delete completion sound files from /config/www/chores4kids.
@@ -863,7 +863,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             raise
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
-    hass.services.async_register(DOMAIN, 'delete_completion_sound', svc_delete_completion_sound)
+    hass.services.async_register(DOMAIN, 'delete_completion_sound', _admin_only(svc_delete_completion_sound))
 
     async def svc_debug_mark_overdue(call: ServiceCall):
         """DEBUG: Manually mark a task as overdue for testing."""
