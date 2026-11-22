@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
+from homeassistant.exceptions import Unauthorized
 from homeassistant.const import Platform
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers import config_validation as cv
@@ -682,21 +683,36 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await store.clear_shop_history(call.data.get("child_id"))
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
-    hass.services.async_register(DOMAIN, "add_child", svc_add_child)
-    hass.services.async_register(DOMAIN, "rename_child", svc_rename_child)
-    hass.services.async_register(DOMAIN, "remove_child", svc_remove_child)
-    hass.services.async_register(DOMAIN, "add_task", svc_add_task)
-    hass.services.async_register(DOMAIN, "assign_task", svc_assign_task)
+    async def _require_admin(call: ServiceCall) -> None:
+        """Reject service calls from non-admin (non-parent) users."""
+        user_id = call.context.user_id
+        if user_id is None:
+            return  # Automation/script-originated calls (no HTTP user) are trusted.
+        user = await hass.auth.async_get_user(user_id)
+        if user is None or not user.is_admin:
+            raise Unauthorized(context=call.context)
+
+    def _admin_only(func):
+        async def _wrapped(call: ServiceCall):
+            await _require_admin(call)
+            return await func(call)
+        return _wrapped
+
+    hass.services.async_register(DOMAIN, "add_child", _admin_only(svc_add_child))
+    hass.services.async_register(DOMAIN, "rename_child", _admin_only(svc_rename_child))
+    hass.services.async_register(DOMAIN, "remove_child", _admin_only(svc_remove_child))
+    hass.services.async_register(DOMAIN, "add_task", _admin_only(svc_add_task))
+    hass.services.async_register(DOMAIN, "assign_task", _admin_only(svc_assign_task))
     hass.services.async_register(DOMAIN, "set_task_status", svc_set_task_status)
-    hass.services.async_register(DOMAIN, "approve_task", svc_approve_task)
+    hass.services.async_register(DOMAIN, "approve_task", _admin_only(svc_approve_task))
     hass.services.async_register(DOMAIN, "complete_bonus_task", svc_complete_bonus_task)
-    hass.services.async_register(DOMAIN, "approve_bonus_task", svc_approve_bonus_task)
-    hass.services.async_register(DOMAIN, "delete_task", svc_delete_task)
-    hass.services.async_register(DOMAIN, "update_task", svc_update_task)
-    hass.services.async_register(DOMAIN, "reset_points", svc_reset_points)
-    hass.services.async_register(DOMAIN, "add_points", svc_add_points)
-    hass.services.async_register(DOMAIN, "set_task_repeat", svc_set_task_repeat)
-    hass.services.async_register(DOMAIN, "set_task_icon", svc_set_task_icon)
+    hass.services.async_register(DOMAIN, "approve_bonus_task", _admin_only(svc_approve_bonus_task))
+    hass.services.async_register(DOMAIN, "delete_task", _admin_only(svc_delete_task))
+    hass.services.async_register(DOMAIN, "update_task", _admin_only(svc_update_task))
+    hass.services.async_register(DOMAIN, "reset_points", _admin_only(svc_reset_points))
+    hass.services.async_register(DOMAIN, "add_points", _admin_only(svc_add_points))
+    hass.services.async_register(DOMAIN, "set_task_repeat", _admin_only(svc_set_task_repeat))
+    hass.services.async_register(DOMAIN, "set_task_icon", _admin_only(svc_set_task_icon))
     # Categories
     async def svc_add_category(call: ServiceCall):
         await store.add_category(call.data["name"], call.data.get("color", ""))
@@ -718,20 +734,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await store.reorder_categories(call.data.get("order") or [])
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
-    hass.services.async_register(DOMAIN, "add_category", svc_add_category)
-    hass.services.async_register(DOMAIN, "rename_category", svc_rename_category)
-    hass.services.async_register(DOMAIN, "delete_category", svc_delete_category)
-    hass.services.async_register(DOMAIN, "set_category_color", svc_set_category_color)
-    hass.services.async_register(DOMAIN, "reorder_categories", svc_reorder_categories)
+    hass.services.async_register(DOMAIN, "add_category", _admin_only(svc_add_category))
+    hass.services.async_register(DOMAIN, "rename_category", _admin_only(svc_rename_category))
+    hass.services.async_register(DOMAIN, "delete_category", _admin_only(svc_delete_category))
+    hass.services.async_register(DOMAIN, "set_category_color", _admin_only(svc_set_category_color))
+    hass.services.async_register(DOMAIN, "reorder_categories", _admin_only(svc_reorder_categories))
     # Shop
-    hass.services.async_register(DOMAIN, "add_shop_item", svc_add_shop_item)
-    hass.services.async_register(DOMAIN, "update_shop_item", svc_update_shop_item)
-    hass.services.async_register(DOMAIN, "delete_shop_item", svc_delete_shop_item)
+    hass.services.async_register(DOMAIN, "add_shop_item", _admin_only(svc_add_shop_item))
+    hass.services.async_register(DOMAIN, "update_shop_item", _admin_only(svc_update_shop_item))
+    hass.services.async_register(DOMAIN, "delete_shop_item", _admin_only(svc_delete_shop_item))
     hass.services.async_register(DOMAIN, "buy_shop_item", svc_buy_shop_item)
-    hass.services.async_register(DOMAIN, "mark_purchase_delivered", svc_mark_purchase_delivered)
-    hass.services.async_register(DOMAIN, "clear_shop_history", svc_clear_shop_history)
+    hass.services.async_register(DOMAIN, "mark_purchase_delivered", _admin_only(svc_mark_purchase_delivered))
+    hass.services.async_register(DOMAIN, "clear_shop_history", _admin_only(svc_clear_shop_history))
     # Backwards/alias
-    hass.services.async_register(DOMAIN, "reset_shop_history", svc_clear_shop_history)
+    hass.services.async_register(DOMAIN, "reset_shop_history", _admin_only(svc_clear_shop_history))
 
     async def svc_upload_task_icon(call: ServiceCall):
         from .task_icons import save_task_icon
