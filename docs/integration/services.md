@@ -48,6 +48,10 @@ All names below use the `chores4kids.` prefix.
 | Shared settings and files | `set_ui_colors`, `upload_task_icon`, `upload_shop_image`, `delete_uploaded_file`, `delete_completion_sound` |
 | Maintenance and testing | `force_rollover`, `debug_mark_overdue`, `purge_orphans` |
 
+## Choose a reward’s audience
+
+Pass `child_ids` to `chores4kids.add_shop_item` or `chores4kids.update_shop_item` with the list of child IDs allowed to buy the reward. An empty list makes the item available to all children. Omitting the field on an update preserves the current selection.
+
 ## Record a reward delivery
 
 Pass `requires_delivery: true` to `chores4kids.add_shop_item` or `chores4kids.update_shop_item` to track future purchases of that reward. Use `chores4kids.mark_purchase_delivered` with the `purchase_id` from the shop sensor’s `purchases` list (the entry’s `id`). Repeating the action preserves the original delivery time. The shop sensor exposes `requires_delivery`, `delivered` and `delivered_at` per purchase.

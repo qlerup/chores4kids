@@ -642,6 +642,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             icon=call.data.get("icon"),
             image=call.data.get("image"),
             active=bool(call.data.get("active", True)),
+            child_ids=call.data.get("child_ids"),
             requires_delivery=cv.boolean(call.data.get("requires_delivery", False)),
             actions=call.data.get("actions"),
         )
@@ -655,6 +656,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             icon=call.data.get("icon"),
             image=call.data.get("image"),
             active=call.data.get("active"),
+            child_ids=call.data.get("child_ids"),
             requires_delivery=cv.boolean(call.data["requires_delivery"]) if "requires_delivery" in call.data else None,
             actions=call.data.get("actions"),
         )

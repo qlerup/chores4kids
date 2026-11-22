@@ -4,6 +4,18 @@
 
 Select **Open shop** on the parent card. Add a title and price, then choose an icon or upload an image. Keep the item **Active** while it is available. For example, offer *Choose a board game* for eight points and *Pick the movie* for fifteen.
 
+## Choose who sees a reward
+
+In the parent shop, open **Visible to** on a reward. Select one or more children and press **Save**. When creating a new reward, make the selection before pressing **Add item**. The default **All children** includes children added later. Selecting it again makes an existing reward available to everyone.
+
+![Selecting Emma on a reward in the parent shop](../../images/reward-audience-setting.png)
+
+In the example, Emma can choose a board game or pick the movie. Oliver sees only the shared movie reward. You can change the selection at any time. Previous purchases stay in the purchase history.
+
+[![Oliver's shop shows the shared movie reward](../../images/child-shop-selection.png)](../../images/choose-shop-children.gif)
+
+[Play walkthrough](../../images/choose-shop-children.gif) | [Full-size GIF](../../images/choose-shop-children.gif)
+
 ## Buy a reward
 
 On the child card, select **Point shop**. Choose **Buy** next to an affordable reward. The balance decreases by its price. Open **Purchase history** on the parent card to see the child, item and purchase time.

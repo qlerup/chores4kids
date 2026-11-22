@@ -96,6 +96,24 @@ class AutomationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.child.points, 3)
         self.assertEqual([r["task_id"] for r in self.store.activity_history if r["points"] < 0], ["late"])
 
+    async def test_shop_audience_is_enforced_before_payment(self):
+        self.store.items = []
+        self.store.purchases = []
+        self.child.points = 12
+        item = await self.store.add_shop_item("Movie", 3, child_ids=["other"])
+        with self.assertRaisesRegex(ValueError, "unavailable"):
+            await self.store.buy_shop_item(self.child.id, item.id)
+        self.assertEqual(self.child.points, 12)
+        self.assertEqual(self.store.purchases, [])
+        await self.store.update_shop_item(item.id, title="Choose movie")
+        self.assertEqual(item.child_ids, ["other"])
+        await self.store.update_shop_item(item.id, child_ids=["other", self.child.id])
+        await self.store.buy_shop_item(self.child.id, item.id)
+        self.assertEqual(self.child.points, 9)
+        await self.store.update_shop_item(item.id, child_ids=[])
+        self.assertEqual(item.child_ids, [])
+        self.assertEqual(storage.ShopItem(id="old", title="Game", price=1).child_ids, [])
+
     async def test_reward_delivery_is_snapshotted_and_idempotent(self):
         self.store.items = []
         self.store.purchases = []

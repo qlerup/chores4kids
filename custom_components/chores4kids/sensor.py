@@ -374,6 +374,7 @@ class Chores4KidsShopSensor(SensorEntity):
             "icon": i.icon,
             "image": getattr(i, 'image', ''),
             "active": i.active,
+            "child_ids": list(i.child_ids),
             "requires_delivery": i.requires_delivery,
             "actions": getattr(i, 'actions', []),
         } for i in self._store.items]

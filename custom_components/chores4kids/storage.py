@@ -1934,9 +1934,17 @@ class KidsChoresStore:
         await self.async_save()
 
     # --- Shop API ---
-    async def add_shop_item(self, title: str, price: int, icon: Optional[str] = None, image: Optional[str] = None, active: bool = True, actions: Optional[List[Dict[str, Any]]] = None, requires_delivery: bool = False):
+    def _shop_child_ids(self, child_ids):
+        if not isinstance(child_ids, list) or not all(isinstance(cid, str) for cid in child_ids):
+            raise ValueError("child_ids must be a list of child IDs")
+        for cid in child_ids:
+            self._get_child(cid)
+        return list(dict.fromkeys(child_ids))
+
+    async def add_shop_item(self, title: str, price: int, icon: Optional[str] = None, image: Optional[str] = None, active: bool = True, actions: Optional[List[Dict[str, Any]]] = None, requires_delivery: bool = False, child_ids: Optional[list[str]] = None):
         sid = str(uuid4())
-        it = ShopItem(id=sid, title=str(title).strip(), price=int(price), icon=(icon or "").strip(), image=(image or "").strip(), active=bool(active), requires_delivery=requires_delivery)
+        it = ShopItem(id=sid, title=str(title).strip(), price=int(price), icon=(icon or "").strip(), image=(image or "").strip(), active=bool(active), requires_delivery=requires_delivery,
+                      child_ids=self._shop_child_ids(child_ids if child_ids is not None else []))
         try:
             it.actions = self._normalize_actions(actions or [])
         except Exception:
@@ -1945,8 +1953,10 @@ class KidsChoresStore:
         await self.async_save()
         return it
 
-    async def update_shop_item(self, item_id: str, title: Optional[str] = None, price: Optional[int] = None, icon: Optional[str] = None, image: Optional[str] = None, active: Optional[bool] = None, actions: Optional[List[Dict[str, Any]]] = None, requires_delivery: Optional[bool] = None):
+    async def update_shop_item(self, item_id: str, title: Optional[str] = None, price: Optional[int] = None, icon: Optional[str] = None, image: Optional[str] = None, active: Optional[bool] = None, actions: Optional[List[Dict[str, Any]]] = None, requires_delivery: Optional[bool] = None, child_ids: Optional[list[str]] = None):
         it = self._get_item(item_id)
+        if child_ids is not None:
+            it.child_ids = self._shop_child_ids(child_ids)
         if requires_delivery is not None:
             it.requires_delivery = requires_delivery
         if title is not None:
@@ -2001,6 +2011,8 @@ class KidsChoresStore:
     async def buy_shop_item(self, child_id: str, item_id: str):
         child = self._get_child(child_id)
         it = self._get_item(item_id)
+        if it.child_ids and child_id not in it.child_ids:
+            raise ValueError("shop_item_unavailable_for_child")
         price = int(it.price)
         if child.points < price:
             raise ValueError("insufficient_points")
@@ -2255,6 +2267,7 @@ class ShopItem:
     image: str = ""
     active: bool = True
     actions: List[Dict[str, Any]] = field(default_factory=list)
+    child_ids: list[str] = field(default_factory=list)
     requires_delivery: bool = False
 
 @dataclass

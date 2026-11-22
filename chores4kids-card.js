@@ -11,6 +11,7 @@ const C4K_ADMIN_SECTIONS = {
 const C4K_I18N = {
 	en: {
 		'delivery.required': 'Requires delivery', 'delivery.pending': 'Awaiting delivery', 'delivery.mark': 'Mark as delivered', 'delivery.done': 'Delivered',
+		'shop.visible_to': 'Visible to', 'shop.all_children': 'All children',
 		'penalty.enable': 'Deduct points if late', 'status.deadline_missed': 'Deadline missed',
 		'editor.sections': 'Sections on this card',
 		'history.title': 'Activity history',
@@ -158,6 +159,7 @@ const C4K_I18N = {
 	},
 	nl: {
 		'delivery.required': 'Overhandiging vereist', 'delivery.pending': 'Wacht op overhandiging', 'delivery.mark': 'Markeer als overhandigd', 'delivery.done': 'Overhandigd',
+		'shop.visible_to': 'Zichtbaar voor', 'shop.all_children': 'Alle kinderen',
 		'penalty.enable': 'Punten aftrekken bij te laat afronden', 'status.deadline_missed': 'Deadline gemist',
 		'editor.sections': 'Onderdelen op deze kaart',
 		'history.title': 'Activiteitengeschiedenis',
@@ -401,6 +403,7 @@ const C4K_I18N = {
 	},
 	tr: {
 		'delivery.required': 'Teslimat gerekiyor', 'delivery.pending': 'Teslimat bekleniyor', 'delivery.mark': 'Teslim edildi olarak işaretle', 'delivery.done': 'Teslim edildi',
+		'shop.visible_to': 'Görebilenler', 'shop.all_children': 'Tüm çocuklar',
 		'penalty.enable': 'Gecikirse puan düş', 'status.deadline_missed': 'Süre doldu',
 		'editor.sections': 'Bu karttaki bölümler',
 		'history.title': 'Etkinlik geçmişi',
@@ -643,6 +646,7 @@ const C4K_I18N = {
 	},
 	da: {
 		'delivery.required': 'Kræver udlevering', 'delivery.pending': 'Afventer udlevering', 'delivery.mark': 'Markér som udleveret', 'delivery.done': 'Udleveret',
+		'shop.visible_to': 'Vises for', 'shop.all_children': 'Alle børn',
 		'penalty.enable': 'Træk point ved overskredet frist', 'status.deadline_missed': 'Frist overskredet',
 		'editor.sections': 'Sektioner på dette kort',
 		'history.title': 'Aktivitetshistorik',
@@ -780,6 +784,7 @@ const C4K_I18N = {
 		},
 			sv: {
 		'delivery.required': 'Kräver utlämning', 'delivery.pending': 'Väntar på utlämning', 'delivery.mark': 'Markera som utlämnad', 'delivery.done': 'Utlämnad',
+		'shop.visible_to': 'Visas för', 'shop.all_children': 'Alla barn',
 		'penalty.enable': 'Dra av poäng vid missad tidsfrist', 'status.deadline_missed': 'Tidsfristen passerad',
 		'editor.sections': 'Avsnitt på det här kortet',
 		'history.title': 'Aktivitetshistorik',
@@ -874,6 +879,7 @@ const C4K_I18N = {
 		},
 			nb: {
 		'delivery.required': 'Krever utlevering', 'delivery.pending': 'Venter på utlevering', 'delivery.mark': 'Merk som utlevert', 'delivery.done': 'Utlevert',
+		'shop.visible_to': 'Vises for', 'shop.all_children': 'Alle barn',
 		'penalty.enable': 'Trekk poeng ved overskredet frist', 'status.deadline_missed': 'Fristen er overskredet',
 		'editor.sections': 'Seksjoner på dette kortet',
 		'history.title': 'Aktivitetshistorikk',
@@ -968,6 +974,7 @@ const C4K_I18N = {
 		},
 			de: {
 		'delivery.required': 'Übergabe erforderlich', 'delivery.pending': 'Ausstehende Übergaben', 'delivery.mark': 'Als übergeben markieren', 'delivery.done': 'Übergeben',
+		'shop.visible_to': 'Sichtbar für', 'shop.all_children': 'Alle Kinder',
 		'penalty.enable': 'Bei verpasster Frist Punkte abziehen', 'status.deadline_missed': 'Frist verpasst',
 		'editor.sections': 'Abschnitte auf dieser Karte',
 		'history.title': 'Aktivitätsverlauf',
@@ -1062,6 +1069,7 @@ const C4K_I18N = {
 		},
 			es: {
 		'delivery.required': 'Requiere entrega', 'delivery.pending': 'Pendiente de entrega', 'delivery.mark': 'Marcar como entregado', 'delivery.done': 'Entregado',
+		'shop.visible_to': 'Visible para', 'shop.all_children': 'Todos los niños',
 		'penalty.enable': 'Restar puntos al vencer el plazo', 'status.deadline_missed': 'Plazo vencido',
 		'editor.sections': 'Secciones de esta tarjeta',
 		'history.title': 'Historial de actividad',
@@ -1156,6 +1164,7 @@ const C4K_I18N = {
 		},
 			fr: {
 		'delivery.required': 'Remise nécessaire', 'delivery.pending': 'En attente de remise', 'delivery.mark': 'Marquer comme remis', 'delivery.done': 'Remis',
+		'shop.visible_to': 'Visible pour', 'shop.all_children': 'Tous les enfants',
 		'penalty.enable': 'Retirer des points en cas de retard', 'status.deadline_missed': 'Échéance dépassée',
 		'editor.sections': 'Sections de cette carte',
 		'history.title': 'Historique des activités',
@@ -1250,6 +1259,7 @@ const C4K_I18N = {
 		},
 			fi: {
 		'delivery.required': 'Vaatii luovutuksen', 'delivery.pending': 'Odottaa luovutusta', 'delivery.mark': 'Merkitse luovutetuksi', 'delivery.done': 'Luovutettu',
+		'shop.visible_to': 'Näkyy lapsille', 'shop.all_children': 'Kaikki lapset',
 		'penalty.enable': 'Vähennä pisteitä myöhästymisestä', 'status.deadline_missed': 'Määräaika ylittyi',
 		'editor.sections': 'Tämän kortin osiot',
 		'history.title': 'Tehtävähistoria',
@@ -1344,6 +1354,7 @@ const C4K_I18N = {
 		},
 			it: {
 		'delivery.required': 'Richiede consegna', 'delivery.pending': 'In attesa di consegna', 'delivery.mark': 'Segna come consegnato', 'delivery.done': 'Consegnato',
+		'shop.visible_to': 'Visibile a', 'shop.all_children': 'Tutti i bambini',
 		'penalty.enable': 'Sottrai punti in caso di ritardo', 'status.deadline_missed': 'Scadenza superata',
 		'editor.sections': 'Sezioni di questa scheda',
 		'history.title': 'Cronologia attività',
@@ -1549,7 +1560,7 @@ class Chores4KidsDevCard extends LitElement {
 			_taskBonusEnabled: { state: true }, _taskBonusTitle: { state: true }, _taskBonusPoints: { state: true },
 			_repeatEnabled: { state: true }, _weeklyEnabled: { state: true }, _monthlyEnabled: { state: true }, _repeatAssign: { state: true }, _persistUntilDone: { state: true }, _markOverdue: { state: true }, _penaltyEnabled: {state:true}, _penaltyAmount: {state:true}, _penaltyTime: {state:true}, _multiplePerDay: { state: true }, _quickComplete: { state: true }, _skipApproval: { state: true }, _fastestWins: { state: true }, _editingTask: { state: true }, _tasksModalOpen: { state: true },
 			_customIconModalOpen: { state: true }, _customIconSearch: { state: true }, _customIconPreview: { state: true }, _customIconLabel: { state: true },
-			_shopModalOpen: { state: true }, _shopTitle: { state: true }, _shopRequiresDelivery: { state: true }, _shopPrice: { state: true }, _shopImage: { state: true }, _editItem: { state: true }, _advItem: { state: true },
+			_shopModalOpen: { state: true }, _shopTitle: { state: true }, _shopRequiresDelivery: { state: true }, _shopAudienceDrafts: {state:true}, _shopPrice: { state: true }, _shopImage: { state: true }, _editItem: { state: true }, _advItem: { state: true },
 			// UI for nicer multi-assign dropdown
 			_openAssignMenuFor: { state: true }, _assignMenuStyle: { state: true },
 			_openRepeatMenu: { state: true },
@@ -1717,6 +1728,7 @@ class Chores4KidsDevCard extends LitElement {
 		.sort-handle{ cursor: grab; opacity:.8; }
 		.sort-item.dragover{ outline:2px solid var(--primary-color); }
 		/* Admin shop responsive tweaks */
+		.shop-audience{margin:8px 0}.shop-audience summary{cursor:pointer}.shop-audience label{display:flex;gap:6px;align-items:center;min-height:30px}.shop-audience input[type=checkbox]{width:auto}
 		.shop-modal h3{ margin: 0 0 8px; }
 		.shop-add-row{ display:flex; align-items:center; gap:12px; }
 		.shop-add-left{ display:flex; align-items:center; gap:10px; flex:2 1 360px; }
@@ -1876,6 +1888,7 @@ class Chores4KidsDevCard extends LitElement {
 		.kv{ display:flex; justify-content:space-between; gap:10px; }
 
 		/* Reduce extra whitespace inside shop modal */
+		.shop-audience{margin:8px 0}.shop-audience summary{cursor:pointer}.shop-audience label{display:flex;gap:6px;align-items:center;min-height:30px}.shop-audience input[type=checkbox]{width:auto}
 		.shop-modal h3{ margin: 0 0 8px; }
 		.shop-modal .row{ margin: 4px 0 !important; }
 		.shop-modal .row.fields{ margin: 4px 0 !important; gap:6px !important; }
@@ -2050,6 +2063,7 @@ class Chores4KidsDevCard extends LitElement {
 		// config: { mode: 'admin' | 'kid', child?: 'Name' }
 		this.config = config || {};
 		this._mode = this.config.mode || 'admin';
+		if (this._childName !== (this.config.child || '')) this._idChild = null;
 		this._childName = this.config.child || '';
 		this._applyColorVars();
 	}
@@ -3288,6 +3302,31 @@ class Chores4KidsDevCard extends LitElement {
 			</div>
 		</div>`;
 	}
+	_shopAudience(item){
+		const key = item?.id || 'new';
+		const drafts = this._shopAudienceDrafts || {};
+		const selected = drafts[key] ?? item?.child_ids ?? [];
+		const children = this._store.children;
+		const visible = children.filter(child => selected.includes(child.id));
+		const summary = selected.length ? visible.map(child=>child.name).join(', ') || '—' : this._t('shop.all_children');
+		const change = ids => { this._shopAudienceDrafts = {...this._shopAudienceDrafts, [key]:ids}; };
+		return html`<details class="shop-audience"><summary>${this._t('shop.visible_to')} · ${summary}</summary>
+			<label><input type="checkbox" .checked=${!selected.length} @change=${e=>{
+				change([]); e.target.checked=true;
+			}}> ${this._t('shop.all_children')}</label>
+			${children.map(child=>html`<label><input type="checkbox" .checked=${selected.includes(child.id)}
+				@change=${e=>change([...visible.filter(c=>c.id!==child.id).map(c=>c.id), ...(e.target.checked ? [child.id] : [])])}> ${child.name}</label>`)}
+			${item && drafts[key] ? html`<button class="btn-primary" @click=${async ()=>{
+				await this.hass.callService('chores4kids','update_shop_item',{item_id:item.id,child_ids:selected});
+				if (this._shopAudienceDrafts[key]===selected) this._clearShopAudience(key);
+			}}>${this._t('form.save')}</button>` : ''}
+		</details>`;
+	}
+	_clearShopAudience(key){
+		const drafts = {...this._shopAudienceDrafts};
+		delete drafts[key];
+		this._shopAudienceDrafts = drafts;
+	}
 	_deliveryToggle(item){
 		return html`<label><input type="checkbox" .checked=${!!item.requires_delivery} @change=${async e=>{
 			const input=e.target;
@@ -3322,6 +3361,7 @@ class Chores4KidsDevCard extends LitElement {
 					<div class="form-field points"><input type="number" placeholder="${this._t('shop.price')}" .value=${this._shopPrice||''} @input=${e=>this._shopPrice=e.target.value} /></div>
 				</div>
 				<label><input type="checkbox" .checked=${!!this._shopRequiresDelivery} @change=${e=>this._shopRequiresDelivery=e.target.checked}> ${this._t('delivery.required')}</label>
+				${this._shopAudience(null)}
 				<div class="shop-add-row">
 					<div class="shop-add-left">
 						${this._shopImage ? html`<img class="img-preview" src="${this._resolveUrl(this._shopImage)}" alt="preview" loading="lazy" decoding="async"/>` : html`<div class="img-preview" style="display:grid;place-items:center;color:var(--secondary-text-color);">${this._t('shop.image')}</div>`}
@@ -3336,7 +3376,7 @@ class Chores4KidsDevCard extends LitElement {
 						${this._store.items.map(i=> html`
 							${this._editItem && this._editItem.id===i.id ? html`
 								<tr>
-									<td data-label="${this._t('shop.item')}"><div style="display:flex; align-items:center; gap:8px;">${this._editItem.image? html`<img class="img-preview" style="width:36px;height:36px;" src="${this._resolveUrl(this._editItem.image)}" loading="lazy" decoding="async">`:''}<input style="max-width:220px;" .value=${this._editItem.title||''} @input=${e=> this._editItem={...this._editItem, title:e.target.value}} /><input type="file" accept="image/*" @change=${this._onPickEditImage} /></div></td>
+									<td data-label="${this._t('shop.item')}"><div style="display:flex; align-items:center; gap:8px;">${this._editItem.image? html`<img class="img-preview" style="width:36px;height:36px;" src="${this._resolveUrl(this._editItem.image)}" loading="lazy" decoding="async">`:''}<input style="max-width:220px;" .value=${this._editItem.title||''} @input=${e=> this._editItem={...this._editItem, title:e.target.value}} /><input type="file" accept="image/*" @change=${this._onPickEditImage} /></div>${this._shopAudience(i)}</td>
 									<td data-label="${this._t('shop.price')}"><input type="number" style="max-width:120px;" .value=${this._editItem.price||0} @input=${e=> this._editItem={...this._editItem, price:Number(e.target.value||0)}} /></td>
 									<td data-label="${this._t('shop.active')}"><input type="checkbox" .checked=${this._editItem.active!==false} @change=${e=> this._editItem={...this._editItem, active: e.target.checked}} /></td>
 									<td>${this._deliveryToggle(i)}</td>
@@ -3344,7 +3384,7 @@ class Chores4KidsDevCard extends LitElement {
 								</tr>
 							`: html`
 								<tr>
-									<td data-label="${this._t('shop.item')}">${i.image? html`<img class="img-preview" style="width:36px;height:36px;margin-right:6px;vertical-align:middle;" src="${this._resolveUrl(i.image)}" loading="lazy" decoding="async">`:''}${i.title}</td>
+									<td data-label="${this._t('shop.item')}">${i.image? html`<img class="img-preview" style="width:36px;height:36px;margin-right:6px;vertical-align:middle;" src="${this._resolveUrl(i.image)}" loading="lazy" decoding="async">`:''}${i.title}${this._shopAudience(i)}</td>
 									<td data-label="${this._t('shop.price')}"><b>${i.price} ${this._t('lbl.points')}</b></td>
 									<td data-label="${this._t('shop.active')}"><input type="checkbox" .checked=${i.active!==false} @change=${e=> this._toggleItemActive(i,e)} /></td>
 									<td>${this._deliveryToggle(i)}</td>
@@ -3369,7 +3409,7 @@ class Chores4KidsDevCard extends LitElement {
 																									<ha-switch .checked=${i.active!==false} @change=${e=> this._toggleItemActive(i,e)}></ha-switch>
 																								</label>
 											</div>
-											${this._deliveryToggle(i)}
+											${this._deliveryToggle(i)} ${this._shopAudience(i)}
 											<div class="shop-admin-actions">
 												<button class="btn-ghost" @click=${()=> this._startEditItem(i)}>${this._t('btn.edit')}</button>
 												<button class="btn-ghost" @click=${()=> this._openAdvanced(i)}>${this._t('shop.advanced')}</button>
@@ -3819,7 +3859,7 @@ class Chores4KidsDevCard extends LitElement {
 		// shop items
 		let shopSensor = this._idShop && this.hass.states[this._idShop];
 		if (!shopSensor){ shopSensor = Object.values(this.hass.states).find(st=> st?.entity_id?.includes('chores4kids_shop')); if (shopSensor?.entity_id) this._idShop = shopSensor.entity_id; }
-		const items = (pointsEnabled && this._shopOpen) ? (shopSensor?.attributes?.items||[]).filter(i=> i.active!==false) : [];
+		const items = (pointsEnabled && this._shopOpen) ? (shopSensor?.attributes?.items||[]).filter(i=>i.active!==false && (!i.child_ids?.length || i.child_ids.includes(s.attributes.child_id))) : [];
 
 		const deliveries = this._shopOpen ? (shopSensor?.attributes?.purchases || []).filter(p=>p.child_id===s.attributes.child_id && p.requires_delivery).reverse() : [];
 		const renderTaskGroups = (taskList)=>{
@@ -4484,7 +4524,7 @@ class Chores4KidsDevCard extends LitElement {
 		this._clearCompleted(taskId);
 		this._setBonusVisualState(taskId, 'assigned');
 	}
-	async _addShopItem(){ if(!this._pointsEnabled()) return; const title=String(this._shopTitle||'').trim(); const price=Number(this._shopPrice||0); if(!title || !Number.isFinite(price)) return; await this.hass.callService('chores4kids','add_shop_item',{ title, price, requires_delivery: !!this._shopRequiresDelivery, image: this._shopImage||undefined }); this._shopRequiresDelivery=false; this._shopTitle=this._shopPrice=this._shopImage=''; try{ const el=this.shadowRoot.getElementById('c4k-shop-file'); if(el) el.value=''; }catch{} }
+	async _addShopItem(){ if(!this._pointsEnabled()) return; const title=String(this._shopTitle||'').trim(); const price=Number(this._shopPrice||0); if(!title || !Number.isFinite(price)) return; await this.hass.callService('chores4kids','add_shop_item',{ title, price, child_ids: this._shopAudienceDrafts?.new || [], requires_delivery: !!this._shopRequiresDelivery, image: this._shopImage||undefined }); this._clearShopAudience('new'); this._shopRequiresDelivery=false; this._shopTitle=this._shopPrice=this._shopImage=''; try{ const el=this.shadowRoot.getElementById('c4k-shop-file'); if(el) el.value=''; }catch{} }
 	async _deleteShopItem(id){ if(!this._pointsEnabled()) return; if(!id) return; await this.hass.callService('chores4kids','delete_shop_item',{ item_id: id }); }
 	async _clearShopHistory(){
 		if(!this._pointsEnabled()) return;
