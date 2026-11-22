@@ -10,6 +10,21 @@ const context=vm.createContext({LitElement:Element,html:(s,...v)=>({s,v}),css:(s
 vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../chores4kids-card.js'),'utf8')
   .replace(/^import .*?;\s*/,''),context);
 const Card=registry.get('chores4kids-card');
+test('shared reward names apply to all card modes without translating child names or the unit', () => {
+  const label = 'Stars {name}';
+  const sensor = {entity_id: 'sensor.renamed_ui', attributes: {chore_columns: '2', points_label: label}};
+  const hass = {language: 'da', states: {[sensor.entity_id]: sensor}};
+  for (const mode of ['admin','kid','overview']) {
+    const instance = Object.create(Card.prototype);
+    instance.hass = hass;
+    instance.setConfig({mode});
+    assert.equal(instance._t('th.points'), label);
+    assert.equal(instance._t('points.title', {name: 'Emma'}), 'Tilføj Stars {name} til Emma');
+    assert.equal(instance._t('lbl.early_bonus_by', {points: 5, date: '24/12'}), '+5 Stars {name} ved udførelse senest 24/12');
+    instance.hass = {...hass, states: {}};
+    assert.equal(instance._t('lbl.points'), 'point');
+  }
+});
 test('a typed icon ID can be previewed and selected from the task picker', () => {
   const instance = Object.create(Card.prototype);
   instance.hass = {language: 'en'};

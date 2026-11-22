@@ -326,6 +326,12 @@ set_ui_colors:
       required: false
     approved_bg:
       required: false
+    points_label:
+      required: false
+      description: Shared reward unit name. An empty string restores the translated default.
+    chore_columns:
+      required: false
+      description: Maximum columns in task lists (auto, 1, 2 or 3).
     approved_text:
       required: false
     start_task_bg:

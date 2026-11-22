@@ -32,6 +32,14 @@ Choose a task below, or use **Find a feature or page** in the navigation. Each a
 
 <div class="grid cards" markdown>
 
+-   **[Set a family reward name and task layout](appearance.md#set-a-family-reward-name-and-task-layout)**
+
+    Choose the unit and task columns in the parent editor and see both settings take effect across dashboards.
+
+    [![Shared Satoshi labels and a two-column child dashboard](../../images/family-task-layout.png)](../../images/family-task-settings.gif)
+
+    [Play walkthrough](../../images/family-task-settings.gif) | [Full-size GIF](../../images/family-task-settings.gif)
+
 -   **[Choose or upload task icons](appearance.md#upload-your-own-artwork)**
 
     Use artwork shared across the family's dashboards.

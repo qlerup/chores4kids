@@ -306,6 +306,8 @@ class Chores4KidsUiSensor(SensorEntity):
         # expose explicit keys for stable frontend lookup
         return {
             "task_icons": dict(self._store.task_icons),
+            "points_label": self._store.points_label,
+            "chore_columns": self._store.chore_columns,
             "enable_points": bool(getattr(self._store, "enable_points", True)),
             "confetti_enabled": bool(getattr(self._store, "confetti_enabled", True)),
             "notify_service": str(getattr(self._store, "notify_service", "") or ""),

@@ -4,6 +4,23 @@ import { LitElement, html, css } from "https://unpkg.com/lit?module";
 // Unified i18n (admin + child keys)
 const C4K_I18N = {
 	en: {
+		'editor.unit_name': 'Reward unit name',
+		'editor.task_columns': 'Task columns',
+		'editor.columns_auto': 'Auto',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Early bonus ({unit})',
+		'ph.time_bonus_points.custom': 'Time bonus ({unit})',
+		'btn.add_points.custom': 'Add {unit}',
+		'btn.reset_points.custom': 'Reset {unit}',
+		'points.title.custom': 'Add {unit} to {name}',
+		'err.points_required.custom': 'Enter an amount in {unit}',
+		'err.points_number.custom': 'Enter a number for {unit}',
+		'err.points_positive.custom': 'Enter zero or more {unit}',
+		'shop.title.custom': '{unit} shop',
+		'lbl.early_bonus_by.custom': '+{points} {unit} if done by {date}',
+		'editor.enable_points_help.custom': 'Show the balance, shop and actions for {unit}',
+		'editor.color_group_kid_points.custom': 'Total balance ({unit})',
+		'editor.color_group_task_points.custom': 'Task reward ({unit})',
 		'icon.library': 'Task icons', 'icon.upload_failed': 'Upload failed',
 		'ui.multiple_per_day': 'Allow multiple completions per day',
 		'editor.language_name': 'English', 'editor.language': 'Language', 'editor.language_auto': 'Auto detect',
@@ -124,6 +141,23 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Empty = default'
 	},
 	nl: {
+		'editor.unit_name': 'Naam van de beloningseenheid',
+		'editor.task_columns': 'Taakkolommen',
+		'editor.columns_auto': 'Automatisch',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Vroege bonus ({unit})',
+		'ph.time_bonus_points.custom': 'Tijdbonus ({unit})',
+		'btn.add_points.custom': '{unit} toevoegen',
+		'btn.reset_points.custom': '{unit} resetten',
+		'points.title.custom': '{unit} toevoegen aan {name}',
+		'err.points_required.custom': 'Vul een bedrag in {unit} in',
+		'err.points_number.custom': 'Voer een getal in voor {unit}',
+		'err.points_positive.custom': 'Vul minstens 0 {unit} in',
+		'shop.title.custom': 'Winkel voor {unit}',
+		'lbl.early_bonus_by.custom': '+{points} {unit} indien klaar op of voor {date}',
+		'editor.enable_points_help.custom': 'Toon saldo, winkel en acties voor {unit}',
+		'editor.color_group_kid_points.custom': 'Totaalsaldo ({unit})',
+		'editor.color_group_task_points.custom': 'Taakbeloning ({unit})',
 		'icon.library': 'Taakpictogrammen', 'icon.upload_failed': 'Uploaden mislukt',
 		'ui.multiple_per_day': 'Meerdere keren per dag uitvoeren',
 		'editor.language_name': 'Nederlands', 'editor.language': 'Taal', 'editor.language_auto': 'Automatisch detecteren',
@@ -340,6 +374,23 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Leeg = standaard',
 	},
 	tr: {
+		'editor.unit_name': 'Ödül biriminin adı',
+		'editor.task_columns': 'Görev sütunları',
+		'editor.columns_auto': 'Otomatik',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Erken bitirme bonusu ({unit})',
+		'ph.time_bonus_points.custom': 'Zaman bonusu ({unit})',
+		'btn.add_points.custom': '{unit} ekle',
+		'btn.reset_points.custom': '{unit} sıfırla',
+		'points.title.custom': '{name} için {unit} ekle',
+		'err.points_required.custom': '{unit} miktarını girin',
+		'err.points_number.custom': '{unit} için sayı girin',
+		'err.points_positive.custom': 'En az 0 {unit} girin',
+		'shop.title.custom': '{unit} mağazası',
+		'lbl.early_bonus_by.custom': '{date} tarihine kadar bitirirsen +{points} {unit}',
+		'editor.enable_points_help.custom': '{unit} için bakiyeyi, mağazayı ve işlemleri göster',
+		'editor.color_group_kid_points.custom': 'Toplam bakiye ({unit})',
+		'editor.color_group_task_points.custom': 'Görev ödülü ({unit})',
 		'icon.library': 'Görev simgeleri', 'icon.upload_failed': 'Yükleme başarısız',
 		'ui.multiple_per_day': 'Günde birden fazla kez tamamlanabilir',
 		'editor.language_name': 'Türkçe', 'editor.language': 'Dil', 'editor.language_auto': 'Otomatik algıla',
@@ -555,6 +606,23 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Varsayılanı kullanmak için boş bırakın',
 	},
 	da: {
+		'editor.unit_name': 'Navn på belønningsenhed',
+		'editor.task_columns': 'Opgavekolonner',
+		'editor.columns_auto': 'Automatisk',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Tidlig bonus ({unit})',
+		'ph.time_bonus_points.custom': 'Tidsbonus ({unit})',
+		'btn.add_points.custom': 'Tilføj {unit}',
+		'btn.reset_points.custom': 'Nulstil {unit}',
+		'points.title.custom': 'Tilføj {unit} til {name}',
+		'err.points_required.custom': 'Angiv et beløb i {unit}',
+		'err.points_number.custom': 'Angiv et tal for {unit}',
+		'err.points_positive.custom': 'Angiv mindst 0 {unit}',
+		'shop.title.custom': 'Butik med {unit}',
+		'lbl.early_bonus_by.custom': '+{points} {unit} ved udførelse senest {date}',
+		'editor.enable_points_help.custom': 'Vis saldo, butik og handlinger for {unit}',
+		'editor.color_group_kid_points.custom': 'Samlet saldo ({unit})',
+		'editor.color_group_task_points.custom': 'Opgavens belønning ({unit})',
 		'icon.library': 'Opgaveikoner', 'icon.upload_failed': 'Upload mislykkedes',
 		'ui.multiple_per_day': 'Kan udføres flere gange om dagen',
 		'editor.language_name': 'Dansk', 'editor.language': 'Sprog', 'editor.language_auto': 'Registrer automatisk',
@@ -665,6 +733,23 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			sv: {
+		'editor.unit_name': 'Namn på belöningsenheten',
+		'editor.task_columns': 'Uppgiftskolumner',
+		'editor.columns_auto': 'Automatiskt',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Tidig bonus ({unit})',
+		'ph.time_bonus_points.custom': 'Tidsbonus ({unit})',
+		'btn.add_points.custom': 'Lägg till {unit}',
+		'btn.reset_points.custom': 'Nollställ {unit}',
+		'points.title.custom': 'Lägg till {unit} för {name}',
+		'err.points_required.custom': 'Ange ett belopp i {unit}',
+		'err.points_number.custom': 'Ange ett tal för {unit}',
+		'err.points_positive.custom': 'Ange minst 0 {unit}',
+		'shop.title.custom': 'Butik för {unit}',
+		'lbl.early_bonus_by.custom': '+{points} {unit} om klart senast {date}',
+		'editor.enable_points_help.custom': 'Visa saldo, butik och åtgärder för {unit}',
+		'editor.color_group_kid_points.custom': 'Totalt saldo ({unit})',
+		'editor.color_group_task_points.custom': 'Uppgiftsbelöning ({unit})',
 		'icon.library': 'Uppgiftsikoner', 'icon.upload_failed': 'Uppladdningen misslyckades',
 		'ui.multiple_per_day': 'Kan utföras flera gånger om dagen',
 		'editor.language_name': 'Svenska', 'editor.language': 'Språk', 'editor.language_auto': 'Identifiera automatiskt',
@@ -732,6 +817,23 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tomt = standard'
 		},
 			nb: {
+		'editor.unit_name': 'Navn på belønningsenhet',
+		'editor.task_columns': 'Oppgavekolonner',
+		'editor.columns_auto': 'Automatisk',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Tidlig bonus ({unit})',
+		'ph.time_bonus_points.custom': 'Tidsbonus ({unit})',
+		'btn.add_points.custom': 'Legg til {unit}',
+		'btn.reset_points.custom': 'Nullstill {unit}',
+		'points.title.custom': 'Legg til {unit} for {name}',
+		'err.points_required.custom': 'Oppgi et beløp i {unit}',
+		'err.points_number.custom': 'Oppgi et tall for {unit}',
+		'err.points_positive.custom': 'Oppgi minst 0 {unit}',
+		'shop.title.custom': 'Butikk for {unit}',
+		'lbl.early_bonus_by.custom': '+{points} {unit} hvis ferdig innen {date}',
+		'editor.enable_points_help.custom': 'Vis saldo, butikk og handlinger for {unit}',
+		'editor.color_group_kid_points.custom': 'Samlet saldo ({unit})',
+		'editor.color_group_task_points.custom': 'Oppgavebelønning ({unit})',
 		'icon.library': 'Oppgaveikoner', 'icon.upload_failed': 'Opplastingen mislyktes',
 		'ui.multiple_per_day': 'Kan utføres flere ganger om dagen',
 		'editor.language_name': 'Norsk bokmål', 'editor.language': 'Språk', 'editor.language_auto': 'Oppdag automatisk',
@@ -799,6 +901,23 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			de: {
+		'editor.unit_name': 'Name der Belohnungseinheit',
+		'editor.task_columns': 'Aufgabenspalten',
+		'editor.columns_auto': 'Automatisch',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Frühbonus ({unit})',
+		'ph.time_bonus_points.custom': 'Zeitbonus ({unit})',
+		'btn.add_points.custom': '{unit} hinzufügen',
+		'btn.reset_points.custom': '{unit} zurücksetzen',
+		'points.title.custom': '{unit} für {name} hinzufügen',
+		'err.points_required.custom': 'Betrag in {unit} eingeben',
+		'err.points_number.custom': 'Zahl für {unit} eingeben',
+		'err.points_positive.custom': 'Mindestens 0 {unit} eingeben',
+		'shop.title.custom': 'Shop für {unit}',
+		'lbl.early_bonus_by.custom': '+{points} {unit} bei Abschluss bis {date}',
+		'editor.enable_points_help.custom': 'Guthaben, Shop und Aktionen für {unit} anzeigen',
+		'editor.color_group_kid_points.custom': 'Gesamtguthaben ({unit})',
+		'editor.color_group_task_points.custom': 'Aufgabenbelohnung ({unit})',
 		'icon.library': 'Aufgabensymbole', 'icon.upload_failed': 'Hochladen fehlgeschlagen',
 		'ui.multiple_per_day': 'Mehrmals täglich erledigen',
 		'editor.language_name': 'Deutsch', 'editor.language': 'Sprache', 'editor.language_auto': 'Automatisch erkennen',
@@ -866,6 +985,23 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Leer = Standard'
 		},
 			es: {
+		'editor.unit_name': 'Nombre de la unidad de recompensa',
+		'editor.task_columns': 'Columnas de tareas',
+		'editor.columns_auto': 'Automático',
+		'ph.bonus_points.custom': 'Bono ({unit})',
+		'ph.early_bonus_points.custom': 'Bono anticipado ({unit})',
+		'ph.time_bonus_points.custom': 'Bono por horario ({unit})',
+		'btn.add_points.custom': 'Añadir {unit}',
+		'btn.reset_points.custom': 'Restablecer {unit}',
+		'points.title.custom': 'Añadir {unit} a {name}',
+		'err.points_required.custom': 'Introduce una cantidad en {unit}',
+		'err.points_number.custom': 'Introduce un número para {unit}',
+		'err.points_positive.custom': 'Introduce al menos 0 {unit}',
+		'shop.title.custom': 'Tienda de {unit}',
+		'lbl.early_bonus_by.custom': '+{points} {unit} si se completa hasta el {date}',
+		'editor.enable_points_help.custom': 'Mostrar el saldo, la tienda y las acciones de {unit}',
+		'editor.color_group_kid_points.custom': 'Saldo total ({unit})',
+		'editor.color_group_task_points.custom': 'Recompensa por tarea ({unit})',
 		'icon.library': 'Iconos de tareas', 'icon.upload_failed': 'Error al subir',
 		'ui.multiple_per_day': 'Permitir varias veces al día',
 		'editor.language_name': 'Español', 'editor.language': 'Idioma', 'editor.language_auto': 'Detectar automáticamente',
@@ -933,6 +1069,23 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vacío = predeterminado'
 		},
 			fr: {
+		'editor.unit_name': 'Nom de l’unité de récompense',
+		'editor.task_columns': 'Colonnes de tâches',
+		'editor.columns_auto': 'Automatique',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Bonus anticipé ({unit})',
+		'ph.time_bonus_points.custom': 'Bonus horaire ({unit})',
+		'btn.add_points.custom': 'Ajouter des {unit}',
+		'btn.reset_points.custom': 'Réinitialiser les {unit}',
+		'points.title.custom': 'Ajouter des {unit} à {name}',
+		'err.points_required.custom': 'Indiquez un montant en {unit}',
+		'err.points_number.custom': 'Indiquez un nombre de {unit}',
+		'err.points_positive.custom': 'Indiquez au moins 0 {unit}',
+		'shop.title.custom': 'Boutique en {unit}',
+		'lbl.early_bonus_by.custom': '+{points} {unit} si terminé au plus tard le {date}',
+		'editor.enable_points_help.custom': 'Afficher le solde, la boutique et les actions en {unit}',
+		'editor.color_group_kid_points.custom': 'Solde total ({unit})',
+		'editor.color_group_task_points.custom': 'Récompense par tâche ({unit})',
 		'icon.library': 'Icônes des tâches', 'icon.upload_failed': 'Échec du téléversement',
 		'ui.multiple_per_day': 'Autoriser plusieurs fois par jour',
 		'editor.language_name': 'Français', 'editor.language': 'Langue', 'editor.language_auto': 'Détection automatique',
@@ -1000,6 +1153,23 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vide = par défaut'
 		},
 			fi: {
+		'editor.unit_name': 'Palkintoyksikön nimi',
+		'editor.task_columns': 'Tehtäväsarakkeet',
+		'editor.columns_auto': 'Automaattinen',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Aikaisen suorituksen bonus ({unit})',
+		'ph.time_bonus_points.custom': 'Aikabonus ({unit})',
+		'btn.add_points.custom': 'Lisää {unit}',
+		'btn.reset_points.custom': 'Nollaa {unit}',
+		'points.title.custom': 'Lisää käyttäjälle {name}: {unit}',
+		'err.points_required.custom': 'Anna määrä ({unit})',
+		'err.points_number.custom': 'Anna luku ({unit})',
+		'err.points_positive.custom': 'Anna vähintään 0 {unit}',
+		'shop.title.custom': 'Kauppa ({unit})',
+		'lbl.early_bonus_by.custom': '+{points} {unit}, jos valmis viimeistään {date}',
+		'editor.enable_points_help.custom': 'Näytä saldo, kauppa ja toiminnot ({unit})',
+		'editor.color_group_kid_points.custom': 'Kokonaissaldo ({unit})',
+		'editor.color_group_task_points.custom': 'Tehtäväpalkkio ({unit})',
 		'icon.library': 'Tehtäväkuvakkeet', 'icon.upload_failed': 'Lataus epäonnistui',
 		'ui.multiple_per_day': 'Salli useita suorituksia päivässä',
 		'editor.language_name': 'Suomi', 'editor.language': 'Kieli', 'editor.language_auto': 'Tunnista automaattisesti',
@@ -1067,6 +1237,23 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tyhjä = oletus'
 		},
 			it: {
+		'editor.unit_name': 'Nome dell’unità di ricompensa',
+		'editor.task_columns': 'Colonne delle attività',
+		'editor.columns_auto': 'Automatico',
+		'ph.bonus_points.custom': 'Bonus ({unit})',
+		'ph.early_bonus_points.custom': 'Bonus anticipato ({unit})',
+		'ph.time_bonus_points.custom': 'Bonus orario ({unit})',
+		'btn.add_points.custom': 'Aggiungi {unit}',
+		'btn.reset_points.custom': 'Azzera {unit}',
+		'points.title.custom': 'Aggiungi {unit} a {name}',
+		'err.points_required.custom': 'Inserisci un importo in {unit}',
+		'err.points_number.custom': 'Inserisci un numero per {unit}',
+		'err.points_positive.custom': 'Inserisci almeno 0 {unit}',
+		'shop.title.custom': 'Negozio in {unit}',
+		'lbl.early_bonus_by.custom': '+{points} {unit} se completata entro il {date}',
+		'editor.enable_points_help.custom': 'Mostra saldo, negozio e azioni in {unit}',
+		'editor.color_group_kid_points.custom': 'Saldo totale ({unit})',
+		'editor.color_group_task_points.custom': 'Ricompensa attività ({unit})',
 		'icon.library': 'Icone delle attività', 'icon.upload_failed': 'Caricamento non riuscito',
 		'ui.multiple_per_day': 'Consenti più completamenti al giorno',
 		'editor.language_name': 'Italiano', 'editor.language': 'Lingua', 'editor.language_auto': 'Rilevamento automatico',
@@ -1156,11 +1343,30 @@ function c4kCardLocale(language, hass){
 	const manual = String(language || '').toLowerCase();
 	return Object.hasOwn(C4K_I18N, manual) ? manual : c4kGetLangFromHass(hass);
 }
-function c4kLocalize(key, langOrHass, vars){
+const c4kSettingsCache = new WeakMap();
+function c4kSettings(hass) {
+	const states = hass?.states;
+	if (!states) return {};
+	if (!c4kSettingsCache.has(states)) {
+		const sensor = states['sensor.chores4kids_ui'] || Object.values(states).find(s =>
+			s.entity_id?.startsWith('sensor.') && ('chore_columns' in (s.attributes || {}) || 'start_task_bg' in (s.attributes || {})));
+		c4kSettingsCache.set(states, sensor?.attributes || {});
+	}
+	return c4kSettingsCache.get(states);
+}
+
+function c4kLocalize(key, langOrHass, vars, unit){
 	const raw = typeof langOrHass==='string'? langOrHass : c4kGetLangFromHass(langOrHass);
 	const lang = String(raw).toLowerCase();
 	const parts = lang.split('-');
 	const candidates = [lang, parts[0], C4K_LANG_ALIAS[lang], C4K_LANG_ALIAS[parts[0]], 'en'].filter(Boolean);
+	if (unit) {
+		if (['lbl.points','th.points','ph.points','editor.enable_points'].includes(key)) return unit;
+		if (C4K_I18N.en[key + '.custom']) {
+			key += '.custom';
+			vars = {...vars, unit};
+		}
+	}
 	let txt = null; for (const c of candidates){ const d=C4K_I18N[c]; if (d && d[key]) { txt=d[key]; break; } }
 	if (!txt) txt = C4K_I18N.en[key] || key;
 	if (vars && typeof vars==='object') txt = String(txt).replace(/\{(\w+)\}/g,(_,k)=> vars[k]!==undefined?String(vars[k]):'{'+k+'}');
@@ -1459,14 +1665,47 @@ class Chores4KidsDevCard extends LitElement {
 			.bonus-subtask{ grid-template-columns:minmax(0,1fr); }
 			.bonus-subtask-actions{ grid-column:1; grid-row:auto; justify-content:flex-start; }
 		}
+		.chore-layout { container: chores / inline-size; }
+		.chore-grid { display:grid; gap:10px; }
+		.chore-occurrence { min-width:0; container: chore / inline-size; }
+		@container chore (max-width: 390px) {
+			.chore-occurrence .task { grid-template-columns:minmax(0,1fr); }
+			.chore-occurrence .task.has-icon { grid-template-columns:auto minmax(0,1fr); }
+			.chore-occurrence .actions { grid-column:1/-1; align-items:start; }
+			.chore-occurrence .bonus-subtask { grid-template-columns:minmax(0,1fr); }
+			.chore-occurrence .bonus-subtask-actions { grid-column:1; grid-row:auto; justify-content:start; }
+		}
+		@container chores (min-width: 640px) {
+			.chore-layout:not([data-columns="1"]) > .chore-grid,
+			.chore-layout:not([data-columns="1"]) > table > tbody {
+				display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;
+			}
+			.chore-layout:not([data-columns="1"]) > table { display:block; width:100%; }
+			.chore-layout:not([data-columns="1"]) > table > :is(thead,colgroup) { display:none; }
+			.chore-layout:not([data-columns="1"]) > table > tbody > tr {
+				display:block; padding:12px; border:1px solid var(--divider-color); border-radius:12px; box-sizing:border-box;
+			}
+			.chore-layout:not([data-columns="1"]) > table > tbody > tr > td {
+				display:flex; flex-flow:row wrap; align-items:center; gap:6px; min-width:0; width:auto; padding:4px; border:0; text-align:start !important; overflow-wrap:anywhere;
+			}
+			.chore-layout:not([data-columns="1"]) > table > tbody > tr > td::before {
+				content:attr(data-label); flex:0 0 30%; font-weight:600; color:var(--secondary-text-color);
+			}
+		}
+		@container chores (min-width: 980px) {
+			.chore-layout:is([data-columns="auto"],[data-columns="3"]) > .chore-grid,
+			.chore-layout:is([data-columns="auto"],[data-columns="3"]) > table > tbody {
+				grid-template-columns:repeat(3,minmax(0,1fr));
+			}
+		}
 		.actions{ display:flex; gap:8px; }
 		.task .actions button{ font-size: var(--c4k-kid-task-button-size, 14px); padding: .55em 1.05em; min-height: 2.4em; }
 		.img-preview{ width:72px; height:72px; border-radius:10px; border:1px solid var(--divider-color); background: color-mix(in srgb, var(--primary-color) 6%, transparent); object-fit:cover; }
 		.file-hidden{ display:none; }
 		/* Child shop grid – responsive */
-		.task .status-awaiting_approval, .bonus-subtask .status-awaiting_approval { background: var(--c4k-awaiting_approval_bg, color-mix(in srgb, var(--warning-color, #ffb300) 20%, transparent)); color: var(--c4k-awaiting_approval_text, var(--primary-text-color)); }
-		.task .status-taken, .bonus-subtask .status-taken { background: var(--c4k-taken_bg, color-mix(in srgb, var(--deep-orange-color, #ef6c00) 20%, transparent)); color: var(--c4k-taken_text, var(--primary-text-color)); }
-		.task .status-approved, .bonus-subtask .status-approved { background: var(--c4k-approved_bg, color-mix(in srgb, var(--success-color, #43a047) 20%, transparent)); color: var(--c4k-approved_text, var(--primary-text-color)); }
+		.badge.status-awaiting_approval, .task .status-awaiting_approval, .bonus-subtask .status-awaiting_approval { background: var(--c4k-awaiting_approval_bg, color-mix(in srgb, var(--warning-color, #ffb300) 20%, transparent)); color: var(--c4k-awaiting_approval_text, var(--primary-text-color)); }
+		.badge.status-taken, .task .status-taken, .bonus-subtask .status-taken { background: var(--c4k-taken_bg, color-mix(in srgb, var(--deep-orange-color, #ef6c00) 20%, transparent)); color: var(--c4k-taken_text, var(--primary-text-color)); }
+		.badge.status-approved, .task .status-approved, .bonus-subtask .status-approved { background: var(--c4k-approved_bg, color-mix(in srgb, var(--success-color, #43a047) 20%, transparent)); color: var(--c4k-approved_text, var(--primary-text-color)); }
 		.shop-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap:12px; width:100%; box-sizing:border-box; }
 		@media (max-width: 900px){
 			.shop-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
@@ -1788,7 +2027,7 @@ class Chores4KidsDevCard extends LitElement {
 			for (const state of C4K_COLOR_STATES) {
 				for (const part of ['bg', 'text']) {
 					const key = state + '_' + part;
-					setVar('--c4k-' + key, this.config?.[key] || global[key]);
+					setVar('--c4k-' + key, global[key] ?? this.config?.[key]);
 				}
 			}
 			setVar('--c4k-start-task-bg', this.config?.start_task_bg || global.start_task_bg);
@@ -1860,7 +2099,7 @@ class Chores4KidsDevCard extends LitElement {
 	getCardSize(){ return this._mode==='admin'? 8 : 3; }
 
 	// Helpers
-	_t(key, vars){ return c4kLocalize(key, this._locale(), vars); }
+	_t(key, vars){ return c4kLocalize(key, this._locale(), vars, c4kSettings(this.hass).points_label); }
 	_resolveUrl(url){
 		if (!url) return '';
 		if (String(url).startsWith('http') || String(url).startsWith('data:')) return url;
@@ -2547,7 +2786,7 @@ class Chores4KidsDevCard extends LitElement {
 						<span class="collapsible" @click=${()=>this._toggleSection('tasks')}><ha-icon class="chev ${this._isCollapsed('tasks')?'rot':''}" icon="mdi:chevron-down"></ha-icon>${this._t('section.tasks')}</span>
 						<button class="btn-ghost icon-btn" title="${this._t('sort.configure')}" @click=${()=> this._sortModalOpen = true}><ha-icon icon="mdi:sort-variant"></ha-icon></button>
 					</h3>
-					${this._isCollapsed('tasks')? '' : html`<div class="table-wrap"><table class="table-center">
+					${this._isCollapsed('tasks')? '' : html`<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center">
 						<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th class="assign-col">${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
 						<tbody @click=${()=>{ this._openAssignMenuFor = null; this._assignMenuStyle=''; }}>
 										${this._sortTasks(this._store.allTasks.filter(t=>!t.assigned_to), false).map(t=> html`
@@ -2628,7 +2867,7 @@ class Chores4KidsDevCard extends LitElement {
 							</td>
 						</tr>`;
 						return html`
-							<div class="table-wrap"><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
+							<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
 								<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
 								<tbody>${top.map(row)}</tbody>
 							</table></div>
@@ -2656,7 +2895,7 @@ class Chores4KidsDevCard extends LitElement {
 							</td>
 						</tr>`;
 						return html`
-							<div class="table-wrap"><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
+							<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
 								<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
 								<tbody>${sorted.map(row)}</tbody>
 							</table></div>
@@ -2689,7 +2928,7 @@ class Chores4KidsDevCard extends LitElement {
 							</td>
 						</tr>`;
 						return html`
-							<div class="table-wrap"><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
+							<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
 								<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
 								<tbody>${sorted.map(row)}</tbody>
 							</table></div>
@@ -2702,7 +2941,7 @@ class Chores4KidsDevCard extends LitElement {
 					${this._isCollapsed('scoreboard')? '' : html`
 						<ol style="display:grid; gap:8px; padding-left:18px;">
 							${[...children].sort((a,b)=>b.points-a.points).map((c,i)=> html`
-								<li style="display:flex; align-items:center; gap:10px;"><span class="badge status-in_progress">#${i+1}</span><span style="flex:1;">${c.name}</span><b>${c.points}</b></li>
+								<li style="display:flex; align-items:center; gap:10px;"><span class="badge status-in_progress">#${i+1}</span><span style="flex:1;">${c.name}</span><b>${c.points} ${this._t('lbl.points')}</b></li>
 							`)}
 						</ol>
 					`}
@@ -2752,7 +2991,7 @@ class Chores4KidsDevCard extends LitElement {
 							</td>
 						</tr>`;
 						return html`
-							<div class="table-wrap"><table class="table-center">
+							<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center">
 								<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
 								<tbody>${top.map(row)}</tbody>
 							</table></div>
@@ -2787,7 +3026,7 @@ class Chores4KidsDevCard extends LitElement {
 			${this._tasksModalOpen ? html`<div class="modal" style="max-width: 820px; width: min(95vw, 820px);" @click=${e=>e.stopPropagation()}>
 				<h3>${this._t('overview.title')}</h3>
 				<div style="max-height:60vh; overflow:visible;">
-						<div class="table-wrap"><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
+						<div class="table-wrap chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}><table class="table-center table-fixed">${this._renderAssignedFinishedColgroup()}
 							<thead><tr><th>${this._t('ph.title')}</th>${pointsEnabled ? html`<th>${this._t('ph.points')}</th>`:''}<th>${this._t('th.categories')}</th><th>${this._t('th.status')}</th><th>${this._t('th.completed')}</th><th>${this._t('th.assign')}</th><th>${this._t('th.actions')}</th></tr></thead>
 						<tbody>${(()=>{
 							const all=(this._store.allTasks||[]).filter(t=>!!t.assigned_to && !['approved','awaiting_approval','taken'].includes(this._effectiveStatus(t)));
@@ -2871,7 +3110,7 @@ class Chores4KidsDevCard extends LitElement {
 							`: html`
 								<tr>
 									<td data-label="${this._t('shop.item')}">${i.image? html`<img class="img-preview" style="width:36px;height:36px;margin-right:6px;vertical-align:middle;" src="${this._resolveUrl(i.image)}" loading="lazy" decoding="async">`:''}${i.title}</td>
-									<td data-label="${this._t('shop.price')}"><b>${i.price}</b></td>
+									<td data-label="${this._t('shop.price')}"><b>${i.price} ${this._t('lbl.points')}</b></td>
 									<td data-label="${this._t('shop.active')}"><input type="checkbox" .checked=${i.active!==false} @change=${e=> this._toggleItemActive(i,e)} /></td>
 									<td data-label="${this._t('th.actions')}"><button class="btn-ghost" @click=${()=> this._startEditItem(i)}>${this._t('btn.edit')}</button><button class="btn-ghost" @click=${()=> this._openAdvanced(i)}>${this._t('shop.advanced')}</button><button class="btn-danger" @click=${()=>this._deleteShopItem(i.id)}>${this._t('btn.delete')}</button></td>
 								</tr>
@@ -2887,7 +3126,7 @@ class Chores4KidsDevCard extends LitElement {
 												${i.image? html`<img src="${this._resolveUrl(i.image)}" alt="${i.title}" loading="lazy" decoding="async">` : html`<div class="img-preview" style="width:44px;height:44px;display:grid;place-items:center;">?</div>`}
 												<div class="shop-admin-meta">
 													<div class="shop-admin-title">${i.title}</div>
-													<div class="shop-admin-price">${i.price}</div>
+													<div class="shop-admin-price">${i.price} ${this._t('lbl.points')}</div>
 												</div>
 																								<label class="shop-admin-toggle">
 																									<span>${this._t('shop.active')}</span>
@@ -2914,7 +3153,7 @@ class Chores4KidsDevCard extends LitElement {
 							<td data-label="${this._t('shop.time')}">${dt.time}</td>
 							<td data-label="${this._t('shop.child')}">${p.child_name||p.child_id}</td>
 							<td data-label="${this._t('shop.item')}">${p.title}</td>
-							<td data-label="${this._t('shop.price')}"><b>${p.price}</b></td>
+							<td data-label="${this._t('shop.price')}"><b>${p.price} ${this._t('lbl.points')}</b></td>
 						</tr>`; })}
 					</tbody>
 				</table></div>
@@ -2926,7 +3165,7 @@ class Chores4KidsDevCard extends LitElement {
 											<div class="kv"><b>${this._t('shop.time')}</b><span>${dt.time}</span></div>
 											<div class="kv"><b>${this._t('shop.child')}</b><span>${p.child_name||p.child_id}</span></div>
 											<div class="kv"><b>${this._t('shop.item')}</b><span>${p.title}</span></div>
-											<div class="kv"><b>${this._t('shop.price')}</b><b>${p.price}</b></div>
+											<div class="kv"><b>${this._t('shop.price')}</b><b>${p.price} ${this._t('lbl.points')}</b></div>
 										</div>`; })}
 								</div>
 				<div class="row" style="justify-content:flex-end; margin-top:8px;"><button class="btn-ghost" @click=${()=>this._shopModalOpen=false}>${this._t('form.close')}</button></div>
@@ -3376,8 +3615,9 @@ class Chores4KidsDevCard extends LitElement {
 			}
 			const catIdsToShow = order.filter(id=> groups.has(id));
 			return catIdsToShow.map(cid=> html`
-				<div class="cat-section">
+				<div class="cat-section chore-layout" data-columns=${c4kSettings(this.hass).chore_columns || 'auto'}>
 					<div class="cat-title">${nameFor(cid)}</div>
+					<div class="chore-grid">
 					${[...(groups.get(cid)||[])].sort((a,b)=> taskStatusOrder(a) - taskStatusOrder(b)).map(t=>{
 						const groupColor = colorFor(cid);
 						const bonusInfo = this._bonusByDateInfo(t);
@@ -3399,7 +3639,7 @@ class Chores4KidsDevCard extends LitElement {
 							? `background: color-mix(in srgb, ${groupColor} 10%, var(--card-background-color)); box-shadow: inset 6px 0 0 ${groupColor};`
 							: '';
 						const hasTaskIcon = !!t?.icon;
-						return html`
+						return html`<div class="chore-occurrence">
 							<div class="task ${isOverdue?'task-overdue':''} ${hasTaskIcon?'has-icon':'no-icon'}" style="${rowStyle} cursor:${t.description?'pointer':'default'};" @click=${(e)=>this._openTaskDescription(t,e)}>
 								<div class="task-icon">${c4kTaskIcon(t.icon)}</div>
 								<div>
@@ -3437,8 +3677,9 @@ class Chores4KidsDevCard extends LitElement {
 									</div>
 								</div>
 							` : ''}
-						`;
+						</div>`;
 					})}
+					</div>
 				</div>
 			`);
 		};
@@ -4245,7 +4486,7 @@ class Chores4KidsDevCardEditor extends LitElement{
 			}, 250);
 		}catch{ /* ignore */ }
 	}
-	_t(key, vars){ return c4kLocalize(key, c4kCardLocale(this._config?.language, this.hass), vars); }
+	_t(key, vars){ return c4kLocalize(key, c4kCardLocale(this._config?.language, this.hass), vars, c4kSettings(this.hass).points_label); }
 	_emit(){ this.dispatchEvent(new CustomEvent('config-changed',{ detail:{ config: this._config }, bubbles:true, composed:true })); }
 	async _uploadTaskIcon(event) {
 		const input = event.target;
@@ -4605,6 +4846,18 @@ class Chores4KidsDevCardEditor extends LitElement{
 			${cfg.mode==='admin' ? html`
 				<div class="section-box">
 					<div class="form-field">
+						<label for="c4k-unit-name">${this._t('editor.unit_name')}</label>
+						<input id="c4k-unit-name" maxlength="48" .value=${c4kSettings(this.hass).points_label || ''}
+							placeholder=${c4kLocalize('lbl.points', c4kCardLocale(cfg.language, this.hass))}
+							@change=${e=>this.hass.callService('chores4kids','set_ui_colors',{points_label:e.target.value.trim()})}>
+					</div>
+					<div class="form-field">
+						<label for="c4k-chore-columns">${this._t('editor.task_columns')}</label>
+						<select id="c4k-chore-columns" @change=${e=>this.hass.callService('chores4kids','set_ui_colors',{chore_columns:e.target.value})}>
+							${['auto','1','2','3'].map(value=>html`<option value=${value} ?selected=${value === (c4kSettings(this.hass).chore_columns || 'auto')}>${value==='auto' ? this._t('editor.columns_auto') : value}</option>`)}
+						</select>
+					</div>
+					<div class="form-field">
 						<label>${this._t('editor.enable_points')}</label>
 						<label style="display:flex;align-items:center;gap:8px;">
 							<span>${this._t('ui.toggle_off_on')}</span>
@@ -4628,7 +4881,7 @@ class Chores4KidsDevCardEditor extends LitElement{
 						${C4K_COLOR_STATES.map(state => html`<ha-expansion-panel .header=${this._t('status.' + state)}>
 								${['bg','text'].map(part => {
 									const key = state + '_' + part;
-									const value = cfg[key] ?? this._getUiSensorAttrs()[key] ?? '';
+									const value = this._getUiSensorAttrs()[key] ?? cfg[key] ?? '';
 									const save = color => {
 										this._config = {...this._config, [key]: color};
 										this._saveGlobalUiSettings({[key]: color});
@@ -4766,7 +5019,7 @@ class Chores4KidsDevCardEditor extends LitElement{
 								</div>
 							</div>
 							<div class="form-field">
-								<label style="font-weight:600;">Task points</label>
+								<label style="font-weight:600;">${this._t('editor.color_group_task_points')}</label>
 								<div style="display:flex; gap:8px; align-items:center;">
 									<input type="number" min="10" max="30" step="1" .value=${(fsPoints||'').replace('px','')} @input=${e=>{ const raw=String(e.target.value||'').trim(); this._fsTaskPoints = raw; const v = raw==='' ? '' : `${Number(raw)}px`; this._saveGlobalUiSettings({ kid_task_points_size: v }); }} placeholder="12" style="flex:1;" />
 									<span style="opacity:.8; white-space:nowrap;">px</span>

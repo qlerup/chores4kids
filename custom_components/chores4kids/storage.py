@@ -133,6 +133,8 @@ class KidsChoresStore:
         # Global UI settings (shared across users/devices via HA storage)
         self.ui_colors: Dict[str, str] = {}
         self.task_icons: Dict[str, str] = {}
+        self.points_label = ""
+        self.chore_columns = "auto"
         self.enable_points: bool = True
         self.confetti_enabled: bool = True
         self.notify_service: str = ""
@@ -146,6 +148,8 @@ class KidsChoresStore:
             return
         self.children = [Child(**c) for c in data.get("children", [])]
         self.task_icons = dict(data.get("task_icons", {}))
+        self.points_label = str(data.get("points_label") or "").strip()
+        self.chore_columns = str(data.get("chore_columns", "auto"))
         self.categories = [Category(**c) for c in data.get("categories", [])]
         # Migrate tasks: if early bonus was configured before the explicit toggle existed,
         # enable it automatically so behavior remains unchanged.
@@ -237,6 +241,8 @@ class KidsChoresStore:
             "purchases": [asdict(p) for p in self.purchases],
             "ui_colors": dict(self.ui_colors or {}),
             "task_icons": dict(self.task_icons),
+            "points_label": self.points_label,
+            "chore_columns": self.chore_columns,
             "enable_points": bool(getattr(self, "enable_points", True)),
             "confetti_enabled": bool(getattr(self, "confetti_enabled", True)),
             "notify_service": str(getattr(self, "notify_service", "") or ""),
@@ -391,8 +397,17 @@ class KidsChoresStore:
         taken_text: Optional[str] = None,
         approved_bg: Optional[str] = None,
         approved_text: Optional[str] = None,
+        points_label: Optional[str] = None,
+        chore_columns: Optional[str] = None,
     ) -> Dict[str, str]:
         """Set global UI colors. Empty string clears a value."""
+        if chore_columns is not None and str(chore_columns) not in ("auto", "1", "2", "3"):
+            raise ValueError("invalid_chore_columns")
+        if chore_columns is not None:
+            self.chore_columns = str(chore_columns)
+        if points_label is not None:
+            self.points_label = str(points_label).strip()[:48]
+
         def _set(key: str, value: Optional[str]):
             if value is None:
                 return

@@ -851,6 +851,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             taken_text=call.data.get("taken_text"),
             approved_bg=call.data.get("approved_bg"),
             approved_text=call.data.get("approved_text"),
+            points_label=call.data.get("points_label"),
+            chore_columns=call.data.get("chore_columns"),
             start_task_bg=call.data.get("start_task_bg"),
             complete_task_bg=call.data.get("complete_task_bg"),
             kid_points_bg=call.data.get("kid_points_bg"),

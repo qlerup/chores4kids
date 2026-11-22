@@ -12,6 +12,7 @@ Give each child a Home Assistant dashboard where they can start chores, earn poi
 
 | Task | Start here |
 | --- | --- |
+| Use a family reward name or show chores in columns | [Shared parent and child card settings](https://qlerup.github.io/chores4kids/card/features/appearance.html#set-a-family-reward-name-and-task-layout) |
 | Let a child record the same chore twice today | [Multiple completions per day](https://qlerup.github.io/chores4kids/card/features/tasks.html#complete-a-chore-several-times-a-day) |
 | Use a drawing or a custom icon on a task | [Upload an icon](https://qlerup.github.io/chores4kids/card/features/appearance.html#upload-your-own-artwork) |
 | Change approval colors on the child dashboard | [Status colors](https://qlerup.github.io/chores4kids/card/features/appearance.html#change-status-colors) |
