@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 
-// Card distribution version: 3.3.0
+// Card distribution version: 3.3.1
 // Unified i18n (admin + child keys)
 const C4K_ADMIN_SECTIONS = {
 	children: 'section.children', categories: 'section.categories', create: 'section.new_task',
