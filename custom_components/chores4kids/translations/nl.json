@@ -1,0 +1,10 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Chores4Kids instellen",
+        "description": "Klik op Verzenden om de integratie in te stellen."
+      }
+    }
+  }
+}

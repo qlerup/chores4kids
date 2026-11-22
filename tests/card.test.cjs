@@ -10,6 +10,23 @@ const context=vm.createContext({LitElement:Element,html:(s,...v)=>({s,v}),css:(s
 vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../chores4kids-card.js'),'utf8')
   .replace(/^import .*?;\s*/,''),context);
 const Card=registry.get('chores4kids-card');
+test('cards and editors default to the profile language and support per-card overrides', () => {
+  const editor = new (registry.get('chores4kids-card-editor'))();
+  const instance = Object.create(Card.prototype);
+  for (const language of ['nl-NL', 'nl-BE']) {
+    instance.hass = editor.hass = {locale: {language}};
+    for (const [config, expected] of [
+      [{}, 'Toegewezen taken'],
+      [{language: 'en'}, 'Assigned tasks'],
+      [{language: 'auto'}, 'Toegewezen taken'],
+    ]) {
+      instance.setConfig(config);
+      editor.setConfig(config);
+      assert.equal(instance._t('overview.title'), expected);
+      assert.equal(editor._t('overview.title'), expected);
+    }
+  }
+});
 test('the card uses Turkish for Turkish Home Assistant profiles', () => {
   const instance = Object.create(Card.prototype);
   for (const language of ['tr', 'tr-TR']) {

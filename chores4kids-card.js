@@ -4,6 +4,7 @@ import { LitElement, html, css } from "https://unpkg.com/lit?module";
 // Unified i18n (admin + child keys)
 const C4K_I18N = {
 	en: {
+		'editor.language_name': 'English', 'editor.language': 'Language', 'editor.language_auto': 'Auto detect',
 		// Shared/admin
 		'overview.title': 'Assigned tasks',
 		'overview.finished_title': 'Finished tasks',
@@ -120,7 +121,222 @@ const C4K_I18N = {
 			'editor.color_task_points_text':'Task points (text)',
 			'editor.color_empty_default':'Empty = default'
 	},
+	nl: {
+		'editor.language_name': 'Nederlands', 'editor.language': 'Taal', 'editor.language_auto': 'Automatisch detecteren',
+		'overview.title': 'Toegewezen taken',
+		'overview.finished_title': 'Voltooide taken',
+		'overview.show_all': 'Toon alles ({pending} in afwachting)',
+		'overview.none_active': 'Momenteel geen actieve taken.',
+		'overview.none': 'Nog geen taken.',
+		'overview.finished_none': 'Nog geen voltooide taken.',
+		'card.admin_title': 'Chores4Kids – Ouders',
+		'input.new_child_name': 'Nieuw kind — naam',
+		'input.new_category_name': 'Nieuwe categorie — naam',
+		'btn.add_child': 'Kind toevoegen',
+		'btn.add_category': 'Categorie toevoegen',
+		'section.children': 'Kinderen',
+		'section.categories': 'Categorieën',
+		'th.name': 'Naam',
+		'th.color': 'Kleur',
+		'th.points': 'Punten',
+		'th.pending': 'In afwachting',
+		'th.actions': 'Acties',
+		'th.status': 'Status',
+		'th.assign': 'Toegewezen aan',
+		'th.categories': 'Categorieën',
+		'th.completed': 'Voltooid',
+		'btn.rename': 'Hernoemen',
+		'btn.delete': 'Verwijderen',
+		'section.new_task': 'Taak aanmaken',
+		'ph.title': 'Titel',
+		'ph.points': 'Punten',
+		'ph.description': 'Beschrijving (optioneel)',
+		'ph.bonus_title': 'Bonustaak titel',
+		'ph.bonus_points': 'Bonuspunten',
+		'ph.due': 'Deadline (datum)',
+		'ph.early_bonus_days': 'Vroegtijdige bonusdagen',
+		'ph.early_bonus_points': 'Vroegtijdige bonuspunten',
+		'ui.early_bonus_enabled': 'Inschakelen vroegtijdige voltooiingsbonus',
+		'warn.repeat_overrides_due': 'Herhaling is ingeschakeld, dus de deadline is gebaseerd op de geselecteerde weekdagen in plaats van deze datum.',
+		'warn.schedule_overrides_due': 'Er is een schema ingeschakeld, dus de deadline is gebaseerd op het schema in plaats van deze datum.',
+		'schedule.weekly': 'Wekelijkse taak',
+		'schedule.monthly': 'Maandelijkse taak',
+		'ph.categories': 'Categorieën',
+		'select.assign_child': 'Kind toewijzen',
+		'select.categories': 'Selecteer categorieën',
+		'ph.icon': 'Icoon (mdi:...)',
+		'icon.choose': 'Kies icoon',
+		'icon.clear': 'Wis icoon',
+		'icon.none': 'Geen',
+		'icon.search': 'Zoek icoon',
+		'btn.create_task': 'Taak aanmaken',
+		'btn.update_task': 'Taak bijwerken',
+		'btn.edit': 'Bewerken',
+		'editor.loaded_task': 'Bestaande taak bewerken',
+		'section.unassigned': 'Niet-toegewezen taken',
+		'btn.assign': 'Toewijzen',
+		'section.tasks_per_child': 'Taken per kind',
+		'btn.start': 'Start',
+		'btn.back': 'Opnieuw toewijzen',
+		'btn.awaiting': 'In afwachting',
+		'btn.approve': 'Goedkeuren',
+		'btn.approve_bonus': 'Bonus goedkeuren',
+		'btn.approve_all': 'Alles goedkeuren',
+		'btn.approve_partial': 'Gedeeltelijk goedkeuren',
+		'lbl.approved': 'Goedgekeurd',
+		'section.scoreboard': 'Scorebord',
+		'confirm.delete_child': '{name} verwijderen?',
+		'confirm.delete_task': 'Taak verwijderen?',
+		'alert.choose_child_first': 'Kies eerst een kind',
+		'ui.auto_recycle': 'Goedgekeurde taken automatisch recyclen',
+		'ui.quick_complete': 'Voltooien in één tik',
+		'ui.skip_approval': 'Goedkeuring door ouders overslaan',
+		'ui.bonus_task': 'Bonustaak inschakelen',
+		'ui.fastest_wins': 'Snelste wint (eerste kind claimt de taak)',
+		'ui.time_bonus_enabled': 'Tijd-voor-tijd bonus inschakelen',
+		'ph.time_bonus_before': 'Bonus indien klaar voor (UU:MM)',
+		'ph.time_bonus_points': 'Tijdbonuspunten',
+		'ui.persist_until_done': 'Onvoltooide taak meenemen naar de volgende dag',
+		'ui.persist_help': 'Onvoltooide taak verplaatst automatisch naar de volgende dag',
+		'ui.mark_overdue': 'Markeer onvoltooide taak als te laat',
+		'ui.toggle_off_on': 'Uit/Aan',
+		'section.tasks': 'Taken',
+		'form.save': 'Opslaan',
+		'form.add': 'Toevoegen',
+		'form.cancel': 'Annuleren',
+		'form.close': 'Sluiten',
+		'form.clear': 'Wis',
+		'repeat.label': 'Herhalen',
+		'repeat.enable': 'Taak herhalen',
+		'repeat.auto_assign': 'Automatisch toewijzen (herhalen)',
+		'repeat.save': 'Plan opslaan',
+		'repeat.days.mon': 'Ma',
+		'repeat.days.tue': 'Di',
+		'repeat.days.wed': 'Wo',
+		'repeat.days.thu': 'Do',
+		'repeat.days.fri': 'Vr',
+		'repeat.days.sat': 'Za',
+		'repeat.days.sun': 'Zo',
+		'assign.disabled_auto': 'Uitgeschakeld: automatisch toewijzen (herhalen) is actief',
+		'assign.auto_to': 'Automatisch toegewezen aan {names}',
+		'btn.add_points': 'Punten toevoegen',
+		'btn.reset_points': 'Punten resetten',
+		'sort.configure': 'Sortering',
+		'sort.title': 'Kies volgorde',
+		'sort.categories_order': 'Categorieën volgorde',
+		'sort.none': 'Geen categorie',
+		'sort.save': 'Opslaan',
+		'sort.reset': 'Reset',
+		'points.title': 'Punten toevoegen aan {name}',
+		'points.quick': 'Snel toevoegen',
+		'points.remove': 'Snel verwijderen',
+		'points.custom': 'Aangepast aantal',
+		'err.title_required': 'Titel is verplicht',
+		'err.points_required': 'Punten zijn verplicht',
+		'err.points_number': 'Punten moeten een getal zijn',
+		'err.points_positive': 'Punten moeten 0 of meer zijn',
+		'status.assigned': 'Toegewezen',
+		'status.in_progress': 'In uitvoering',
+		'status.awaiting_approval': 'Wacht op goedkeuring',
+		'status.approved': 'Goedgekeurd',
+		'status.rejected': 'Afgewezen',
+		'status.unassigned': 'Niet toegewezen',
+		'status.taken': 'Genomen',
+		'status.overdue': 'Te laat',
+		'overdue.reassign_prompt': 'Deze taak is ook gepland voor vandaag. Nogmaals toewijzen?',
+		'overdue.yes': 'Ja, opnieuw toewijzen',
+		'overdue.no': 'Nee bedankt',
+		'debug.mark_overdue': '[TEST] Markeer als te laat',
+		'shop.title': 'Punteshop',
+		'shop.open': 'Open shop',
+		'shop.item': 'Artikel',
+		'shop.price': 'Prijs',
+		'shop.icon': 'Icoon',
+		'shop.image': 'Afbeelding',
+		'shop.upload': 'Upload afbeelding',
+		'shop.add_item': 'Artikel toevoegen',
+		'shop.history': 'Aankoopgeschiedenis',
+		'shop.child': 'Kind',
+		'shop.when': 'Wanneer',
+		'shop.date': 'Datum',
+		'shop.time': 'Tijd',
+		'shop.advanced': 'Geavanceerde acties',
+		'shop.entity': 'Entiteit',
+		'shop.operation': 'Bewerking',
+		'shop.add_action': 'Actie toevoegen',
+		'shop.add_delay': 'Vertraging toevoegen',
+		'shop.steps': 'Stappen',
+		'shop.seconds': 'Seconden',
+		'shop.minutes': 'Minuten',
+		'shop.hours': 'Uur',
+		'shop.delay': 'Vertraging',
+		'shop.active': 'Actief',
+		'shop.buy': 'Kopen',
+		'shop.bought': 'Gekocht',
+		'shop.clear_history': 'Geschiedenis wissen',
+		'confirm.clear_history': 'Hele aankoopgeschiedenis wissen?',
+		'card.child_title_fallback': 'Chores4Kids – {name}',
+		'msg.child_not_found': 'Kind niet gevonden. Controleer de naam in de configuratie.',
+		'msg.no_tasks': 'Momenteel geen taken.',
+		'btn.done': 'Klaar',
+		'btn.start_task': 'Start taak',
+		'btn.complete_task': 'Taak voltooid',
+		'btn.task_done': 'Taak klaar',
+		'btn.complete_bonus': 'Bonus voltooien',
+		'lbl.awaiting': 'Wacht op goedkeuring',
+		'lbl.bonus': 'Bonustaak',
+		'lbl.bonus_locked': 'Voltooi eerst de hoofdtaak',
+		'lbl.taken_by': 'Taak overgenomen door {name}',
+		'lbl.points': 'punten',
+		'section.daily_tasks': 'Vandaag',
+		'section.weekly_tasks': 'Wekelijkse taken',
+		'lbl.deadline': 'Deadline: {date}',
+		'lbl.early_bonus_by': '+{points} bonuspunten indien klaar op of voor {date}',
+		'editor.mode': 'Modus',
+		'editor.mode_admin': 'Ouders',
+		'editor.mode_kid': 'Kind',
+		'editor.mode_overview': 'Recente taken',
+		'editor.child_label': 'Kind',
+		'editor.child_placeholder': 'Naam van het kind',
+		'editor.child_select_prompt': '— Selecteer kind —',
+		'editor.child_hint': 'Nog geen kinderen gevonden — typ de naam handmatig.',
+		'editor.developer_mode': 'Ontwikkelaarsmodus',
+		'editor.developer_mode_help': 'Toont debug-bedieningselementen zoals handmatige markering voor te laat',
+		'editor.enable_points': 'Punten',
+		'editor.enable_points_help': 'Toon punten, punteshop en puntacties',
+		'editor.completion_sound': 'Voltooiingsgeluid',
+		'editor.completion_sound_help': 'Opgeslagen als /local/chores4kids/completion.<ext> en gebruikt op dashboards',
+		'editor.delete_sound': 'Geluidsbestand verwijderen',
+		'editor.delete_sound_confirm': 'Het geüploade voltooiingsgeluid verwijderen?',
+		'editor.delete_sound_failed': 'Verwijderen geluidsbestand mislukt',
+		'editor.confetti': 'Confetti',
+		'editor.confetti_help': 'Toon confetti-animatie bij voltooiing',
+		'editor.notify_target': 'Voltooiingsnotificatie',
+		'editor.notify_target_help': 'Stuur een pushmelding wanneer een kind een taak als klaar markeert.',
+		'editor.notify_target_none': 'Persoon toevoegen',
+		'editor.notify_toggle_complete': 'Melden bij taakvoltooiing',
+		'editor.notify_toggle_shop': 'Melden bij aankoop in shop',
+		'editor.notify_toggle_shop_image': 'Toon afbeelding in shopnotificatie',
+		'section.notifications': 'Notificaties',
+		'editor.colors': 'Kleuren',
+		'editor.color_field_bg': 'Achtergrond',
+		'editor.color_field_text': 'Tekst',
+		'editor.color_group_start': 'Start taak knop',
+		'editor.color_group_complete': 'Taak voltooid knop',
+		'editor.color_group_kid_points': 'Totaal punten kinderen',
+		'editor.color_group_task_points': 'Taakpunten',
+		'editor.color_start_bg': 'Start taak knop (achtergrond)',
+		'editor.color_start_text': 'Start taak knop (tekst)',
+		'editor.color_complete_bg': 'Taak voltooid knop (achtergrond)',
+		'editor.color_complete_text': 'Taak voltooid knop (tekst)',
+		'editor.color_kid_points_bg': 'Totaal punten kinderen (achtergrond)',
+		'editor.color_kid_points_text': 'Totaal punten kinderen (tekst)',
+		'editor.color_task_points_bg': 'Taakpunten (achtergrond)',
+		'editor.color_task_points_text': 'Taakpunten (tekst)',
+		'editor.color_empty_default': 'Leeg = standaard',
+	},
 	tr: {
+		'editor.language_name': 'Türkçe', 'editor.language': 'Dil', 'editor.language_auto': 'Otomatik algıla',
 		'overview.title': 'Atanan görevler',
 		'overview.finished_title': 'Tamamlanan görevler',
 		'overview.show_all': 'Tümünü göster ({pending} bekliyor)',
@@ -333,6 +549,7 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Varsayılanı kullanmak için boş bırakın',
 	},
 	da: {
+		'editor.language_name': 'Dansk', 'editor.language': 'Sprog', 'editor.language_auto': 'Registrer automatisk',
 		'overview.title': 'Tildelte opgaver',
 		'overview.finished_title': 'Færdige opgaver',
 		'overview.show_all': 'Vis alle ({pending} afventer)',
@@ -440,6 +657,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			sv: {
+		'editor.language_name': 'Svenska', 'editor.language': 'Språk', 'editor.language_auto': 'Identifiera automatiskt',
 			'overview.title': 'Tilldelade uppgifter', 'overview.show_all': 'Visa alla ({pending} väntar)', 'overview.none': 'Inga uppgifter ännu.',
 			'card.admin_title': 'Chores4Kids – Förälder', 'input.new_child_name': 'Nytt barn — namn', 'btn.add_child': 'Lägg till barn',
 			'input.new_category_name':'Ny kategori — namn','btn.add_category':'Lägg till kategori','section.categories':'Kategorier','th.categories':'Kategorier','ph.categories':'Kategorier','select.categories':'Välj kategorier',
@@ -504,6 +722,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tomt = standard'
 		},
 			nb: {
+		'editor.language_name': 'Norsk bokmål', 'editor.language': 'Språk', 'editor.language_auto': 'Oppdag automatisk',
 				'overview.title':'Tildelte oppgaver','overview.show_all':'Vis alle ({pending} venter)','overview.none':'Ingen oppgaver ennå.',
 			'card.admin_title':'Chores4Kids – Forelder','input.new_child_name':'Nytt barn — navn','btn.add_child':'Legg til barn',
 				'input.new_category_name':'Ny kategori — navn','btn.add_category':'Legg til kategori','section.categories':'Kategorier','th.categories':'Kategorier','ph.categories':'Kategorier','select.categories':'Velg kategorier',
@@ -568,6 +787,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			de: {
+		'editor.language_name': 'Deutsch', 'editor.language': 'Sprache', 'editor.language_auto': 'Automatisch erkennen',
 				'overview.title':'Zugewiesene Aufgaben','overview.show_all':'Alle anzeigen ({pending} ausstehend)','overview.none':'Noch keine Aufgaben.',
 			'card.admin_title':'Chores4Kids – Eltern','input.new_child_name':'Neues Kind — Name','btn.add_child':'Kind hinzufügen',
 				'input.new_category_name':'Neue Kategorie — Name','btn.add_category':'Kategorie hinzufügen','section.categories':'Kategorien','th.categories':'Kategorien','ph.categories':'Kategorien','select.categories':'Kategorien wählen',
@@ -632,6 +852,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Leer = Standard'
 		},
 			es: {
+		'editor.language_name': 'Español', 'editor.language': 'Idioma', 'editor.language_auto': 'Detectar automáticamente',
 				'overview.title':'Tareas asignadas','overview.show_all':'Ver todas ({pending} pendientes)','overview.none':'Aún no hay tareas.',
 			'card.admin_title':'Chores4Kids – Padres','input.new_child_name':'Nuevo niño — nombre','btn.add_child':'Añadir niño',
 				'input.new_category_name':'Nueva categoría — nombre','btn.add_category':'Añadir categoría','section.categories':'Categorías','th.categories':'Categorías','ph.categories':'Categorías','select.categories':'Seleccionar categorías',
@@ -696,6 +917,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vacío = predeterminado'
 		},
 			fr: {
+		'editor.language_name': 'Français', 'editor.language': 'Langue', 'editor.language_auto': 'Détection automatique',
 				'overview.title':'Tâches assignées','overview.show_all':'Tout afficher ({pending} en attente)','overview.none':'Aucune tâche pour le moment.',
 			'card.admin_title':'Chores4Kids – Parents','input.new_child_name':'Nouvel enfant — nom','btn.add_child':'Ajouter un enfant',
 				'input.new_category_name':'Nouvelle catégorie — nom','btn.add_category':'Ajouter une catégorie','section.categories':'Catégories','th.categories':'Catégories','ph.categories':'Catégories','select.categories':'Sélectionner des catégories',
@@ -760,6 +982,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vide = par défaut'
 		},
 			fi: {
+		'editor.language_name': 'Suomi', 'editor.language': 'Kieli', 'editor.language_auto': 'Tunnista automaattisesti',
 				'overview.title':'Määritetyt tehtävät','overview.show_all':'Näytä kaikki ({pending} odottaa)','overview.none':'Ei vielä tehtäviä.',
 			'card.admin_title':'Chores4Kids – Vanhemmat','input.new_child_name':'Uusi lapsi — nimi','btn.add_child':'Lisää lapsi',
 				'input.new_category_name':'Uusi kategoria — nimi','btn.add_category':'Lisää kategoria','section.categories':'Kategoriat','th.categories':'Kategoriat','ph.categories':'Kategoriat','select.categories':'Valitse kategoriat',
@@ -824,6 +1047,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tyhjä = oletus'
 		},
 			it: {
+		'editor.language_name': 'Italiano', 'editor.language': 'Lingua', 'editor.language_auto': 'Rilevamento automatico',
 				'overview.title':'Attività assegnate','overview.show_all':'Mostra tutto ({pending} in attesa)','overview.none':'Nessuna attività.',
 			'card.admin_title':'Chores4Kids – Genitori','input.new_child_name':'Nuovo bambino — nome','btn.add_child':'Aggiungi bambino',
 				'input.new_category_name':'Nuova categoria — nome','btn.add_category':'Aggiungi categoria','section.categories':'Categorie','th.categories':'Categorie','ph.categories':'Categorie','select.categories':'Seleziona categorie',
@@ -897,6 +1121,10 @@ try {
 	}
 } catch {}
 function c4kGetLangFromHass(hass){ const raw = hass?.locale?.language || hass?.language || navigator.language || 'en'; return String(raw).toLowerCase(); }
+function c4kCardLocale(language, hass){
+	const manual = String(language || '').toLowerCase();
+	return Object.hasOwn(C4K_I18N, manual) ? manual : c4kGetLangFromHass(hass);
+}
 function c4kLocalize(key, langOrHass, vars){
 	const raw = typeof langOrHass==='string'? langOrHass : c4kGetLangFromHass(langOrHass);
 	const lang = String(raw).toLowerCase();
@@ -1585,7 +1813,7 @@ class Chores4KidsDevCard extends LitElement {
 	getCardSize(){ return this._mode==='admin'? 8 : 3; }
 
 	// Helpers
-	_t(key, vars){ return c4kLocalize(key, this.hass || navigator.language || 'en', vars); }
+	_t(key, vars){ return c4kLocalize(key, this._locale(), vars); }
 	_resolveUrl(url){
 		if (!url) return '';
 		if (String(url).startsWith('http') || String(url).startsWith('data:')) return url;
@@ -1660,7 +1888,7 @@ class Chores4KidsDevCard extends LitElement {
 			return ms < start.getTime();
 		}catch{ return false; }
 	}
-	_locale(){ return c4kGetLangFromHass(this.hass || navigator.language || 'en'); }
+	_locale(){ return c4kCardLocale(this.config?.language, this.hass); }
 	_fmtDateTime(ts){
 		try{
 			const d = ts ? new Date(ts) : null;
@@ -3958,7 +4186,7 @@ class Chores4KidsDevCardEditor extends LitElement{
 			}, 250);
 		}catch{ /* ignore */ }
 	}
-	_t(key, vars){ return c4kLocalize(key, this.hass || navigator.language || 'en', vars); }
+	_t(key, vars){ return c4kLocalize(key, c4kCardLocale(this._config?.language, this.hass), vars); }
 	_emit(){ this.dispatchEvent(new CustomEvent('config-changed',{ detail:{ config: this._config }, bubbles:true, composed:true })); }
 	async _onSoundUpload(e) {
 		const file = e.target?.files?.[0];
@@ -4179,6 +4407,13 @@ class Chores4KidsDevCardEditor extends LitElement{
 						<ha-switch .checked=${cfg.debug_mode === true} @change=${e=>{ this._config={...cfg, debug_mode: !!e.target.checked}; this._emit(); }}></ha-switch>
 					</label>
 					<small style="opacity:.8; margin-top:4px; display:block;">${this._t('editor.developer_mode_help')}</small>
+				</div>
+				<div class="form-field">
+					<label for="card-language">${this._t('editor.language')}</label>
+					<select id="card-language" @change=${e=>{ this._config={...cfg, language:e.target.value}; this._emit(); }}>
+						<option value="auto" ?selected=${!Object.hasOwn(C4K_I18N, cfg.language)}>${this._t('editor.language_auto')}</option>
+						${Object.entries(C4K_I18N).map(([code, labels])=>html`<option value=${code} ?selected=${cfg.language === code}>${labels['editor.language_name']}</option>`)}
+					</select>
 				</div>
 				<div class="form-field"><label>${this._t('editor.mode')}</label>
 					<select .value=${cfg.mode||'admin'} @change=${e=>{ this._config={...cfg, mode:e.target.value}; this._emit(); }}>

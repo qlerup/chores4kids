@@ -224,7 +224,7 @@ Every night at **00:00**, the integration:
 
 ## Internationalization 🌍
 
-The card follows your Home Assistant profile language automatically, including Turkish (`tr` and `tr-TR`). To use Turkish, select **Türkçe** in your Home Assistant profile. Task and shop notifications follow the Home Assistant system language.
+**Language** defaults to **Auto detect** for new and existing cards. The card follows the viewer's Home Assistant profile, including Dutch (`nl-NL`, `nl-BE`) and Turkish (`tr-TR`). To use a fixed language for one card, open its visual editor and select a language such as **Nederlands**. In YAML, use `language: nl`. Select **Auto detect** to follow the profile again. Task and shop notifications follow the Home Assistant system language.
 
 ---
 
