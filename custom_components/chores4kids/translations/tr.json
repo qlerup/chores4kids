@@ -1,0 +1,10 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Chores4Kids kurulumu",
+        "description": "Entegrasyonu kurmak için Gönder düğmesine basın."
+      }
+    }
+  }
+}

@@ -224,7 +224,7 @@ Every night at **00:00**, the integration:
 
 ## Internationalization 🌍
 
-The card includes multiple languages (including English and Danish) and localizes based on your Home Assistant language settings.
+The card follows your Home Assistant profile language automatically, including Turkish (`tr` and `tr-TR`). To use Turkish, select **Türkçe** in your Home Assistant profile. Task and shop notifications follow the Home Assistant system language.
 
 ---
 

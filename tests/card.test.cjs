@@ -10,6 +10,14 @@ const context=vm.createContext({LitElement:Element,html:(s,...v)=>({s,v}),css:(s
 vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../chores4kids-card.js'),'utf8')
   .replace(/^import .*?;\s*/,''),context);
 const Card=registry.get('chores4kids-card');
+test('the card uses Turkish for Turkish Home Assistant profiles', () => {
+  const instance = Object.create(Card.prototype);
+  for (const language of ['tr', 'tr-TR']) {
+    instance.hass = {locale: {language}};
+    assert.equal(instance._t('btn.create_task'), 'Görev oluştur');
+    assert.equal(instance._t('overview.show_all', {pending: 3}), 'Tümünü göster (3 bekliyor)');
+  }
+});
 function card(fail=false){
   const instance=Object.create(Card.prototype),calls=[];
   instance._taskBusy={};instance.requestUpdate=()=>{};instance._isTaskOverdue=()=>false;
