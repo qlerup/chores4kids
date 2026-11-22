@@ -59,6 +59,44 @@ class AutomationTests(unittest.IsolatedAsyncioTestCase):
         self.store.tasks = [self.template, self.instance]
         self.store.async_save = AsyncMock()
 
+    async def test_multiple_completions_are_independent_and_rewarded_once(self):
+        self.instance.multiple_per_day = True
+        for occurrence, timestamp in [(0, 1000), (1, 2000)]:
+            task = self.store.tasks[occurrence + 1]
+            await self.store.set_task_status(task.id, "awaiting_approval", timestamp)
+            await self.store.set_task_status(task.id, "awaiting_approval", timestamp + 1)
+            self.assertEqual(task.completed_ts, timestamp)
+        self.assertEqual([t.status for t in self.store.tasks[1:]],
+                         ["awaiting_approval", "awaiting_approval", "assigned"])
+        self.assertEqual(self.child.points, 0)
+        for task in self.store.tasks[1:3]:
+            await self.store.approve_task(task.id)
+            await self.store.approve_task(task.id)
+        self.assertEqual(self.child.points, 10)
+        self.assertEqual(len(self.store.tasks), 4)
+
+    async def test_unscheduled_multi_use_task_is_still_available_tomorrow(self):
+        self.instance.multiple_per_day = True
+        await self.store.set_task_status("instance", "awaiting_approval", 1000)
+        successor = self.store.tasks[-1]
+        successor.created = "2020-01-01T08:00:00+00:00"
+        await self.store.daily_rollover()
+        self.assertIn(successor, self.store.tasks)
+        self.assertIn(self.instance, self.store.tasks)
+        self.assertEqual(successor.status, "assigned")
+
+    async def test_multiple_completions_with_automatic_approval(self):
+        self.instance.multiple_per_day = self.instance.skip_approval = True
+        await self.store.set_task_status("instance", "awaiting_approval", 1000)
+        await self.store.set_task_status("instance", "awaiting_approval", 1001)
+        self.assertEqual(self.child.points, 5)
+        self.assertEqual(len(self.store.tasks), 3)
+        successor = self.store.tasks[-1]
+        self.assertEqual(successor.assigned_to, self.instance.assigned_to)
+        self.assertIsNone(successor.completed_ts)
+        await self.store.set_task_status(successor.id, "awaiting_approval", 2000)
+        self.assertEqual(self.child.points, 10)
+
     async def test_template_and_child_approves_assigned_copy(self):
         await self.store.approve_task("template", child_id="child")
         self.assertEqual(self.instance.status, "approved")

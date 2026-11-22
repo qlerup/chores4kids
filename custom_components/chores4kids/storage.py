@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict, field, replace
 from typing import Any, Dict, List, Optional
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
@@ -118,6 +118,8 @@ class Task:
 
     # If true, unfinished task carried to next day is marked as overdue (red).
     mark_overdue: bool = True
+    multiple_per_day: bool = False
+    occurrence_renewed: bool = False
 
 class KidsChoresStore:
     def __init__(self, hass: HomeAssistant):
@@ -496,6 +498,7 @@ class KidsChoresStore:
         fastest_wins_template_id: Optional[str] = None,
         schedule_mode: Optional[str] = None,
         mark_overdue: Optional[bool] = None,
+        multiple_per_day: Optional[bool] = None,
     ) -> Task:
         tid = str(uuid4())
         # normalize repeat days to list[int]
@@ -584,6 +587,8 @@ class KidsChoresStore:
                 t.early_bonus_enabled = False
         if persist_until_completed is not None:
             t.persist_until_completed = bool(persist_until_completed)
+        if multiple_per_day is not None:
+            t.multiple_per_day = bool(multiple_per_day)
         if quick_complete is not None:
             t.quick_complete = bool(quick_complete)
         if skip_approval is not None:
@@ -793,6 +798,7 @@ class KidsChoresStore:
                 icon=getattr(template, "icon", "") or "",
                 repeat_template_id=template.id,
                 persist_until_completed=True,
+                multiple_per_day=bool(getattr(template, "multiple_per_day", False)),
                 quick_complete=bool(getattr(template, "quick_complete", False)),
                 skip_approval=bool(getattr(template, "skip_approval", False)),
                 categories=list(getattr(template, "categories", []) or []),
@@ -825,7 +831,7 @@ class KidsChoresStore:
             except Exception:
                 mode = ""
             try:
-                if mode in ("weekly", "monthly", "repeat") or getattr(t, "repeat_days", None):
+                if t.multiple_per_day or mode in ("weekly", "monthly", "repeat") or getattr(t, "repeat_days", None):
                     # If the template is scheduled, link spawned copy back to the template
                     # so updates to the template can be propagated to active assigned instances.
                     repeat_template_id = t.id
@@ -840,6 +846,7 @@ class KidsChoresStore:
                 repeat_template_id=repeat_template_id,
                 icon=t.icon,
                 persist_until_completed=getattr(t, "persist_until_completed", False),
+                multiple_per_day=getattr(t, "multiple_per_day", False),
                 quick_complete=getattr(t, "quick_complete", False),
                 skip_approval=getattr(t, "skip_approval", False),
                 categories=list(getattr(t, "categories", []) or []),
@@ -864,16 +871,19 @@ class KidsChoresStore:
         t.status = STATUS_ASSIGNED
         await self.async_save()
 
-    async def set_task_status(self, task_id: str, status: str, completed_ts: Optional[int] = None, child_id: Optional[str] = None):
+    async def set_task_status(self, task_id: str, status: str, completed_ts: Optional[int] = None, child_id: Optional[str] = None) -> bool:
         if status not in STATUSES:
             raise ValueError("invalid_status")
         t = self._resolve_assigned_task(task_id, child_id)
         task_id = t.id
+        if (t.occurrence_renewed and t.status in (STATUS_AWAITING, STATUS_APPROVED)
+                and status in (STATUS_IN_PROGRESS, STATUS_AWAITING)):
+            return False
         if status == STATUS_APPROVED:
             if completed_ts is not None:
                 t.completed_ts = completed_ts
             await self.approve_task(task_id)
-            return
+            return True
 
         def _local_created_date(task: Task):
             created_raw = getattr(task, "created", None)
@@ -1000,6 +1010,11 @@ class KidsChoresStore:
             await self.async_save()
             raise ValueError("task_already_claimed")
 
+        if status == STATUS_AWAITING and t.multiple_per_day and t.assigned_to:
+            if t.completed_ts is None:
+                t.completed_ts = int(dt_util.utcnow().timestamp() * 1000)
+            self._renew_occurrence(t)
+
         # If the task is configured to skip approval, auto-approve when it would
         # normally be sent for parent approval.
         if status == STATUS_AWAITING and getattr(t, "skip_approval", False):
@@ -1007,7 +1022,7 @@ class KidsChoresStore:
             # but this keeps the flow consistent with UI expectations).
             t.status = STATUS_AWAITING
             await self.approve_task(task_id)
-            return
+            return True
 
         t.status = status
         # Clear timestamp if moving away from awaiting_approval and caller didn't
@@ -1022,6 +1037,20 @@ class KidsChoresStore:
             t.bonus_approved = False
             t.bonus_approved_at = None
         await self.async_save()
+        return True
+
+    def _renew_occurrence(self, task: Task) -> None:
+        if task.occurrence_renewed:
+            return
+        successor = replace(
+            task, id=str(uuid4()), status=STATUS_ASSIGNED,
+            created=datetime.now(timezone.utc).isoformat(), approved_at=None,
+            completed_ts=None, carried_over=False, bonus_completed_ts=None,
+            bonus_approved=False, bonus_approved_at=None, time_bonus_awarded=0,
+            time_bonus_awarded_ts=None,
+        )
+        self.tasks.append(successor)
+        task.occurrence_renewed = True
 
     def _add_earned_points(self, child: Child, earned: int) -> None:
         if not earned:
@@ -1090,6 +1119,8 @@ class KidsChoresStore:
         if t.status != STATUS_AWAITING:
             # allow approving from other states but normalize
             pass
+        if t.multiple_per_day:
+            self._renew_occurrence(t)
         t.status = STATUS_APPROVED
         t.approved_at = datetime.now(timezone.utc).isoformat()
         # Clear carried_over flag when task is approved
@@ -1182,6 +1213,7 @@ class KidsChoresStore:
                             icon=getattr(template, "icon", "") or "",
                             repeat_template_id=template.id,
                             persist_until_completed=True,
+                            multiple_per_day=bool(getattr(template, "multiple_per_day", False)),
                             quick_complete=bool(getattr(template, "quick_complete", False)),
                             skip_approval=bool(getattr(template, "skip_approval", False)),
                             categories=list(getattr(template, "categories", []) or []),
@@ -1319,6 +1351,7 @@ class KidsChoresStore:
         categories: Optional[list[str]] = None,
         fastest_wins: Optional[bool] = None,
         mark_overdue: Optional[bool] = None,
+        multiple_per_day: Optional[bool] = None,
     ):
         """Update core editable fields on a task.
 
@@ -1394,6 +1427,8 @@ class KidsChoresStore:
             t.icon = str(icon).strip()
         if persist_until_completed is not None:
             t.persist_until_completed = bool(persist_until_completed)
+        if multiple_per_day is not None:
+            t.multiple_per_day = bool(multiple_per_day)
         if quick_complete is not None:
             t.quick_complete = bool(quick_complete)
         if skip_approval is not None:
@@ -1445,6 +1480,7 @@ class KidsChoresStore:
                     inst.bonus_title = str(getattr(t, "bonus_title", "") or "").strip()
                     inst.bonus_points = int(getattr(t, "bonus_points", 0) or 0)
                     inst.persist_until_completed = bool(getattr(t, "persist_until_completed", False))
+                    inst.multiple_per_day = bool(getattr(t, "multiple_per_day", False))
                     inst.quick_complete = bool(getattr(t, "quick_complete", False))
                     inst.skip_approval = bool(getattr(t, "skip_approval", False))
                     inst.mark_overdue = bool(getattr(t, "mark_overdue", True))
@@ -1507,6 +1543,7 @@ class KidsChoresStore:
                 "bonus_title": getattr(t, "bonus_title", ""),
                 "bonus_points": getattr(t, "bonus_points", 0),
                 "persist_until_completed": getattr(t, "persist_until_completed", False),
+                "multiple_per_day": getattr(t, "multiple_per_day", False),
                 "quick_complete": getattr(t, "quick_complete", False),
                 "skip_approval": getattr(t, "skip_approval", False),
                 "categories": list(getattr(t, "categories", []) or []),
@@ -1531,6 +1568,7 @@ class KidsChoresStore:
         #    - NEVER remove unassigned template tasks (assigned_to is empty)
         #    - Only carry tasks forward when persist_until_completed is true and task is not approved.
         kept: list[Task] = []
+        scheduled_ids = {tpl['id'] for tpl in templates}
         for t in self.tasks:
             is_template = not (getattr(t, "assigned_to", None) and str(getattr(t, "assigned_to", "")).strip())
             if is_template:
@@ -1541,6 +1579,11 @@ class KidsChoresStore:
             # If created is missing/invalid, treat it as "old" so it doesn't stick around forever.
             is_older = (created_date is None) or (created_date < today)
             if is_older:
+                if (t.multiple_per_day and t.status in (STATUS_ASSIGNED, STATUS_IN_PROGRESS)
+                        and t.repeat_template_id not in scheduled_ids and not t.fastest_wins_claimed_by_child_id):
+                    t.created = datetime.now(timezone.utc).isoformat()
+                    kept.append(t)
+                    continue
                 if getattr(t, "status", None) == STATUS_AWAITING:
                     kept.append(t)
                     continue
@@ -1637,6 +1680,7 @@ class KidsChoresStore:
                             bonus_title=str(tpl.get("bonus_title", "") or ""),
                             bonus_points=int(tpl.get("bonus_points", 0) or 0),
                             persist_until_completed=True,
+                            multiple_per_day=tpl.get("multiple_per_day", False),
                             quick_complete=tpl.get("quick_complete", False),
                             skip_approval=tpl.get("skip_approval", False),
                             categories=list(tpl.get("categories") or []),
@@ -1690,6 +1734,7 @@ class KidsChoresStore:
                         bonus_title=tpl.get("bonus_title"),
                         bonus_points=tpl.get("bonus_points"),
                         persist_until_completed=(tpl.get("persist_until_completed", False) if mode in ("", "repeat") else False),
+                        multiple_per_day=tpl.get("multiple_per_day", False),
                         quick_complete=tpl.get("quick_complete", False),
                         skip_approval=tpl.get("skip_approval", False),
                         categories=list(tpl.get("categories") or []),

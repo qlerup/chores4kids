@@ -4,6 +4,7 @@ import { LitElement, html, css } from "https://unpkg.com/lit?module";
 // Unified i18n (admin + child keys)
 const C4K_I18N = {
 	en: {
+		'ui.multiple_per_day': 'Allow multiple completions per day',
 		'editor.language_name': 'English', 'editor.language': 'Language', 'editor.language_auto': 'Auto detect',
 		// Shared/admin
 		'overview.title': 'Assigned tasks',
@@ -122,6 +123,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Empty = default'
 	},
 	nl: {
+		'ui.multiple_per_day': 'Meerdere keren per dag uitvoeren',
 		'editor.language_name': 'Nederlands', 'editor.language': 'Taal', 'editor.language_auto': 'Automatisch detecteren',
 		'overview.title': 'Toegewezen taken',
 		'overview.finished_title': 'Voltooide taken',
@@ -336,6 +338,7 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Leeg = standaard',
 	},
 	tr: {
+		'ui.multiple_per_day': 'Günde birden fazla kez tamamlanabilir',
 		'editor.language_name': 'Türkçe', 'editor.language': 'Dil', 'editor.language_auto': 'Otomatik algıla',
 		'overview.title': 'Atanan görevler',
 		'overview.finished_title': 'Tamamlanan görevler',
@@ -549,6 +552,7 @@ const C4K_I18N = {
 		'editor.color_empty_default': 'Varsayılanı kullanmak için boş bırakın',
 	},
 	da: {
+		'ui.multiple_per_day': 'Kan udføres flere gange om dagen',
 		'editor.language_name': 'Dansk', 'editor.language': 'Sprog', 'editor.language_auto': 'Registrer automatisk',
 		'overview.title': 'Tildelte opgaver',
 		'overview.finished_title': 'Færdige opgaver',
@@ -657,6 +661,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			sv: {
+		'ui.multiple_per_day': 'Kan utföras flera gånger om dagen',
 		'editor.language_name': 'Svenska', 'editor.language': 'Språk', 'editor.language_auto': 'Identifiera automatiskt',
 			'overview.title': 'Tilldelade uppgifter', 'overview.show_all': 'Visa alla ({pending} väntar)', 'overview.none': 'Inga uppgifter ännu.',
 			'card.admin_title': 'Chores4Kids – Förälder', 'input.new_child_name': 'Nytt barn — namn', 'btn.add_child': 'Lägg till barn',
@@ -722,6 +727,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tomt = standard'
 		},
 			nb: {
+		'ui.multiple_per_day': 'Kan utføres flere ganger om dagen',
 		'editor.language_name': 'Norsk bokmål', 'editor.language': 'Språk', 'editor.language_auto': 'Oppdag automatisk',
 				'overview.title':'Tildelte oppgaver','overview.show_all':'Vis alle ({pending} venter)','overview.none':'Ingen oppgaver ennå.',
 			'card.admin_title':'Chores4Kids – Forelder','input.new_child_name':'Nytt barn — navn','btn.add_child':'Legg til barn',
@@ -787,6 +793,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tom = standard'
 		},
 			de: {
+		'ui.multiple_per_day': 'Mehrmals täglich erledigen',
 		'editor.language_name': 'Deutsch', 'editor.language': 'Sprache', 'editor.language_auto': 'Automatisch erkennen',
 				'overview.title':'Zugewiesene Aufgaben','overview.show_all':'Alle anzeigen ({pending} ausstehend)','overview.none':'Noch keine Aufgaben.',
 			'card.admin_title':'Chores4Kids – Eltern','input.new_child_name':'Neues Kind — Name','btn.add_child':'Kind hinzufügen',
@@ -852,6 +859,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Leer = Standard'
 		},
 			es: {
+		'ui.multiple_per_day': 'Permitir varias veces al día',
 		'editor.language_name': 'Español', 'editor.language': 'Idioma', 'editor.language_auto': 'Detectar automáticamente',
 				'overview.title':'Tareas asignadas','overview.show_all':'Ver todas ({pending} pendientes)','overview.none':'Aún no hay tareas.',
 			'card.admin_title':'Chores4Kids – Padres','input.new_child_name':'Nuevo niño — nombre','btn.add_child':'Añadir niño',
@@ -917,6 +925,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vacío = predeterminado'
 		},
 			fr: {
+		'ui.multiple_per_day': 'Autoriser plusieurs fois par jour',
 		'editor.language_name': 'Français', 'editor.language': 'Langue', 'editor.language_auto': 'Détection automatique',
 				'overview.title':'Tâches assignées','overview.show_all':'Tout afficher ({pending} en attente)','overview.none':'Aucune tâche pour le moment.',
 			'card.admin_title':'Chores4Kids – Parents','input.new_child_name':'Nouvel enfant — nom','btn.add_child':'Ajouter un enfant',
@@ -982,6 +991,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Vide = par défaut'
 		},
 			fi: {
+		'ui.multiple_per_day': 'Salli useita suorituksia päivässä',
 		'editor.language_name': 'Suomi', 'editor.language': 'Kieli', 'editor.language_auto': 'Tunnista automaattisesti',
 				'overview.title':'Määritetyt tehtävät','overview.show_all':'Näytä kaikki ({pending} odottaa)','overview.none':'Ei vielä tehtäviä.',
 			'card.admin_title':'Chores4Kids – Vanhemmat','input.new_child_name':'Uusi lapsi — nimi','btn.add_child':'Lisää lapsi',
@@ -1047,6 +1057,7 @@ const C4K_I18N = {
 			'editor.color_empty_default':'Tyhjä = oletus'
 		},
 			it: {
+		'ui.multiple_per_day': 'Consenti più completamenti al giorno',
 		'editor.language_name': 'Italiano', 'editor.language': 'Lingua', 'editor.language_auto': 'Rilevamento automatico',
 				'overview.title':'Attività assegnate','overview.show_all':'Mostra tutto ({pending} in attesa)','overview.none':'Nessuna attività.',
 			'card.admin_title':'Chores4Kids – Genitori','input.new_child_name':'Nuovo bambino — nome','btn.add_child':'Aggiungi bambino',
@@ -1194,7 +1205,7 @@ class Chores4KidsDevCard extends LitElement {
 			_name: { state: true }, _taskTitle: { state: true }, _taskPoints: { state: true }, _taskDesc: { state: true }, _taskIcon: { state: true }, _iconModalOpen: { state: true },
 			_taskCategories: { state: true }, _openCategoriesMenu: { state: true }, _newCategoryName: { state: true }, _newCategoryColor: { state: true },
 			_taskBonusEnabled: { state: true }, _taskBonusTitle: { state: true }, _taskBonusPoints: { state: true },
-			_repeatEnabled: { state: true }, _weeklyEnabled: { state: true }, _monthlyEnabled: { state: true }, _repeatAssign: { state: true }, _persistUntilDone: { state: true }, _markOverdue: { state: true }, _quickComplete: { state: true }, _skipApproval: { state: true }, _fastestWins: { state: true }, _editingTask: { state: true }, _tasksModalOpen: { state: true },
+			_repeatEnabled: { state: true }, _weeklyEnabled: { state: true }, _monthlyEnabled: { state: true }, _repeatAssign: { state: true }, _persistUntilDone: { state: true }, _markOverdue: { state: true }, _multiplePerDay: { state: true }, _quickComplete: { state: true }, _skipApproval: { state: true }, _fastestWins: { state: true }, _editingTask: { state: true }, _tasksModalOpen: { state: true },
 			_customIconModalOpen: { state: true }, _customIconSearch: { state: true }, _customIconPreview: { state: true }, _customIconLabel: { state: true },
 			_shopModalOpen: { state: true }, _shopTitle: { state: true }, _shopPrice: { state: true }, _shopImage: { state: true }, _editItem: { state: true }, _advItem: { state: true },
 			// UI for nicer multi-assign dropdown
@@ -1538,6 +1549,7 @@ class Chores4KidsDevCard extends LitElement {
 		this._openRepeatMenu = false;
 		this._persistUntilDone = false;
 		this._markOverdue = true;
+		this._multiplePerDay = false;
 		this._quickComplete = false;
 		this._skipApproval = false;
 		this._fastestWins = false;
@@ -2425,6 +2437,10 @@ class Chores4KidsDevCard extends LitElement {
 																	</label>
 																` : ''}
 								<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
+									<input style="margin:0;" type="checkbox" .checked=${!!this._multiplePerDay} @change=${e=>{ this._multiplePerDay = !!e.target.checked; }} />
+									<span style="white-space:nowrap;">${this._t('ui.multiple_per_day')}</span>
+								</label>
+								<label style="display:flex; align-items:center; justify-content:flex-start; gap:8px; margin:0; font-size:.95rem; width:fit-content; text-align:left;">
 									<input style="margin:0;" type="checkbox" .checked=${!!this._quickComplete} @change=${e=>{ this._quickComplete = !!e.target.checked; }} />
 									<span style="white-space:nowrap;">${this._t('ui.quick_complete')}</span>
 								</label>
@@ -2919,11 +2935,12 @@ class Chores4KidsDevCard extends LitElement {
 			<div class="modal" style="max-width: 560px; width: min(95vw, 560px);" @click=${e=>e.stopPropagation()}>
 				<h3>${this._t('icon.choose')}</h3>
 				<div class="row" style="gap:8px; align-items:center;">
-					<input style="flex:1" placeholder="${this._t('icon.search')}" .value=${this._iconSearch||''} @input=${e=>{ this._iconSearch=e.target.value; this.requestUpdate(); }} />
+					<input style="flex:1" placeholder="${this._t('icon.search')} (custom:braces)" .value=${this._iconSearch||''} @input=${e=>{ this._iconSearch=e.target.value; this.requestUpdate(); }} />
 					${this._taskIcon ? html`<button class="btn-ghost" @click=${()=>{ this._taskIcon=''; this.requestUpdate(); }}>${this._t('icon.clear')}</button>`: ''}
 				</div>
 				${(()=>{ 
-					const q=String(this._iconSearch||'').toLowerCase(); 
+					const iconId=String(this._iconSearch||'').trim();
+					const q=iconId.toLowerCase();
 					const filter=(arr)=> arr.filter(i=> i.id.toLowerCase().includes(q) || (i.label||'').toLowerCase().includes(q)); 
 					const customIcons = (this._customIcons||[]).map(c=> ({id:c.id, label:c.label}));
 					const allIcons = [...customIcons, ...C4K_ICON_SET];
@@ -2933,6 +2950,7 @@ class Chores4KidsDevCard extends LitElement {
 					const tile=(i)=> html`<button class="btn-ghost" style="display:flex;align-items:center;gap:8px;border:1px solid var(--divider-color);border-radius:8px;padding:8px;" @click=${()=> this._pickIcon(i.id)}><ha-icon icon="${i.id}"></ha-icon><small>${i.label||i.id}</small></button>`; 
 					const customTile = html`<button class="btn-primary" style="display:flex;align-items:center;gap:8px;border:1px solid var(--divider-color);border-radius:8px;padding:8px;" @click=${()=> this._openCustomIconModal()}><ha-icon icon="mdi:plus-circle"></ha-icon><small>Custom</small></button>`;
 					return html`
+						${/^[a-z][a-z0-9_-]*:[a-z0-9][a-z0-9_.-]*$/i.test(iconId) && !allIcons.some(i=>i.id===iconId) ? tile({id:iconId}) : ''}
 						${recent.length? html`<div style="font-size:.9rem;color:var(--secondary-text-color);margin:6px 0;">Recent</div>`:''}${recent.length? html`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${recent.map(tile)}</div>`:''}
 						${custom.length? html`<div style="font-size:.9rem;color:var(--secondary-text-color);margin:6px 0;">Custom</div>`:''}
 						${custom.length? html`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${custom.map(tile)}</div>`:''}
@@ -3550,6 +3568,7 @@ class Chores4KidsDevCard extends LitElement {
 			early_bonus_points: (bonusOn && this._taskEarlyBonusPoints!=='' && this._taskEarlyBonusPoints!=null) ? Number(this._taskEarlyBonusPoints) : undefined,
 			bonus_enabled: _bonusEnabled,
 			icon:this._taskIcon||undefined,
+			multiple_per_day: !!this._multiplePerDay,
 			quick_complete: _quick,
 			skip_approval: _skip,
 			fastest_wins: _fastest,
@@ -3603,7 +3622,8 @@ class Chores4KidsDevCard extends LitElement {
 		this._taskCategories=new Set();
 		this._markOverdue=true;
 		this._persistUntilDone=false;
-		this._quickComplete=false;
+		this._multiplePerDay = false;
+		this._quickComplete = false;
 		this._skipApproval=false;
 		this._fastestWins=false;
 		this._touchedTitle=false; this._touchedPoints=false;
@@ -3697,6 +3717,7 @@ class Chores4KidsDevCard extends LitElement {
 							points: Number(task.points),
 							description: task.description || '',
 							icon: task.icon || undefined,
+							multiple_per_day: !!task.multiple_per_day,
 							quick_complete: !!task.quick_complete,
 							skip_approval: !!task.skip_approval,
 							persist_until_completed: !!task.persist_until_completed,
@@ -3828,7 +3849,7 @@ class Chores4KidsDevCard extends LitElement {
 			}
 		}catch{}
 	}
-	_editTask(t){ this._editingTask=t; this._taskTitle=t.title; this._taskPoints=t.points; this._taskDesc=t.description||''; this._taskIcon=t.icon||''; this._taskDue = (()=>{ const d=this._parseDueToDate(t?.due); return d? this._formatDateISO(d) : ''; })(); this._taskEarlyBonusDays = (t?.early_bonus_days!=null && Number(t.early_bonus_days)>0)? String(t.early_bonus_days) : ''; this._taskEarlyBonusPoints = (t?.early_bonus_points!=null && Number(t.early_bonus_points)>0)? String(t.early_bonus_points) : ''; this._taskEarlyBonusEnabled = (()=>{ const v=t?.early_bonus_enabled; if (v===true) return true; if (v===false) return false; return (Number(t?.early_bonus_days||0)>0 && Number(t?.early_bonus_points||0)>0); })(); this._taskBonusTitle = String(t?.bonus_title||''); this._taskBonusPoints = (t?.bonus_points!=null && Number(t.bonus_points)>0)? String(t.bonus_points) : ''; this._taskBonusEnabled = !!(String(t?.bonus_title||'').trim() || Number(t?.bonus_points||0)>0); const mode = String(t?.schedule_mode||'').toLowerCase(); this._weeklyEnabled = (mode==='weekly'); this._monthlyEnabled = (mode==='monthly'); const map=["mon","tue","wed","thu","fri","sat","sun"]; const fromAttr=Array.isArray(t.repeat_days)? t.repeat_days.map(d=> typeof d==='number'? map[d] : String(d).slice(0,3)) : []; this._repeatDays=new Set(fromAttr); const kids = Array.isArray(t.repeat_child_ids)? t.repeat_child_ids : (t.repeat_child_id? [t.repeat_child_id]:[]); this._repeatAssign=new Set(kids); this._repeatEnabled = (!this._weeklyEnabled && !this._monthlyEnabled) && !!(fromAttr.length || kids.length || mode==='repeat'); this._persistUntilDone = !!t.persist_until_completed; this._markOverdue = t.mark_overdue !== false; this._quickComplete = !!t.quick_complete; this._skipApproval = !!t.skip_approval; this._fastestWins = !!t.fastest_wins; const cats = Array.isArray(t.categories)? t.categories : []; this._taskCategories = new Set(cats); if (this._weeklyEnabled || this._monthlyEnabled){ this._persistUntilDone = false; this._markOverdue = true; } this._taskTimeBonusEnabled = !!(t?.time_bonus_enabled || (String(t?.time_bonus_before||'').trim() && Number(t?.time_bonus_points||0) > 0)); this._taskTimeBonusBefore = String(t?.time_bonus_before || ''); this._taskTimeBonusPoints = (t?.time_bonus_points != null && Number(t.time_bonus_points) > 0) ? String(t.time_bonus_points) : '';}
+	_editTask(t){ this._editingTask=t; this._taskTitle=t.title; this._taskPoints=t.points; this._taskDesc=t.description||''; this._taskIcon=t.icon||''; this._taskDue = (()=>{ const d=this._parseDueToDate(t?.due); return d? this._formatDateISO(d) : ''; })(); this._taskEarlyBonusDays = (t?.early_bonus_days!=null && Number(t.early_bonus_days)>0)? String(t.early_bonus_days) : ''; this._taskEarlyBonusPoints = (t?.early_bonus_points!=null && Number(t.early_bonus_points)>0)? String(t.early_bonus_points) : ''; this._taskEarlyBonusEnabled = (()=>{ const v=t?.early_bonus_enabled; if (v===true) return true; if (v===false) return false; return (Number(t?.early_bonus_days||0)>0 && Number(t?.early_bonus_points||0)>0); })(); this._taskBonusTitle = String(t?.bonus_title||''); this._taskBonusPoints = (t?.bonus_points!=null && Number(t.bonus_points)>0)? String(t.bonus_points) : ''; this._taskBonusEnabled = !!(String(t?.bonus_title||'').trim() || Number(t?.bonus_points||0)>0); const mode = String(t?.schedule_mode||'').toLowerCase(); this._weeklyEnabled = (mode==='weekly'); this._monthlyEnabled = (mode==='monthly'); const map=["mon","tue","wed","thu","fri","sat","sun"]; const fromAttr=Array.isArray(t.repeat_days)? t.repeat_days.map(d=> typeof d==='number'? map[d] : String(d).slice(0,3)) : []; this._repeatDays=new Set(fromAttr); const kids = Array.isArray(t.repeat_child_ids)? t.repeat_child_ids : (t.repeat_child_id? [t.repeat_child_id]:[]); this._repeatAssign=new Set(kids); this._repeatEnabled = (!this._weeklyEnabled && !this._monthlyEnabled) && !!(fromAttr.length || kids.length || mode==='repeat'); this._persistUntilDone = !!t.persist_until_completed; this._markOverdue = t.mark_overdue !== false; this._multiplePerDay = !!t.multiple_per_day; this._quickComplete = !!t.quick_complete; this._skipApproval = !!t.skip_approval; this._fastestWins = !!t.fastest_wins; const cats = Array.isArray(t.categories)? t.categories : []; this._taskCategories = new Set(cats); if (this._weeklyEnabled || this._monthlyEnabled){ this._persistUntilDone = false; this._markOverdue = true; } this._taskTimeBonusEnabled = !!(t?.time_bonus_enabled || (String(t?.time_bonus_before||'').trim() && Number(t?.time_bonus_points||0) > 0)); this._taskTimeBonusBefore = String(t?.time_bonus_before || ''); this._taskTimeBonusPoints = (t?.time_bonus_points != null && Number(t.time_bonus_points) > 0) ? String(t.time_bonus_points) : '';}
 	async _saveEditedTask(){
 		if(!this._editingTask) return;
 		// validate like create
@@ -3868,6 +3889,7 @@ class Chores4KidsDevCard extends LitElement {
 				icon: this._taskIcon||'',
 				persist_until_completed: (scheduleMode==='weekly' || scheduleMode==='monthly') ? false : !!this._persistUntilDone,
 				mark_overdue: ((scheduleMode==='weekly' || scheduleMode==='monthly') ? false : !!this._persistUntilDone) ? !!this._markOverdue : true,
+				multiple_per_day: !!this._multiplePerDay,
 				quick_complete: !!this._quickComplete,
 				skip_approval: !!this._skipApproval,
 				fastest_wins: !!this._fastestWins,
@@ -3931,7 +3953,8 @@ class Chores4KidsDevCard extends LitElement {
 			this._monthlyEnabled=false;
 			this._taskCategories=new Set();
 			this._markOverdue=true;
-			this._quickComplete=false;
+			this._multiplePerDay = false;
+			this._quickComplete = false;
 			this._skipApproval=false;
 			this._touchedTitle=false; this._touchedPoints=false;
 		}

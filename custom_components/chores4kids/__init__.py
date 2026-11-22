@@ -528,6 +528,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             repeat_child_ids=call.data.get("repeat_child_ids"),
             icon=call.data.get("icon"),
             persist_until_completed=call.data.get("persist_until_completed"),
+            multiple_per_day=call.data.get("multiple_per_day"),
             quick_complete=call.data.get("quick_complete"),
             skip_approval=call.data.get("skip_approval"),
             categories=call.data.get("categories"),
@@ -543,12 +544,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def svc_set_task_status(call: ServiceCall):
         task = store._resolve_assigned_task(call.data["task_id"], call.data.get("child_id"))
-        await store.set_task_status(
+        changed = await store.set_task_status(
             task.id,
             call.data["status"],
             call.data.get("completed_ts"),
         )
-        if call.data.get("status") == "awaiting_approval":
+        if changed and call.data.get("status") == "awaiting_approval":
             await _notify_task_completed(task.id)
         async_dispatcher_send(hass, SIGNAL_DATA_UPDATED)
 
@@ -591,6 +592,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             bonus_points=call.data.get("bonus_points"),
             icon=call.data.get("icon"),
             persist_until_completed=call.data.get("persist_until_completed"),
+            multiple_per_day=call.data.get("multiple_per_day"),
             quick_complete=call.data.get("quick_complete"),
             skip_approval=call.data.get("skip_approval"),
             categories=call.data.get("categories"),

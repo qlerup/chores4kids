@@ -10,6 +10,20 @@ const context=vm.createContext({LitElement:Element,html:(s,...v)=>({s,v}),css:(s
 vm.runInContext(fs.readFileSync(require('node:path').join(__dirname,'../chores4kids-card.js'),'utf8')
   .replace(/^import .*?;\s*/,''),context);
 const Card=registry.get('chores4kids-card');
+test('a typed icon ID can be previewed and selected from the task picker', () => {
+  const instance = Object.create(Card.prototype);
+  instance.hass = {language: 'en'};
+  instance._iconSearch = 'custom:braces';
+  function findTile(template) {
+    if (!template?.v) return;
+    if (template.v.includes('custom:braces') && template.s[0].includes('<button')) return template;
+    return template.v.flat().map(findTile).find(Boolean);
+  }
+  const tile = findTile(instance._renderIconModal());
+  assert.ok(tile);
+  tile.v.find(value => typeof value === 'function')();
+  assert.equal(instance._taskIcon, 'custom:braces');
+});
 test('cards and editors default to the profile language and support per-card overrides', () => {
   const editor = new (registry.get('chores4kids-card-editor'))();
   const instance = Object.create(Card.prototype);

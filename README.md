@@ -43,7 +43,7 @@ If you find this project useful, you can support me on Ko-fi 💙
 - 🎉 **Kid UX**: daily/weekly task sections, confetti, and completion sound
 - 🎨 **Color theming**: customize button and points colors
 - 🧪 **Developer mode**: debug controls like manual overdue marking
-- 🌍 **Internationalization**: English, Danish, and more
+- 🌍 **Card language:** automatic profile detection or a manual language per card, including Dutch and Turkish
 
 ## What you get ✨
 
@@ -55,7 +55,7 @@ If you find this project useful, you can support me on Ko-fi 💙
 - **Icon picker:** search & pick Material Design Icons
 - **Scoreboard:** optional ranking of children by points
 - **Reward shop:** items with images, prices, and optional HA actions on purchase
-- **Multi-language i18n:** includes English, Danish, and more
+- **Supported card languages:** Danish, Dutch, English, Finnish, French, German, Italian, Norwegian Bokmål, Spanish, Swedish, and Turkish
 
 ### Backend (Integration / Sync Engine)
 - Persists **children, tasks, points, shop items and purchase history** as HA entities
@@ -156,6 +156,14 @@ Other states you may see: **Unassigned** and **Rejected**.
 - Choose weekdays (Mon–Sun) for a task to repeat
 - Optionally pick a default child (`repeat_child_id`) to auto-assign on those days
 - Save the plan — the card calls `chores4kids.set_task_repeat`
+
+### Tasks that can be completed several times a day
+
+In the parent card, enable **Allow multiple completions per day** when creating or editing a task. Assign it to a child. Each time the child finishes it, a fresh occurrence becomes available immediately. For example, a child can record emptying the dishwasher after breakfast and again after dinner. Parents can approve each completion separately. With **Skip parent approval** enabled, each completion earns its points immediately.
+
+### Use an icon from an installed icon pack
+
+Open the task icon picker and enter the full icon ID in the search field, for example `custom:braces`. Select the preview tile and save the task. The icon pack must already be installed and available in the Home Assistant frontend displaying the card.
 
 If **Auto-assign** is active, manual assignment can be disabled for that task (the UI will indicate this).
 

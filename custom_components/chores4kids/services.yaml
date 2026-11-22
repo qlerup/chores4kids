@@ -51,6 +51,9 @@ add_task:
     icon:
       required: false
       description: "Optional icon id (e.g. mdi:vacuum)"
+    multiple_per_day:
+      required: false
+      description: "Offer another occurrence as soon as the child completes this one"
     quick_complete:
       required: false
       description: "If true, child can mark task done immediately (skip start step)"
@@ -170,6 +173,9 @@ update_task:
       example: 3
     icon:
       required: false
+    multiple_per_day:
+      required: false
+      description: "Offer another occurrence as soon as the child completes this one"
     quick_complete:
       required: false
       description: "If true, child can mark task done immediately (skip start step)"
